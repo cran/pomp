@@ -1,13 +1,42 @@
-###################################################
-### chunk number 1: 
-###################################################
+\documentclass[10pt,reqno,final]{amsart}
+%\VignetteIndexEntry{Introduction to pomp by example}
+\usepackage{times}
+\usepackage{fullpage}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\title[Examples in \texttt{pomp}]{Introduction to \texttt{pomp} by example}
+
+\author[A. A. King]{Aaron A. King}
+
+\address{A. A. King, Departments of Ecology \& Evolutionary Biology and Mathematics, University of Michigan, Ann Arbor, Michigan 48109-1048 USA}
+
+\email{kingaa at umich dot edu} 
+
+\urladdr{http://www.umich.edu/\~{}kingaa}
+
+\date{\today}
+
+\newcommand\code[1]{\texttt{#1}}
+
+\begin{document}
+
+\SweaveOpts{echo=T,results=verbatim,print=F,eps=F,pdf=T}
+
+\maketitle
+
+\section{A first example: a two-dimensional random-walk.}
+
+<<echo=F,results=hide>>=
   options(keep.source=TRUE,width=60)
   library(pomp)
+@ 
 
-
-###################################################
-### chunk number 2: 
-###################################################
+In order to specify a partially-observed Markov process, we must define the process model and the measurement model.
+In particular, we will need to be able to simulate from and compute the p.d.f. of both models.
+The following function will simulate the process model.
+The documentation (\code{?pomp}) spells out the specifications for this function.
+<<>>=
   rw.rprocess <- function (xstart, times, params, ...) { 
     ## this function simulates two independent random walks with intensities s1, s2
     nsims <- ncol(params)
@@ -24,11 +53,10 @@
     }
     x
   }
-
-
-###################################################
-### chunk number 3: 
-###################################################
+@ 
+Some methods will require the probability density of a given state transition.
+The function \code{dprocess} will evaluate this for a sequences of state transitions.
+<<>>=
   rw.dprocess <- function (x, times, params, log = FALSE, ...) { 
     ## given a sequence of consecutive states in 'x', this function computes the p.d.f.
     nsims <- ncol(params)
@@ -44,11 +72,10 @@
       exp(apply(d,c(2,3),sum))
     }
   }
-
-
-###################################################
-### chunk number 4: 
-###################################################
+@ 
+Now we specify the function that will simulate the measurement process.
+Again, the documentation spells out how.
+<<>>=
   bvnorm.rmeasure <- function (x, times, params, ...) {
     ## noisy observations of the two walks with common noise SD 'tau'
     nsims <- dim(x)[2]
@@ -62,11 +89,9 @@
     }
     y
   }
-
-
-###################################################
-### chunk number 5: 
-###################################################
+@ 
+Finally, we have to specify how to evaluate the likelihood of an observation given the underlying state.
+<<>>=
   bvnorm.dmeasure <- function (y, x, times, params, log = FALSE, ...) {
     ## noisy observations of the two walks with common noise SD 'tau'
     d1 <- dnorm(
@@ -87,11 +112,9 @@
       exp(sum(d1,d2,na.rm=T))
     }
   }
-
-
-###################################################
-### chunk number 6: 
-###################################################
+@ 
+The following builds a \code{pomp} object called \code{rw2}.
+<<>>=
 rw2 <- pomp(
             rprocess = rw.rprocess,
             dprocess = rw.dprocess,
@@ -105,25 +128,25 @@ rw2 <- pomp(
             t0=0,
             useless=23
             )
+@ 
 
-
-###################################################
-### chunk number 7: 
-###################################################
+Now we'll specify some parameters and initial states.
+<<print=T>>=
 p <- rbind(s1=c(2,2,3),s2=c(0.1,1,2),tau=c(1,5,0))
 x0 <- rbind(x1=c(0,0,5),x2=c(0,0,0))
+@ 
+Each column is a different initial state or parameter vector.
+Note that we must use rownames!
 
-
-###################################################
-### chunk number 8: 
-###################################################
+When we defined \code{rw2}, the data were all missing.
+We can generate simulated data by:
+<<>>=
 examples <- simulate(rw2,xstart=x0,params=p)
 rw2 <- examples[[1]]
-
-
-###################################################
-### chunk number 9: 
-###################################################
+@ 
+By default \code{simulate} will generate a list of new \code{pomp} objects.
+It can also be used to obtain the simulated state and/or measurement trajectories:
+<<>>=
 y <- simulate(rw2,xstart=x0,params=p,obs=T,states=T)
 y <- simulate(rw2,xstart=x0,params=p,obs=T)
 x <- simulate(rw2,xstart=x0,params=p,states=T)
@@ -133,52 +156,67 @@ x <- simulate(rw2,nsim=10,xstart=x0[,1],params=p[,1],obs=T,states=T)
 x <- simulate(rw2,nsim=10,xstart=x0,params=p[,1],obs=T,states=T)
 x <- simulate(rw2,nsim=10,xstart=x0[,2],params=p,obs=T,states=T)
 x <- simulate(rw2,nsim=10,xstart=x0[,1],params=p[,1])
+@ 
 
+A \code{plot} method exists for \code{pomp} objects (Fig.~\ref{fig:random_walk}).
 
-###################################################
-### chunk number 10: 
-###################################################
+\begin{figure}
+<<fig=T>>=
 plot(rw2)
+@ 
+\caption{A \code{plot} method exists for \code{pomp} objects.}
+\label{fig:random_walk}
+\end{figure}
 
-
-###################################################
-### chunk number 11: 
-###################################################
+Access to the individual components of the \code{pomp} object is available by means of a few \emph{methods}.
+To extract the data and the observation times, use \code{data.array} and \code{time}, respectively:
+<<>>=
 x <- data.array(rw2)
 t <- time(rw2)
-
-
-###################################################
-### chunk number 12: 
-###################################################
+@ 
+To run the process model, users should use \code{simulate} with the \code{states=T} option.
+Lower-level access is available via the \code{rprocess} method:
+<<>>=
 x <- rprocess(rw2,xstart=x0,times=0:100,params=p)
-
-
-###################################################
-### chunk number 13: 
-###################################################
+@ 
+Similarly, low-level access to the measurement-model simulator can be had through \code{rmeasure}:
+<<>>=
 y <- rmeasure(rw2,x=x[,,-1,drop=F],times=1:100,params=p)
-
-
-###################################################
-### chunk number 14: 
-###################################################
+@ 
+Access to the process-model p.d.f. is available via \code{dprocess}:
+<<>>=
 dprocess(rw2,x[,,6:11],times=5:10,params=p)
 dprocess(rw2,x[,,6:11],times=5:10,params=p,log=T)
-
-
-###################################################
-### chunk number 15: 
-###################################################
+@ 
+Note that \code{dprocess} returns a matrix: the rows correspond to independent simulations, the columns to distinct state transitions.
+The measurement-model p.d.f. is accessed via the \code{dmeasure} method, which like \code{dprocess}, returns a matrix.
+The rows correspond to independent simulations, the columns to distinct times.
+<<>>=
 dmeasure(rw2,y=y[,1,1:4],x=x[,,2:5,drop=F],times=time(rw2)[1:4],p)
 dmeasure(rw2,y=y[,2,1:4],x=x[,,2:5,drop=F],times=time(rw2)[1:4],p)
 dmeasure(rw2,y=y[,3,1:4],x=x[,,2:5,drop=F],times=time(rw2)[1:4],p)
 exp(dmeasure(rw2,y=y[,3,1:4],x=x[,,2:5,drop=F],times=time(rw2)[1:4],p,log=T))
+@ 
 
+\section{A two-dimensional Ornstein-Uhlenbeck process.}
 
-###################################################
-### chunk number 16: 
-###################################################
+To keep things simple, we will study a discrete-time process.
+The tricks below will continue to be useful even in the case of a continuous-time process, but the computational effort will be greater.
+The unobserved Ornstein-Uhlenbeck (OU) process $X_{t}\in\mathbb{R}^2$ satisfies
+\begin{equation*}
+  X_{t} = A\,X_{t-1}+\xi_{t}.
+\end{equation*}
+The observation process is
+\begin{equation*}
+  Y_{t} = B\,X_{t}+\varepsilon_{t}.
+\end{equation*}
+In these equations, $A$ and and $B$ are 2$\times$2 constant matrices; $\xi_{t}$ and $\varepsilon_{t}$ are mutually-independent families of i.i.d. bivariate normal random variables.
+We let $\sigma\sigma^T$ be the variance-covariance matrix of $\xi_{t}$, where $\sigma$ is lower-triangular;
+likewise, we let $\tau\tau^T$ be that of $\varepsilon_{t}$.
+
+We build the \code{pomp} object by specifying the three basic elements.
+The process model simulator and density functions:
+<<>>=
   ou2.rprocess <- function (xstart, times, params, ...) { 
     ## this function simulates two discrete-time OU processes
     nsims <- ncol(xstart)
@@ -196,11 +234,8 @@ exp(dmeasure(rw2,y=y[,3,1:4],x=x[,,2:5,drop=F],times=time(rw2)[1:4],p,log=T))
     }
     x
   }
-
-
-###################################################
-### chunk number 17: 
-###################################################
+@ 
+<<>>=
   ou2.dprocess <- function (x, times, params, log = FALSE, ...) { 
     ## this function simulates two discrete-time OU processes
     nsims <- ncol(x)
@@ -221,11 +256,10 @@ exp(dmeasure(rw2,y=y[,3,1:4],x=x[,,2:5,drop=F],times=time(rw2)[1:4],p,log=T))
     }
     d
   }
-
-
-###################################################
-### chunk number 18: 
-###################################################
+@ 
+The measurement model is the same as that for the random walk example above.
+We build the \code{pomp} object:
+<<>>=
 ou2 <- pomp( 
 	    times=seq(1,100),
 	    data=rbind(
@@ -238,90 +272,68 @@ ou2 <- pomp(
 	    rmeasure = bvnorm.rmeasure,
 	    dmeasure = bvnorm.dmeasure
 	    )
+@
 
-
-###################################################
-### chunk number 19: 
-###################################################
+Now we'll specify the ``true'' parameters and initial states.
+<<print=T>>=
 x0 <- c(x1=50,x2=-50)
-
-
-###################################################
-### chunk number 20: 
-###################################################
+@ 
+<<print=T>>=
 p <- c(
        alpha.1=0.9,alpha.2=0,alpha.3=0,alpha.4=0.99,
        sigma.1=1,sigma.2=0,sigma.3=2,
        tau=1
        )
-
-
-###################################################
-### chunk number 21: 
-###################################################
+@ 
+As before, we'll fill in the missing values with simulated data.
+<<>>=
  tic <- Sys.time()
  ou2 <- simulate(ou2,xstart=x0,params=p,nsim=1000)[[1]]
  toc <- Sys.time()
  print(toc-tic)
+@ 
 
-
-###################################################
-### chunk number 22: 
-###################################################
+Let's make sure everything works.
+<<>>=
 x <- rprocess(ou2,xstart=as.matrix(x0),times=c(0,time(ou2)),params=as.matrix(p))
-
-
-###################################################
-### chunk number 23: 
-###################################################
+@ 
+<<>>=
 y <- rmeasure(ou2,x=x[,,-1,drop=F],times=time(ou2),params=as.matrix(p))
-
-
-###################################################
-### chunk number 24: 
-###################################################
+@ 
+<<>>=
 dprocess(ou2,x[,,36:41,drop=F],times=time(ou2)[35:40],params=as.matrix(p))
 exp(dprocess(ou2,x[,,36:41,drop=F],times=time(ou2)[35:40],params=as.matrix(p),log=T))
-
-
-###################################################
-### chunk number 25: 
-###################################################
+@ 
+<<>>=
 dmeasure(ou2,y=y[,1,1:4],x=x[,,2:5,drop=F],times=time(ou2)[1:4],params=as.matrix(p))
 exp(dmeasure(ou2,y=y[,1,1:4],x=x[,,2:5,drop=F],times=time(ou2)[1:4],params=as.matrix(p),log=T))
+@ 
 
+\section{Linking in compiled code for computational efficiency.}
 
-###################################################
-### chunk number 26: 
-###################################################
+The functions we've just written are (relatively) easy to read, but they will be slow to evaluate because, being written in R, they must be interpreted.
+Since many of the methods we will use require us to simulate the process and/or measurement models many times, it is a good idea to translate these codes into a compiled language.
+The package includes some C codes that were written to implement the OU example.
+Read the source (file `ou2.c') for details.
+The following wrapper functions make use of these compiled codes.
+<<>>=
   ou2.rprocess <- function (xstart, times, params, ...) 
     .Call('ou2_simulator',xstart,times,params)
-
-
-###################################################
-### chunk number 27: 
-###################################################
+@ 
+<<>>=
   ou2.dprocess <- function (x, times, params, log = FALSE, ...)
     .Call('ou2_density',x,as.numeric(times),params,log)
-
-
-###################################################
-### chunk number 28: 
-###################################################
+@ 
+<<>>=
   bvnorm.dmeasure <- function (y, x, times, params, log = FALSE, ...)
     .Call('bivariate_normal_dmeasure',y,x,as.numeric(times),params,log)
-
-
-###################################################
-### chunk number 29: 
-###################################################
+@ 
+<<>>=
   bvnorm.rmeasure <- function (x, times, params, ...)
     .Call('bivariate_normal_rmeasure',x,as.numeric(times),params)
-
-
-###################################################
-### chunk number 30: 
-###################################################
+@ 
+To take advantage of the compiled functions, we need to reconstruct the \code{pomp} object.
+<<>>=
 ou2 <- pomp( 
 	    times=seq(1,100),
 	    data=rbind(
@@ -339,61 +351,57 @@ ou2 <- pomp(
               'sigma.1','sigma.2','sigma.3',
               'tau')
 	    )
+@ 
+The \code{pomp} object we just created is included in the package: use \code{data(ou2)} to retrieve it.
+<<echo=F>>=
+save(list='ou2',file='ou2.rda')
+@ 
+We'll fill the data slot with simulated data:
+<<>>=
  tic <- Sys.time()
  ou2 <- simulate(ou2,xstart=x0,params=p,nsim=1000)[[1]]
  toc <- Sys.time()
  print(toc-tic)
+@ 
+Notice that we have added two objects, \code{ivpnames} and \code{parnames} to the \code{pomp} object.
+These will be passed to each of the functions and will come in handy later when we do particle filtering.
+Fig.~\ref{fig:ou_process} plots the data.
 
-
-###################################################
-### chunk number 31: 
-###################################################
+\begin{figure}
+<<fig=T>>=
   plot(ou2)
+@ 
+  \caption{The OU process.}
+  \label{fig:ou_process}
+\end{figure}
 
-
-###################################################
-### chunk number 32: 
-###################################################
+Let's make sure everything works.
+<<>>=
 x <- rprocess(ou2,xstart=as.matrix(x0),times=c(0,time(ou2)),params=as.matrix(p))
-
-
-###################################################
-### chunk number 33: 
-###################################################
+@ 
+<<>>=
 y <- rmeasure(ou2,x=x[,,-1,drop=F],times=time(ou2),params=as.matrix(p))
-
-
-###################################################
-### chunk number 34: 
-###################################################
+@ 
+<<>>=
 log(dprocess(ou2,x[,,36:41,drop=F],times=time(ou2)[35:40],params=as.matrix(p)))
 dprocess(ou2,x[,,36:41,drop=F],times=time(ou2)[35:40],params=as.matrix(p),log=T)
-
-
-###################################################
-### chunk number 35: 
-###################################################
+@ 
+<<>>=
 log(dmeasure(ou2,y=y[,1,1:4],x=x[,,2:5,drop=F],times=time(ou2)[1:4],params=as.matrix(p)))
 dmeasure(ou2,y=y[,1,1:4],x=x[,,2:5,drop=F],times=time(ou2)[1:4],params=as.matrix(p),log=T)
+@ 
 
+\section{Particle filter.}
 
-###################################################
-### chunk number 36: 
-###################################################
-save(list='ou2',file='ou2.rda')
-
-
-###################################################
-### chunk number 37: 
-###################################################
+We can run a particle filter as follows:
+<<>>=
 X0 <- matrix(x0,2,2000)
 rownames(X0) <- c('x1','x2')
 fit1 <- pfilter(ou2,X0,p,filter.mean=T,pred.mean=T,pred.var=T)
-
-
-###################################################
-### chunk number 38: 
-###################################################
+@ 
+We can compare the results against those of the Kalman filter, which is exact in this case.
+First, we need to implement the Kalman filter.
+<<>>=
 kalman.filter <- function (y, x0, a, b, sigma, tau) {
   n <- nrow(y)
   ntimes <- ncol(y)
@@ -426,22 +434,24 @@ kalman.filter <- function (y, x0, a, b, sigma, tau) {
        loglik=-0.5*dev
        )
 }
-
-
-###################################################
-### chunk number 39: 
-###################################################
+@ 
+Now we can run it on the example data we generated above.
+<<>>=
 y <- data.array(ou2)
 a <- matrix(p[c('alpha.1','alpha.2','alpha.3','alpha.4')],2,2)
 b <- diag(1,2)
 sigma <- matrix(c(p['sigma.1'],p['sigma.2'],0,p['sigma.3']),2,2)
 tau <- diag(p['tau'],2,2)
 fit2 <- kalman.filter(y,x0,a,b,sigma,tau)
+@ 
+In this case, the Kalman filter gives us a log likelihood of \code{fit2\$loglik=\Sexpr{fit2$loglik}}, while the particle filter gives us \code{fit1\$loglik=\Sexpr{fit1$loglik}}.
 
+\section{The MIF algorithm}
 
-###################################################
-### chunk number 40: 
-###################################################
+In order to use MIF, we need to specify the distribution of particles in the state-parameter space.
+This distribution must be such that, when \code{sd=0}, all the particles are identical.
+For this example, we'll just draw our particles from a multivariate normal distribution.
+<<>>=
 normal.particles <- function (Np, center, sd, ivpnames, ...) {
   params <- matrix(
                    rnorm(Np*length(center),mean=center,sd=sd),
@@ -455,11 +465,11 @@ normal.particles <- function (Np, center, sd, ivpnames, ...) {
        params=params
        )
 }
+@ 
 
-
-###################################################
-### chunk number 41: 
-###################################################
+Now we'll run MIF to maximize the likelihood over two of the parameters and the initial conditions.
+We'll use 1000 particles, an exponential cooling factor of 0.95, and a fixed-lag smoother with lag 10 for the initial conditions.
+<<>>=
   ou2 <- mif(ou2,Nmif=0,start=c(x1.0=50,x2.0=-50,p),
              pars=c('alpha.1','alpha.4'),ivps=c('x1.0','x2.0'),
              particles=normal.particles,
@@ -472,11 +482,9 @@ normal.particles <- function (Np, center, sd, ivpnames, ...) {
              alg.pars=list(Np=1000,var.factor=1,ic.lag=10,cooling.factor=0.95),
              max.fail=100
              )
-
-
-###################################################
-### chunk number 42: 
-###################################################
+@ 
+Just to make it interesting, we'll start far from the true parameter values:
+<<>>=
 coef(ou2,c('x1.0','x2.0','alpha.1','alpha.4')) <- c(45,-60,0.8,0.9)
 tic <- Sys.time()
 fit <- mif(ou2,Nmif=2,max.fail=100)
@@ -484,27 +492,34 @@ fit <- continue(fit,Nmif=78,max.fail=100)
 toc <- Sys.time()
 print(toc-tic)
 coef(fit)
-
-
-###################################################
-### chunk number 43: 
-###################################################
+@
+The log likelihood of the random-parameter model at the end of the mif iterations, which should be a rough approximation of that of the fixed-parameter model, is \code{logLik(fit)=}\Sexpr{logLik(fit)}.
+To get the log likelihood of the fixed-parameter model (up to Monte Carlo error) we can use \code{pfilter}:
+<<>>=
 pfilter(fit)$loglik
+@ 
+We can diagnose convergence of the MIF algorithm using ``convergence plots'' (Fig.~\ref{fig:convplot}).
 
-
-###################################################
-### chunk number 44: 
-###################################################
+\begin{figure}
+<<fig=T,echo=F>>=
 par(mfrow=c(3,1))
 plot(conv.rec(fit,'loglik'),type='l')
 plot(conv.rec(fit,'alpha.1'),type='l')
 plot(conv.rec(fit,'alpha.4'),type='l')
 par(mfrow=c(1,1))
+@ 
+\caption{Convergence plots can be used to help diagnose convergence of the MIF algorithm.}
+\label{fig:convplot}
+\end{figure}
 
+Like \code{pomp} objects, \code{mif} objects can be simulated (Fig.~\ref{fig:mifsim}).
 
-###################################################
-### chunk number 45: 
-###################################################
+\begin{figure}
+<<fig=T>>=
 plot(simulate(fit)[[1]])
+@ 
+\caption{\code{mif} objects can be simulated.}  
+\label{fig:mifsim}
+\end{figure}
 
-
+\end{document}
