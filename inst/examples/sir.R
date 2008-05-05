@@ -5,7 +5,8 @@ includedir <- system.file("include",package="pomp")
 lib <- system.file("libs/pomp.so",package="pomp")
 
 ## compile the model into shared-object library
-system(paste("gcc -fPIC -c -I/usr/local/lib64/R/include -I",includedir,modelfile))
+system(paste("cp",modelfile,"."))
+system(paste("R CMD COMPILE CFLAGS=\"-I",includedir,"\" sir.c",sep=""))
 system(paste("R CMD SHLIB -o sir.so sir.o",lib))
 
 ## set up a lookup table for basis functions for the seasonality
@@ -95,9 +96,6 @@ toc <- Sys.time()
 print(toc-tic)
 
 X <- simulate(po,params=log(params),nsim=10,states=T)
-nm <- rownames(X)
-dim(X) <- c(11,10,1041)
-rownames(X) <- nm
 
 f <- dmeasure(
               po,
