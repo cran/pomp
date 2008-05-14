@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
-#ifndef _POMP_INTERP_H_
-#define _POMP_INTERP_H_
+#ifndef _POMP_LOOKUP_TABLE_H_
+#define _POMP_LOOKUP_TABLE_H_
 
 #include <R.h>
 #include <Rmath.h>
@@ -16,6 +16,5 @@ struct lookup_table {
 
 double dot_product (int dim, const double *basis, const double *coef);
 void table_lookup (struct lookup_table *tab, double x, double *y, double *dydt);
-
 
 #endif

@@ -1,4 +1,4 @@
-#include "interp.h"
+#include "lookup_table.h"
 
 // linear interpolation on a lookup table
 void table_lookup (struct lookup_table *tab, double x, double *y, double *dydt)
@@ -21,7 +21,6 @@ void table_lookup (struct lookup_table *tab, double x, double *y, double *dydt)
 }
 
 // compute the transmission coefficient using the basis functions
-// useful in combination with table_lookup
 double dot_product (int dim, const double *basis, const double *coef)
 {
   int j;
