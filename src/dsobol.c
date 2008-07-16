@@ -1,6 +1,6 @@
 // -*- C++ -*-
 
-#include "pomp.h"
+#include "pomp_internal.h"
 
 static void dsobol (double *data, int dim, int n);
 void F77_NAME(insobl)(int *, int *, int *, int *);

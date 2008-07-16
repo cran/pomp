@@ -1,12 +1,14 @@
-require(pomp)
+library(pomp)
 
 data(ou2)
 
+set.seed(64857673)
+
 fit1.pfilter <- pfilter(ou2,Np=1000)
 cat("coefficients at `truth'\n")
-print(coef(ou2,c('x1.0','x2.0','alpha.1','alpha.4')))
+print(coef(ou2,c('x1.0','x2.0','alpha.1','alpha.4')),digits=4)
 cat("particle filter log likelihood at truth\n")
-print(fit1.pfilter$loglik)
+print(fit1.pfilter$loglik,digits=4)
 
 p.truth <- coef(ou2)
 guess <- p.truth
@@ -14,9 +16,9 @@ guess[c('x1.0','x2.0','alpha.1','alpha.4')] <- c(45,-60,0.8,0.9)
 
 fit2.pfilter <- pfilter(ou2,params=guess,Np=1000,max.fail=1000,warn=F)
 cat("coefficients at guess\n")
-print(guess[c('x1.0','x2.0','alpha.1','alpha.4')])
+print(guess[c('x1.0','x2.0','alpha.1','alpha.4')],digits=4)
 cat("particle filter log likelihood at guess\n")
-print(fit2.pfilter$loglik)
+print(fit2.pfilter$loglik,digits=4)
 
 cat("running MIF\n")
 tic <- Sys.time()
@@ -35,9 +37,13 @@ mif.fit <- continue(mif.fit,Nmif=70,max.fail=100)
 toc <- Sys.time()
 print(toc-tic)
 cat("PF estimated log likelihood at MIF MLE\n")
-print(pfilter(mif.fit)$loglik)
+print(pfilter(mif.fit)$loglik,digits=4)
 
 cat("coefficients at truth\n")
-print(coef(ou2,c('x1.0','x2.0','alpha.1','alpha.4')))
+print(coef(ou2,c('x1.0','x2.0','alpha.1','alpha.4')),digits=4)
 cat("MIF MLE\n")
-print(coef(mif.fit,c('x1.0','x2.0','alpha.1','alpha.4')))
+print(coef(mif.fit,c('x1.0','x2.0','alpha.1','alpha.4')),digits=4)
+
+plot(mif.fit)
+compare.mif(mif.fit)
+compare.mif(list(mif.fit,mif.fit))

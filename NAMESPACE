@@ -1,4 +1,4 @@
-useDynLib(
+useDynLib(			
           pomp,
           bspline_basis,
           bspline_basis_function,
@@ -11,17 +11,24 @@ useDynLib(
           do_dprocess,
           do_rmeasure,
           do_dmeasure,
+          do_skeleton,
           do_init_state
           )
-importFrom(graphics,plot)
+
+importFrom(graphics,plot)		
 importFrom(stats,simulate,time,coef,logLik)
+
 exportClasses('pomp','mif')
-exportMethods('plot','show','time','print','show','coerce',
-              'dprocess','rprocess','rmeasure','dmeasure','init.state',
+
+exportMethods(
+              'plot','show','time','print','coerce',
+              'dprocess','rprocess','rmeasure','dmeasure','init.state','skeleton',
               'simulate','data.array','pfilter',
               'coef','logLik',
               'pred.mean','pred.var','filter.mean','conv.rec',
-              'particles','mif','continue','coef<-')
+              'particles','mif','continue','coef<-','states'
+              )
+
 export(
        pomp,
        pfilter,
@@ -31,5 +38,6 @@ export(
        euler.density,
        sobol,
        bspline.basis,
-       periodic.bspline.basis
+       periodic.bspline.basis,
+       compare.mif
        )

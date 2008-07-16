@@ -2,7 +2,7 @@
 #include <Rmath.h>
 #include <Rdefines.h>
 
-#include "pomp.h"
+#include "pomp_internal.h"
 
 // simulate Euler-multinomial transitions
 void reulermultinom (int m, double size, double *rate, double dt, double *trans) {

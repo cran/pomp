@@ -1,6 +1,6 @@
 // -*- C++ -*-
 
-#include "pomp.h"
+#include "pomp_internal.h"
 
 static void bspline_internal (double *y, const double *x, int nx, int i, int p, const double *knots, int nknots);
 

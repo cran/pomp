@@ -1,6 +1,6 @@
 // -*- C++ -*-
 
-#include "pomp.h"
+#include "pomp_internal.h"
 #include <Rdefines.h>
 
 SEXP systematic_resampling (SEXP weights)

@@ -16,7 +16,7 @@
 mif(object, \dots)
 \S4method{mif}{pomp}(object, Nmif, start, pars, ivps = character(0),
     particles, rw.sd, alg.pars, weighted = TRUE,
-    tol = 1e-17, warn = TRUE, max.fail = 0)
+    tol = 1e-17, warn = TRUE, max.fail = 0, verbose = FALSE)
 \S4method{mif}{mif}(object, \dots)
 \S4method{continue}{mif}(object, Nmif, \dots)
 }
@@ -56,6 +56,9 @@ mif(object, \dots)
   \item{max.fail}{
     Maximum number of filtering failures permitted.
     If the number of failures exceeds this number, execution will terminate with an error.
+  }
+  \item{verbose}{
+    logical; if TRUE, print progress reports.
   }
   \item{\dots}{
     Additional arguments that can be used to override the defaults.

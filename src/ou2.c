@@ -4,16 +4,18 @@
 #include <Rmath.h>
 #include <Rdefines.h>
 
-#include "pomp.h"
+#include "pomp_internal.h"
 
 // prototypes
-SEXP ou2_simulator (SEXP xstart, SEXP times, SEXP params);
-SEXP ou2_density (SEXP x, SEXP times, SEXP params, SEXP give_log);
-SEXP bivariate_normal_rmeasure (SEXP x, SEXP times, SEXP params);
-SEXP bivariate_normal_dmeasure (SEXP y, SEXP x, SEXP times, SEXP params, SEXP give_log);
 
-void normal_rmeasure (int *n, double *X, double *par, int *index, double *obs);
-void normal_dmeasure (int *n, double *X, double *par, int *index, double *Y, double *f, int *give_log);
+void normal_rmeasure (double *y, double *x, double *p, 
+		      int *stateindex, int *parindex, 
+		      int *covindex, int *obsindex, 
+		      int ncovar, double *covar, 
+		      double t);
+void normal_dmeasure (double *lik, double *y, double *x, double *p, int give_log, 
+		      int *stateindex, int *parindex, int *covindex, int *obsindex,
+		      int covdim, double *covar, double t);
 void ou2_adv (double *x, double *xstart, double *par, double *times, int *n, int *parindex);
 void ou2_pdf (double *d, double *X, double *par, double *times, int *n, int *parindex, int *give_log);
 static void sim_ou2 (double *x,
@@ -22,99 +24,6 @@ static void sim_ou2 (double *x,
 static double dens_ou2 (double *x1, double *x2,
 			double alpha1, double alpha2, double alpha3, double alpha4, 
 			double sigma1, double sigma2, double sigma3, int give_log);
-static SEXP matchnames (SEXP x, int n, char **names);
-
-// this is the rprocess function
-// it is basically a wrapper around a call to 'ou2_adv', which could be called from R directly
-SEXP ou2_simulator (SEXP xstart, SEXP times, SEXP params) {
-  int nprotect = 0;
-  int *dim, xdim[3], ndim[4];
-  int nvar, npar, nrep, ntimes;
-  char *paramnames[] = {"alpha.1","alpha.2","alpha.3","alpha.4","sigma.1","sigma.2","sigma.3"};
-  int nparams = sizeof(paramnames)/sizeof(paramnames[0]);
-  SEXP X, pindex;
-  dim = INTEGER(GET_DIM(xstart)); nvar = dim[0]; nrep = dim[1];
-  dim = INTEGER(GET_DIM(params)); npar = dim[0];
-  ntimes = length(times);
-  xdim[0] = nvar; xdim[1] = nrep; xdim[2] = ntimes;
-  PROTECT(X = makearray(3,xdim)); nprotect++;
-  setrownames(X,GET_ROWNAMES(GET_DIMNAMES(xstart)),3);
-  PROTECT(pindex = matchnames(GET_ROWNAMES(GET_DIMNAMES(params)),nparams,paramnames)); nprotect++;
-  ndim[0] = nvar; ndim[1] = npar; ndim[2] = nrep; ndim[3] = ntimes;
-  ou2_adv(REAL(X),REAL(xstart),REAL(params),REAL(times),ndim,INTEGER(pindex));
-  UNPROTECT(nprotect);
-  return X;
-}
-
-// this is the dprocess function
-// it is a wrapper around a call to 'ou2_pdf', which could be called from R directly
-SEXP ou2_density (SEXP x, SEXP times, SEXP params, SEXP give_log) {
-  int nprotect = 0;
-  int *dim, xdim[2], ndim[4];
-  int nvar, npar, nrep, ntimes;
-  char *paramnames[] = {"alpha.1","alpha.2","alpha.3","alpha.4","sigma.1","sigma.2","sigma.3"};
-  int nparams = sizeof(paramnames)/sizeof(paramnames[0]);
-  SEXP D, index;
-  dim = INTEGER(GET_DIM(x)); nvar = dim[0]; nrep = dim[1];
-  dim = INTEGER(GET_DIM(params)); npar = dim[0]; 
-  ntimes = length(times);
-  xdim[0] = nrep; xdim[1] = ntimes-1;
-  PROTECT(D = makearray(2,xdim)); nprotect++;
-  PROTECT(index = matchnames(GET_ROWNAMES(GET_DIMNAMES(params)),nparams,paramnames)); nprotect++;
-  ndim[0] = nvar; ndim[1] = npar; ndim[2] = nrep; ndim[3] = ntimes;
-  ou2_pdf(REAL(D),REAL(x),REAL(params),REAL(times),ndim,INTEGER(index),LOGICAL(give_log));
-  UNPROTECT(nprotect);
-  return D;
-}
-
-// this is the rmeasure function
-// it is a wrapper around a call to 'normal_rmeasure', which could be called from R directly
-SEXP bivariate_normal_rmeasure (SEXP x, SEXP times, SEXP params) {
-  int nprotect = 0;
-  int *dim, xdim[3], ndim[5];
-  int nvar, npar, nrep, ntimes;
-  char *paramnames[] = {"tau"}, *obsnames[] = {"y1","y2"};
-  int nparams = sizeof(paramnames)/sizeof(paramnames[0]);
-  int nobs = sizeof(obsnames)/sizeof(obsnames[0]);
-  int k;
-  SEXP obs, obsnm, index;
-  dim = INTEGER(GET_DIM(x)); nvar = dim[0]; nrep = dim[1];
-  dim = INTEGER(GET_DIM(params)); npar = dim[0];
-  ntimes = length(times);
-  xdim[0] = nobs; xdim[1] = nrep; xdim[2] = ntimes;
-  PROTECT(obs = makearray(3,xdim)); nprotect++;
-  PROTECT(obsnm = NEW_CHARACTER(nobs)); nprotect++;
-  for (k = 0; k < nobs; k++) 
-    SET_STRING_ELT(obsnm,k,mkChar(obsnames[k]));
-  setrownames(obs,obsnm,3);
-  PROTECT(index = matchnames(GET_ROWNAMES(GET_DIMNAMES(params)),nparams,paramnames)); nprotect++;
-  ndim[0] = nvar; ndim[1] = npar; ndim[2] = nrep; ndim[3] = ntimes; ndim[4] = nobs;
-  normal_rmeasure(ndim,REAL(x),REAL(params),INTEGER(index),REAL(obs));
-  UNPROTECT(nprotect);
-  return obs;
-}
-
-// this is the dmeasure function
-// it is a wrapper around a call to 'normal_dmeasure', which could be called from R directly
-SEXP bivariate_normal_dmeasure (SEXP y, SEXP x, SEXP times, SEXP params, SEXP give_log) {
-  int nprotect = 0;
-  int *dim, xdim[2], ndim[5];
-  int nobs, nvar, npar, nrep, ntimes;
-  char *paramnames[] = {"tau"};
-  int nparams = sizeof(paramnames)/sizeof(paramnames[0]);
-  SEXP d, index;
-  dim = INTEGER(GET_DIM(y)); nobs = dim[0];
-  dim = INTEGER(GET_DIM(x)); nvar = dim[0]; nrep = dim[1];
-  dim = INTEGER(GET_DIM(params)); npar = dim[0];
-  ntimes = length(times);
-  xdim[0] = nrep; xdim[1] = ntimes;
-  PROTECT(d = makearray(2,xdim)); nprotect++;
-  PROTECT(index = matchnames(GET_ROWNAMES(GET_DIMNAMES(params)),nparams,paramnames)); nprotect++;
-  ndim[0] = nvar; ndim[1] = npar; ndim[2] = nrep; ndim[3] = ntimes; ndim[4] = nobs;
-  normal_dmeasure(ndim,REAL(x),REAL(params),INTEGER(index),REAL(y),REAL(d),LOGICAL(give_log));
-  UNPROTECT(nprotect);
-  return d;
-}
 
 #define ALPHA1     (pp[parindex[0]])
 #define ALPHA2     (pp[parindex[1]])
@@ -174,60 +83,43 @@ void ou2_pdf (double *d, double *X, double *par, double *times, int *n, int *par
 #undef SIGMA2
 #undef SIGMA3
 
-#define TAU   (p[index[0]])
+#define X1    (x[stateindex[0]])
+#define X2    (x[stateindex[1]])
+#define TAU   (p[parindex[7]])
+#define Y1    (y[obsindex[0]])
+#define Y2    (y[obsindex[1]])
 
 // bivariate normal measurement error density
-void normal_dmeasure (int *n, double *X, double *par, int *index, double *Y, double *f, int *give_log) {
-  int nvar = n[0], npar = n[1], nrep = n[2], ntimes = n[3], nobs = n[4];
-  double *x, *p, *y, v, val;
-  double tol = 1.0e-18;	// tol should be less than the tol in the particle filter!
-  int j, k;
-  for (j = 0; j < ntimes; j++) {
-    R_CheckUserInterrupt();
-    y = &Y[nobs*j];
-    for (k = 0; k < nrep; k++) {
-      x = &X[nvar*(k+j*nrep)];
-      p = &par[npar*k];
-      v = fabs(TAU);
-      if (R_FINITE(v)) {
-	val = 0.0;
-	if (!ISNA(y[0])) val = dnorm(y[0],x[0],v+tol,1);
-	if (!ISNA(y[1])) val += dnorm(y[1],x[1],v+tol,1);
-// when give_log=TRUE, use the 1st-order Taylor expansion of log(p+tol) = log(p)+log(1+tol/p) ~= log(p)+tol/p
-	f[k+j*nrep] = (*give_log) ? val+tol*exp(-val) : exp(val)+tol; 
-      } else {
-	f[k+j*nrep] = (*give_log) ? log(tol) : tol;
-      }
-    }
-  }
+void normal_dmeasure (double *lik, double *y, double *x, double *p, int give_log, 
+		      int *stateindex, int *parindex, int *covindex, int *obsindex,
+		      int covdim, double *covar, double t) 
+{
+  double sd = fabs(TAU);
+  double f = 0.0;
+  f += (ISNA(Y1)) ? 0.0 : dnorm(Y1,X1,sd,1);
+  f += (ISNA(Y2)) ? 0.0 : dnorm(Y2,X2,sd,1);
+  *lik = (give_log) ? f : exp(f);
 }
 
 // bivariate normal measurement error simulator
-void normal_rmeasure (int *n, double *X, double *par, int *index, double *obs) {
-  int nvar = n[0], npar = n[1], nrep = n[2], ntimes = n[3], nobs = n[4];
-  double *x, *p, v;
-  double tol = 1.0e-18;	// tol should be less than the tol in the particle filter!
-  int j, k;
+void normal_rmeasure (double *y, double *x, double *p, 
+		      int *stateindex, int *parindex, 
+		      int *covindex, int *obsindex, 
+		      int ncovar, double *covar, 
+		      double t) 
+{
+  double sd = fabs(TAU);
   GetRNGstate();
-  for (j = 0; j < ntimes; j++) {
-    R_CheckUserInterrupt();
-    for (k = 0; k < nrep; k++) {
-      x = &X[nvar*(k+j*nrep)];
-      p = &par[npar*k];
-      v = fabs(TAU);
-      if (R_FINITE(v)) {
-	obs[nobs*(k+j*nrep)] = rnorm(x[0],v+tol);
-	obs[1+nobs*(k+j*nrep)] = rnorm(x[1],v+tol);
-      } else {
-	obs[nobs*(k+j*nrep)] = R_NaReal;
-	obs[1+nobs*(k+j*nrep)] = R_NaReal;
-      }
-    }
-  }
+  Y1 = rnorm(X1,sd);
+  Y2 = rnorm(X2,sd);
   PutRNGstate();
 }
 
+#undef X1
+#undef X2
 #undef TAU
+#undef Y1
+#undef Y2
 
 // simple 2D Ornstein-Uhlenbeck process simulation
 static void sim_ou2 (double *x,
@@ -288,24 +180,4 @@ static double dens_ou2 (double *x1, double *x2,
   return ((give_log) ? val : exp(val));
 }
 
-static SEXP matchnames (SEXP x, int n, char **names) {
-  int nprotect = 0;
-  int *idx, k;
-  SEXP index, nm;
-  PROTECT(nm = NEW_CHARACTER(n)); nprotect++;
-  for (k = 0; k < n; k++) {
-    SET_STRING_ELT(nm,k,mkChar(names[k]));
-  }
-  PROTECT(index = match(x,nm,0)); nprotect++;
-  idx = INTEGER(index);
-  for (k = 0; k < n; k++) {
-    if (idx[k]==0) {
-      UNPROTECT(nprotect);
-      error("variable %s not specified",names[k]);
-    }
-    idx[k] -= 1;
-  }
-  UNPROTECT(nprotect);
-  return index;
-}
 

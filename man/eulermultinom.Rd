@@ -29,7 +29,7 @@ deulermultinom(x, size, rate, dt, log = FALSE)
   }
 }
 \details{
-  Direct access to the underlying C routines is available: see the header file "euler.h", included with the package.
+  Direct access to the underlying C routines is available: see the header file "pomp.h", included with the package.
 }
 \author{Aaron A. King (kingaa at umich dot edu)}
 \seealso{\code{\link{euler}}, \code{\link{pomp}}}

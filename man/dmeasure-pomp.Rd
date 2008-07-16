@@ -3,7 +3,6 @@
 \alias{dmeasure}
 \alias{dmeasure,pomp-method}
 \alias{dmeasure-pomp}
-
 \title{Evaluate the probability density of observations given underlying states in a partially-observed Markov process}
 \description{
   The method \code{dmeaure} evaluates the probability density of a set of measurements given the state of the system.
@@ -20,7 +19,7 @@ dmeasure(object, y, x, times, params, log = FALSE, \dots)
   }
   \item{x}{
     a rank-3 array containing the states of the unobserved process.
-    The dimensions of \code{x} are \code{nvars} x \code{nsims} x \code{ntimes}, where \code{nvars} is the number of state variables, \code{nsims} is the number of replicates, and \code{ntimes} is the length of \code{times}.
+    The dimensions of \code{x} are \code{nvars} x \code{nreps} x \code{ntimes}, where \code{nvars} is the number of state variables, \code{nreps} is the number of replicates, and \code{ntimes} is the length of \code{times}.
     Note that if \code{ntimes != length(times)} or \code{ntimes != ncol(y)}, an error is generated.
   }
   \item{times}{
@@ -34,7 +33,7 @@ dmeasure(object, y, x, times, params, log = FALSE, \dots)
   \item{\dots}{at present, these are ignored.}
 }
 \value{
-  Returns a matrix of dimensions \code{nsims} x \code{ntimes}.
+  Returns a matrix of dimensions \code{nreps} x \code{ntimes}.
   If \code{d} is the returned matrix, \code{d[j,k]} is the likelihood of the observation \code{y[,k]} at time \code{times[k]} given the state \code{x[,j,k]}.
 }
 \details{

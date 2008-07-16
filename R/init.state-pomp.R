@@ -5,7 +5,6 @@ setMethod(
           function (object, params, t0, ...) { # the package algorithms will only use these arguments
             if (missing(t0))
               t0 <- object@t0
-            nreps <- NCOL(params)
             x <- try(
                      apply(
                            as.matrix(params),

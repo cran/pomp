@@ -1,16 +1,5 @@
-require(pomp)
+library(pomp)
 
-modelfile <- system.file("examples/sir.c",package="pomp")
-includedir <- system.file("include",package="pomp")
-lib <- system.file("libs/pomp.so",package="pomp")
-
-## compile the model into shared-object library
-system(paste("cp",modelfile,"."))
-system(paste("cp ",includedir,"/euler.h .",sep=""))
-system(paste("cp ",includedir,"/lookup_table.h .",sep=""))
-system(paste("R CMD SHLIB -o sir.so sir.c",lib))
-
-## basis functions for the seasonality
 tbasis <- seq(0,25,by=1/52)
 basis <- periodic.bspline.basis(tbasis,nbasis=3)
 colnames(basis) <- paste("seas",1:3,sep='')
@@ -26,6 +15,7 @@ params <- c(
             )
 
 ## set up the pomp object
+## the C codes "sir_euler_simulator" and "sir_euler_density" are included in the "examples" directory (file "sir.c")
 po <- pomp(
            times=seq(1/52,4,by=1/52),
            data=rbind(measles=numeric(52*4)),
@@ -37,8 +27,6 @@ po <- pomp(
            paramnames=c("gamma","mu","iota","beta1","beta.sd","pop"),
            covarnames=c("seas1"),
            zeronames=c("cases"),
-           measurement.model=measles~binom(size=cases,prob=exp(rho)),
-           rprocess=euler.simulate,
            step.fun=function(t,x,params,covars,delta.t,...) {
              params <- exp(params)
              with(
@@ -66,7 +54,6 @@ po <- pomp(
                   }
                   )
            },
-           dprocess=euler.density,
            dens.fun=function(t1,t2,params,x1,x2,covars,...) {
              params <- exp(params)
              with(
@@ -112,6 +99,9 @@ po <- pomp(
                   }
                   )
            },
+           rprocess=euler.simulate,
+           dprocess=euler.density,
+           measurement.model=measles~binom(size=cases,prob=exp(rho)),
            initializer=function(params,t0,...){
              p <- exp(params)
              with(
@@ -136,8 +126,49 @@ x <- simulate(po,params=log(params),nsim=3)
 toc <- Sys.time()
 print(toc-tic)
 
-# alternatively, one can define the computationally intensive bits using native routines:
-## the C codes "sir_euler_simulator" and "sir_euler_density" are included in the "examples" directory (file "sir.c")
+t <- seq(0,4/52,1/52/20)
+X <- simulate(po,params=log(params),nsim=10,states=TRUE,obs=TRUE,times=t)
+
+f <- dprocess(
+              po,
+              x=X$states[,,31:40],
+              times=t[31:40],
+              params=matrix(
+                log(params),
+                nrow=length(params),
+                ncol=10,
+                dimnames=list(names(params),NULL)
+                ),
+              log=TRUE
+              )
+print(apply(f,1,sum),digits=4)
+
+g <- dmeasure(
+              po,
+              y=rbind(measles=X$obs[,7,]),
+              x=X$states,
+              times=t,
+              params=matrix(
+                log(params),
+                nrow=length(params),
+                ncol=10,
+                dimnames=list(names(params),NULL)
+                ),
+              log=TRUE
+              )
+print(apply(g,1,sum),digits=4)
+
+t <- seq(0,2,1/52)
+X <- simulate(po,params=log(params),nsim=1,states=TRUE,obs=TRUE,times=t)
+
+h <- skeleton(
+              po,
+              x=X$states[,1,55:70,drop=FALSE],
+              t=t[55:70],
+              params=as.matrix(log(params))
+              )
+print(h[c("S","I","R"),,],digits=4)
+
 po <- pomp(
            times=seq(1/52,4,by=1/52),
            data=rbind(measles=numeric(52*4)),
@@ -149,13 +180,13 @@ po <- pomp(
            paramnames=c("gamma","mu","iota","beta1","beta.sd","pop"),
            covarnames=c("seas1"),
            zeronames=c("cases"),
-           measurement.model=measles~binom(size=cases,prob=exp(rho)),
-           rprocess=euler.simulate,
            step.fun="sir_euler_simulator",
-           dprocess=euler.density,
+           rprocess=euler.simulate,
            dens.fun="sir_euler_density",
+           dprocess=euler.density,
            skeleton="sir_ODE",
            PACKAGE="pomp",
+           measurement.model=measles~binom(size=cases,prob=exp(rho)),
            initializer=function(params,t0,...){
              p <- exp(params)
              with(
@@ -173,13 +204,52 @@ po <- pomp(
            }
            )
 
-dyn.load("sir.so")                    # load the shared-object library
-
+set.seed(3049953)
 ## simulate from the model
 tic <- Sys.time()
 x <- simulate(po,params=log(params),nsim=3)
 toc <- Sys.time()
 print(toc-tic)
-plot(x[[1]])
 
-dyn.unload("sir.so")
+t <- seq(0,4/52,1/52/20)
+X <- simulate(po,params=log(params),nsim=10,states=TRUE,obs=TRUE,times=t)
+
+f <- dprocess(
+              po,
+              x=X$states[,,31:40],
+              times=t[31:40],
+              params=matrix(
+                log(params),
+                nrow=length(params),
+                ncol=10,
+                dimnames=list(names(params),NULL)
+                ),
+              log=TRUE
+              )
+print(apply(f,1,sum),digits=4)
+
+g <- dmeasure(
+              po,
+              y=rbind(measles=X$obs[,7,]),
+              x=X$states,
+              times=t,
+              params=matrix(
+                log(params),
+                nrow=length(params),
+                ncol=10,
+                dimnames=list(names(params),NULL)
+                ),
+              log=TRUE
+              )
+print(apply(g,1,sum),digits=4)
+
+t <- seq(0,2,1/52)
+X <- simulate(po,params=log(params),nsim=1,states=TRUE,obs=TRUE,times=t)
+
+h <- skeleton(
+              po,
+              x=X$states[,1,55:70,drop=FALSE],
+              t=t[55:70],
+              params=as.matrix(log(params))
+              )
+print(h[c("S","I","R"),,],digits=4)

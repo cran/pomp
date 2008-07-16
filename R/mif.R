@@ -26,7 +26,7 @@ setMethod(
                     rw.sd = stop("'rw.sd' must be specified"),
                     alg.pars = stop("'alg.pars' must be specified"),
                     weighted = TRUE, tol = 1e-17, warn = TRUE, max.fail = 0,
-                    .ndone = 0) {
+                    verbose = FALSE, .ndone = 0) {
             if (missing(particles)) {         # use default: normal distribution
               particles <- function (Np, center, sd, ...) {
                 matrix(
@@ -76,7 +76,10 @@ setMethod(
             if (any(!(rw.names%in%start.names)))
               stop("mif error: all the names of 'rw.sd' must be names of 'start'",call.=FALSE)
             if (!all(c('Np','cooling.factor','ic.lag','var.factor')%in%names(alg.pars)))
-              stop("mif error: 'alg.pars' must be a named list with elements 'Np','cooling.factor','ic.lag',and 'var.factor'",call.=FALSE)
+              stop(
+                   "mif error: 'alg.pars' must be a named list with elements 'Np','cooling.factor','ic.lag',and 'var.factor'",
+                   call.=FALSE
+                   )
             coef(object) <- start
             newmif <- new(
                           "mif",
@@ -104,7 +107,16 @@ setMethod(
                           loglik=as.numeric(NA)
                           )
             if (Nmif > 0) {
-              mif(newmif,Nmif=Nmif,weighted=weighted,tol=tol,warn=warn,max.fail=max.fail,.ndone=0)
+              mif(
+                  newmif,
+                  Nmif=Nmif,
+                  weighted=weighted,
+                  tol=tol,
+                  warn=warn,
+                  max.fail=max.fail,
+                  verbose=verbose,
+                  .ndone=0
+                  )
             } else {
               newmif
             }
@@ -119,7 +131,7 @@ setMethod(
                     pars = object@pars, ivps = object@ivps, rw.sd = object@random.walk.sd,
                     alg.pars = object@alg.pars,
                     weighted = TRUE, tol = 1e-17, warn = TRUE, max.fail = 0,
-                    .ndone = 0) {
+                    verbose = FALSE, .ndone = 0) {
             theta <- start
             sigma <- rep(0,length(start))
             names(sigma) <- names(start)
@@ -187,8 +199,9 @@ setMethod(
                 theta[pars] <- apply(theta.hat,1,mean)
               }
               theta[ivps] <- x$filter.mean[ivps,alg.pars$ic.lag]
-              conv.rec[n+1,-1] <- c(x$nfail,theta)
-              conv.rec[n,1] <- x$loglik
+              conv.rec[n+1,-c(1,2)] <- theta
+              conv.rec[n,c(1,2)] <- c(x$loglik,x$nfail)
+              if (verbose) cat("MIF iteration ",n," of ",Nmif," completed\n")
             }
             coef(object) <- theta
             new(

@@ -18,8 +18,6 @@ setMethod(
             }
             if (is.null(dim(params)))
               params <- matrix(params,ncol=1,dimnames=list(names(params),NULL))
-            if (is.null(rownames(params)))
-              stop("'params' must have rownames",call.=FALSE)
             npars <- ncol(params)
             if (!is.null(seed)) { # set the random seed (be very careful about this)
               if (!exists('.Random.seed',envir=.GlobalEnv)) runif(1)
@@ -54,7 +52,8 @@ setMethod(
                                  po@data <- array(0,dim=c(nobs,ntimes-1),dimnames=list(nm.y,NULL))
                                  po@data[,] <- y[,rep,-1] # replace the data
                                  po@params <- params[,rep] # store the parameters
-                                 po@states <- x[,rep,] # store the states
+                                 po@states <- array(dim=dim(x)[c(1,3)],dimnames=list(rownames(x),NULL))
+                                 po@states[,] <- x[,rep,] # store the states
                                  po
                                }
                                )

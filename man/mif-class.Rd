@@ -77,20 +77,7 @@
       A numeric value containing the value of the log likelihood, as evaluated for the random-parameter model.
       Note that this will not be equal to the log likelihood for the fixed-parameter model.
     }
-    \item{data}{Inherited from the \code{pomp} class.}
-    \item{times}{Inherited from the \code{pomp} class.}
-    \item{t0}{Inherited from the \code{pomp} class.}
-    \item{rprocess}{Inherited from the \code{pomp} class.}
-    \item{dprocess}{Inherited from the \code{pomp} class.}
-    \item{rmeasure}{Inherited from the \code{pomp} class.}
-    \item{dmeasure}{Inherited from the \code{pomp} class.}
-    \item{initializer}{Inherited from the \code{pomp} class.}
-    \item{states}{Inherited from the \code{pomp} class.}
-    \item{params}{
-      A named vector containing the parameter estimate.
-      Inherited from the \code{pomp} class.
-    }
-    \item{userdata}{Inherited from the \code{pomp} class.}
+    \item{data, times, t0, rprocess, dprocess, dmeasure, rmeasure, skeleton, initializer, states, params, obsindex, statenames, paramnames, covarnames, tcovar, covar, PACKAGE, userdata}{Inherited from the \code{pomp} class.}
   }
 }
 \section{Extends}{

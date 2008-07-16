@@ -3,12 +3,12 @@ setMethod(
           'rmeasure',
           'pomp',
           function (object, x, times, params, ...) {
-            x <- try(
-                     .Call(do_rmeasure,object,x,times,params),
-                     silent=FALSE
-                     )
-            if (inherits(x,'try-error'))
+            val <- try(
+                       .Call(do_rmeasure,object,x,times,params),
+                       silent=FALSE
+                       )
+            if (inherits(val,'try-error'))
               stop("rmeasure error: error in user 'rmeasure'",call.=FALSE)
-            x
+            val
           }
           )

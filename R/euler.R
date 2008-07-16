@@ -1,17 +1,27 @@
 euler.simulate <- function (xstart, times, params,
-                            euler.step.fun, delta.t,
+                            step.fun, delta.t, ...,
                             statenames = character(0),
                             paramnames = character(0),
+                            covarnames = character(0),
                             zeronames = character(0),
                             tcovar, covar, PACKAGE)
 {
-  if (missing(tcovar))
-    tcovar <- range(times)
-  if (missing(covar))
-    covar <- matrix(nrow=2,ncol=0)
-  if (missing(PACKAGE))
-    PACKAGE <- ""
-  efun <- getNativeSymbolInfo(euler.step.fun,PACKAGE)$address
+  if (is.character(step.fun)) {
+    efun <- try(
+                getNativeSymbolInfo(step.fun,PACKAGE)$address,
+                silent=FALSE
+                )
+    if (inherits(efun,'try-error')) {
+      stop("no symbol named ",step.fun," in package ",PACKAGE)
+    }
+  } else if (is.function(step.fun)) {
+    if (!all(c('x','t','params','delta.t','...')%in%names(formals(step.fun))))
+      stop("'step.fun' must be a function of prototype 'step.fun(x,t,params,delta.t,...)'")
+    efun <- step.fun
+  } else {
+    stop("'step.fun' must be either a function or the name of a compiled routine")
+  }
+
   .Call(
         euler_model_simulator,
         efun,
@@ -21,26 +31,38 @@ euler.simulate <- function (xstart, times, params,
         delta.t,
         statenames,
         paramnames,
+        covarnames,
         zeronames,
         tcovar,
-        covar
+        covar,
+        args=pairlist(...)
         )
 }
 
 euler.density <- function (x, times, params,
-                           euler.dens.fun, 
+                           dens.fun, ...,
                            statenames = character(0),
                            paramnames = character(0),
+                           covarnames = character(0),
                            tcovar, covar, log = FALSE,
                            PACKAGE)
 {
-  if (missing(tcovar))
-    tcovar <- range(times)
-  if (missing(covar))
-    covar <- matrix(nrow=2,ncol=0)
-  if (missing(PACKAGE))
-    PACKAGE <- ""
-  efun <- getNativeSymbolInfo(euler.dens.fun,PACKAGE)$address
+  if (is.character(dens.fun)) {
+    efun <- try(
+                getNativeSymbolInfo(dens.fun,PACKAGE)$address,
+                silent=FALSE
+                )
+    if (inherits(efun,'try-error')) {
+      stop("no symbol named ",dens.fun," in package ",PACKAGE)
+    }
+  } else if (is.function(dens.fun)) {
+    if (!all(c('x1','x2','t1','t2','params','...')%in%names(formals(dens.fun))))
+      stop("'dens.fun' must be a function of prototype 'dens.fun(x1,x2,t1,t2,params,...)'")
+    efun <- dens.fun
+  } else {
+    stop("'dens.fun' must be either a function or the name of a compiled routine")
+  }
+
   .Call(
         euler_model_density,
         efun,
@@ -49,8 +71,10 @@ euler.density <- function (x, times, params,
         params,
         statenames,
         paramnames,
+        covarnames,
         tcovar,
         covar,
-        log
+        log,
+        args=pairlist(...)
         )
 }

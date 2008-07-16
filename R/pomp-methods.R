@@ -27,6 +27,17 @@ setMethod(
           }
           )
 
+## a simple method to extract the array of states
+setMethod(
+          'states',
+          'pomp',
+          function (object, vars, ...) {
+            if (missing(vars))
+              vars <- seq(length=nrow(object@states))
+            object@states[vars,,drop=FALSE]
+          }
+          )
+
 ## a simple method to extract the vector of times
 setMethod(
           "time",
@@ -95,3 +106,41 @@ setMethod(
             object
           }
           )
+
+setMethod(
+          'print',
+          'pomp',
+          function (x, ...) {
+            print(as(x,'data.frame'))
+            invisible(x)
+          }
+          )
+
+setMethod(
+          'show',
+          'pomp',
+          function (object) {
+            print(object)
+            cat("zero time, t0 = ",object@t0,"\n")
+            if (length(coef(object))>0) {
+              cat("parameters:\n")
+              print(coef(object))
+            } else {
+              cat ("parameters unspecified\n");
+            }
+            cat("process model simulator, rprocess = \n")
+            print(object@rprocess)
+            cat("process model density, dprocess = \n")
+            print(object@dprocess)
+            cat("measurement model simulator, rmeasure = \n")
+            print(object@rmeasure)
+            cat("measurement model density, dmeasure = \n")
+            print(object@dmeasure)
+            cat("initializer = \n")
+            print(object@initializer)
+            cat("userdata = \n")
+            show(object@userdata)
+            invisible(NULL)
+          }
+          )
+

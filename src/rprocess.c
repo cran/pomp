@@ -9,7 +9,7 @@ SEXP do_rprocess (SEXP object, SEXP xstart, SEXP times, SEXP params)
 {
   int nprotect = 0;
   int *xdim, nvars, nreps, ntimes;
-  SEXP X, fn, slotname, userdata, fcall, rho;
+  SEXP X, fn, fcall, rho;
   SEXP dimXstart, dimP, dimX;
   ntimes = length(times);
   if (ntimes < 2)
@@ -24,15 +24,29 @@ SEXP do_rprocess (SEXP object, SEXP xstart, SEXP times, SEXP params)
   nvars = xdim[0]; nreps = xdim[1];
   if (nreps != INTEGER(dimP)[1])
     error("rprocess error: number of columns of 'params' and 'xstart' do not agree");
-  PROTECT(slotname = NEW_CHARACTER(1)); nprotect++;
   // extract the process function
-  SET_STRING_ELT(slotname,0,mkChar("rprocess"));
-  PROTECT(fn = GET_SLOT(object,slotname)); nprotect++;
-  // extract the userdata
-  SET_STRING_ELT(slotname,0,mkChar("userdata"));
-  PROTECT(userdata = GET_SLOT(object,slotname)); nprotect++;
+  PROTECT(fn = GET_SLOT(object,install("rprocess"))); nprotect++;
   // construct the call
-  PROTECT(fcall = LCONS(fn,LCONS(xstart,LCONS(times,LCONS(params,VectorToPairList(userdata)))))); nprotect++;
+  PROTECT(fcall = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;
+  PROTECT(fcall = LCONS(GET_SLOT(object,install("PACKAGE")),fcall)); nprotect++;
+  SET_TAG(fcall,install("PACKAGE"));
+  PROTECT(fcall = LCONS(GET_SLOT(object,install("covarnames")),fcall)); nprotect++;
+  SET_TAG(fcall,install("covarnames"));
+  PROTECT(fcall = LCONS(GET_SLOT(object,install("paramnames")),fcall)); nprotect++;
+  SET_TAG(fcall,install("paramnames"));
+  PROTECT(fcall = LCONS(GET_SLOT(object,install("statenames")),fcall)); nprotect++;
+  SET_TAG(fcall,install("statenames"));
+  PROTECT(fcall = LCONS(GET_SLOT(object,install("covar")),fcall)); nprotect++;
+  SET_TAG(fcall,install("covar"));
+  PROTECT(fcall = LCONS(GET_SLOT(object,install("tcovar")),fcall)); nprotect++;
+  SET_TAG(fcall,install("tcovar"));
+  PROTECT(fcall = LCONS(params,fcall)); nprotect++;
+  SET_TAG(fcall,install("params"));
+  PROTECT(fcall = LCONS(times,fcall)); nprotect++;
+  SET_TAG(fcall,install("times"));
+  PROTECT(fcall = LCONS(xstart,fcall)); nprotect++;
+  SET_TAG(fcall,install("xstart"));
+  PROTECT(fcall = LCONS(fn,fcall)); nprotect++;
   PROTECT(rho = (CLOENV(fn))); nprotect++; // environment of the function
   PROTECT(X = eval(fcall,rho)); nprotect++; // do the call
   PROTECT(dimX = GET_DIM(X)); nprotect++;
