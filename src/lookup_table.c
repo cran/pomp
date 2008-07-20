@@ -7,30 +7,22 @@
 SEXP lookup_in_table (SEXP ttable, SEXP xtable, SEXP t, int *index) {
   int nprotect = 0;
   int flag = 0;
-  int *dim, length, width, j, p;
-  double x, *xx, *yy, e;
+  int *dim, length, width;
   SEXP X;
-  length = LENGTH(ttable);
+
   dim = INTEGER(GET_DIM(xtable));
-  if (length != dim[0]) {
+  length = dim[0]; width = dim[1];
+  if (length != LENGTH(ttable)) {
     UNPROTECT(nprotect);
     error("incommensurate dimensions in 'lookup_in_table'");
   }
-  width = dim[1];
-  x = *(REAL(t));
-  xx = REAL(ttable);
-  yy = REAL(xtable);
+
   PROTECT(X = NEW_NUMERIC(width)); nprotect++;
   SET_NAMES(X,GET_COLNAMES(GET_DIMNAMES(xtable)));
-  *index = findInterval(REAL(ttable),length,x,TRUE,TRUE,*index,&flag);
-  if (flag != 0)
-    warning("table_lookup: extrapolating (flag %d) at %le",flag,*(REAL(t)));
-  e = (x-xx[*index-1])/(xx[*index]-xx[*index-1]);
-  xx = REAL(X);
-  for (j = 0; j < width; j++) {
-    p = *index+j*length;
-    xx[j] = e*yy[p]+(1-e)*yy[p-1];
-  }
+
+  struct lookup_table tab = {length,width,0,REAL(ttable),REAL(xtable)};
+  table_lookup(&tab,*(REAL(t)),REAL(X),0);
+  
   UNPROTECT(nprotect);
   return X;
 }

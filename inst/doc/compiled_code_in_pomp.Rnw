@@ -13,7 +13,7 @@
 \setlength{\parskip}{.1in}  
 \setlength{\parindent}{0.0in}  
 
-%% $Revision: 1.9 $
+%% $Revision: 1.11 $
 
 \title[Using compiled code]{Using compiled code in \texttt{pomp}}
 
