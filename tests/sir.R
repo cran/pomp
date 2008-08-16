@@ -77,7 +77,8 @@ po <- pomp(
                   }
                   )
            },
-           skeleton=function(x,t,params,covars,...) {
+           skeleton.vectorfield=function(x,t,params,covars,...) {
+             xdot <- rep(0,length(x))
              params <- exp(params)
              with(
                   as.list(c(x,params)),
@@ -92,12 +93,13 @@ po <- pomp(
                                mu*I,
                                mu*R
                                )
-                    c(
-                      terms[1]-terms[2]-terms[3],
-                      terms[2]-terms[4]-terms[5],
-                      terms[4]-terms[6],
-                      terms[4]
-                      )
+                    xdot[1:4] <- c(
+                                   terms[1]-terms[2]-terms[3],
+                                   terms[2]-terms[4]-terms[5],
+                                   terms[4]-terms[6],
+                                   terms[4]
+                                   )
+                    xdot
                   }
                   )
            },
@@ -128,48 +130,59 @@ x <- simulate(po,params=log(params),nsim=3)
 toc <- Sys.time()
 print(toc-tic)
 
-t <- seq(0,4/52,by=1/52/25)
-X <- simulate(po,params=log(params),nsim=10,states=TRUE,obs=TRUE,times=t)
+pdf(file='sir.pdf')
 
-f <- dprocess(
-              po,
-              x=X$states[,,31:40],
-              times=t[31:40],
-              params=matrix(
-                log(params),
-                nrow=length(params),
-                ncol=10,
-                dimnames=list(names(params),NULL)
-                ),
-              log=TRUE
-              )
-print(apply(f,1,sum),digits=4)
+plot(x[[1]],variables=c("S","I","R","cases","W"))
 
-g <- dmeasure(
-              po,
-              y=rbind(measles=X$obs[,7,]),
-              x=X$states,
-              times=t,
-              params=matrix(
-                log(params),
-                nrow=length(params),
-                ncol=10,
-                dimnames=list(names(params),NULL)
-                ),
-              log=TRUE
-              )
-print(apply(g,1,sum),digits=4)
+t1 <- seq(0,4/52,by=1/52/25)
+X1 <- simulate(po,params=log(params),nsim=10,states=TRUE,obs=TRUE,times=t1)
 
-t <- seq(0,2,by=1/52)
-X <- simulate(po,params=log(params),nsim=1,states=TRUE,obs=TRUE,times=t)
+t2 <- seq(0,2,by=1/52)
+X2 <- simulate(po,params=log(params),nsim=1,states=TRUE,obs=TRUE,times=t2)
 
-h <- skeleton(
-              po,
-              x=X$states[,1,55:70,drop=FALSE],
-              t=t[55:70],
-              params=as.matrix(log(params))
-              )
-print(h[c("S","I","R"),,],digits=4)
+t3 <- seq(0,20,by=1/52)
+tic <- Sys.time()
+X3 <- trajectory(po,params=log(params),times=t3,hmax=1/52)
+toc <- Sys.time()
+print(toc-tic)
+plot(t3,X3['I',1,],type='l')
+
+f1 <- dprocess(
+               po,
+               x=X1$states[,,31:40],
+               times=t1[31:40],
+               params=matrix(
+                 log(params),
+                 nrow=length(params),
+                 ncol=10,
+                 dimnames=list(names(params),NULL)
+                 ),
+               log=TRUE
+               )
+print(apply(f1,1,sum),digits=4)
+
+g1 <- dmeasure(
+               po,
+               y=rbind(measles=X1$obs[,7,]),
+               x=X1$states,
+               times=t1,
+               params=matrix(
+                 log(params),
+                 nrow=length(params),
+                 ncol=10,
+                 dimnames=list(names(params),NULL)
+                 ),
+               log=TRUE
+               )
+print(apply(g1,1,sum),digits=4)
+
+h1 <- skeleton(
+               po,
+               x=X2$states[,1,55:70,drop=FALSE],
+               t=t2[55:70],
+               params=as.matrix(log(params))
+               )
+print(h1[c("S","I","R"),,],digits=4)
 
 po <- pomp(
            times=seq(1/52,4,by=1/52),
@@ -186,7 +199,7 @@ po <- pomp(
            rprocess=euler.simulate,
            dens.fun="sir_euler_density",
            dprocess=euler.density,
-           skeleton="sir_ODE",
+           skeleton.vectorfield="sir_ODE",
            PACKAGE="pomp",
            measurement.model=measles~binom(size=cases,prob=exp(rho)),
            initializer=function(params,t0,...){
@@ -212,46 +225,54 @@ tic <- Sys.time()
 x <- simulate(po,params=log(params),nsim=3)
 toc <- Sys.time()
 print(toc-tic)
+plot(x[[1]],variables=c("S","I","R","cases","W"))
 
-t <- seq(0,4/52,by=1/52/25)
-X <- simulate(po,params=log(params),nsim=10,states=TRUE,obs=TRUE,times=t)
+t3 <- seq(0,20,by=1/52)
+tic <- Sys.time()
+X4 <- trajectory(po,params=log(params),times=t3,hmax=1/52)
+toc <- Sys.time()
+print(toc-tic)
+plot(t3,X4['I',1,],type='l')
 
-f <- dprocess(
-              po,
-              x=X$states[,,31:40],
-              times=t[31:40],
-              params=matrix(
-                log(params),
-                nrow=length(params),
-                ncol=10,
-                dimnames=list(names(params),NULL)
-                ),
-              log=TRUE
-              )
-print(apply(f,1,sum),digits=4)
+f2 <- dprocess(
+               po,
+               x=X1$states[,,31:40],
+               times=t1[31:40],
+               params=matrix(
+                 log(params),
+                 nrow=length(params),
+                 ncol=10,
+                 dimnames=list(names(params),NULL)
+                 ),
+               log=TRUE
+               )
+print(apply(f2,1,sum),digits=4)
 
-g <- dmeasure(
-              po,
-              y=rbind(measles=X$obs[,7,]),
-              x=X$states,
-              times=t,
-              params=matrix(
-                log(params),
-                nrow=length(params),
-                ncol=10,
-                dimnames=list(names(params),NULL)
-                ),
-              log=TRUE
-              )
-print(apply(g,1,sum),digits=4)
+g2 <- dmeasure(
+               po,
+               y=rbind(measles=X1$obs[,7,]),
+               x=X1$states,
+               times=t1,
+               params=matrix(
+                 log(params),
+                 nrow=length(params),
+                 ncol=10,
+                 dimnames=list(names(params),NULL)
+                 ),
+               log=TRUE
+               )
+print(apply(g2,1,sum),digits=4)
 
-t <- seq(0,2,by=1/52)
-X <- simulate(po,params=log(params),nsim=1,states=TRUE,obs=TRUE,times=t)
+h2 <- skeleton(
+               po,
+               x=X2$states[,1,55:70,drop=FALSE],
+               t=t2[55:70],
+               params=as.matrix(log(params))
+               )
+print(h2[c("S","I","R"),,],digits=4)
 
-h <- skeleton(
-              po,
-              x=X$states[,1,55:70,drop=FALSE],
-              t=t[55:70],
-              params=as.matrix(log(params))
-              )
-print(h[c("S","I","R"),,],digits=4)
+print(max(abs(f2-f1),na.rm=T),digits=4)
+print(max(abs(g2-g1),na.rm=T),digits=4)
+print(max(abs(h2-h1),na.rm=T),digits=4)
+
+dev.off()

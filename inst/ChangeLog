@@ -1,3 +1,68 @@
+2008-08-15  kingaa
+
+	* tests/sir.R, tests/sir.Rout.save: improve test of SIR model
+	* tests/logistic.Rout.save:
+	* DESCRIPTION, src/euler.c: fix bug in Euler step
+
+2008-08-14  kingaa
+
+	* DESCRIPTION: make description more descriptive
+	* inst/examples/sir.R: put trajectory computation into SIR example
+
+2008-08-13  kingaa
+
+	* data/ou2.rda, inst/doc/compiled_code_in_pomp.pdf,
+	  inst/doc/intro_to_pomp.pdf:
+	* inst/ChangeLog:
+	* inst/examples/sir.c: cosmetic
+	* DESCRIPTION, NAMESPACE, R/aaa.R, R/pomp.R, R/trajectory-pomp.R,
+	  data/ou2.rda, inst/examples/logistic.R, inst/examples/sir.R,
+	  inst/examples/sir.c, man/mif-class.Rd, man/pomp-class.Rd,
+	  man/pomp.Rd, man/skeleton-pomp.Rd, man/trajectory-pomp.Rd,
+	  src/skeleton.c, tests/logistic.R, tests/logistic.Rout.save,
+	  tests/sir.R, tests/sir.Rout.save: add support for computing
+	  trajectories of the deterministic skeleton
+	  the skeleton must now be specified when the pomp is created: if
+	  the pomp is a discrete-time system, 'skeleton.map' is used to
+	  specify its deterministic skeleton; if it is a continuous-time
+	  system, 'skeleton.vectorfield' is used.
+	  the new method 'trajectory' will, in the first case, iterate the
+	  map to produce an itinerary and in the second case, it will call
+	  'lsoda' from the now-required 'odesolve' package to compute the
+	  trajectory.
+	  some changes to the basic 'pomp' structure have been made to
+	  facilitate all this.
+	  specifically, a new slot, 'skeleton-type', distinguishes between
+	  discrete-time and continuous-time systems
+
+2008-08-01  kingaa
+
+	* inst/ChangeLog:
+	* inst/ChangeLog:
+	* inst/examples/logistic.R: make dprocess depend on 'log'
+
+2008-07-31  kingaa
+
+	* inst/NEWS:
+	* DESCRIPTION:
+	* R/mif.R: improved error handling in mif
+	* man/pomp.Rd: fix inaccuracy in documentation of rmeasure and
+	  dmeasure arguments
+
+2008-07-29  kingaa
+
+	* inst/NEWS:
+	* DESCRIPTION:
+	* R/mif.R: bug fix in convergence record storage
+	* R/mif.R: cosmetic
+
+2008-07-26  kingaa
+
+	* DESCRIPTION, inst/ChangeLog, inst/NEWS,
+	  inst/doc/compiled_code_in_pomp.pdf, inst/doc/intro_to_pomp.Rnw,
+	  inst/doc/intro_to_pomp.pdf, src/ou2.c: bug fix in
+	  "intro_to_pomp.Rnw"
+
 2008-07-25  kingaa
 
 	* R/pfilter-mif.R:
