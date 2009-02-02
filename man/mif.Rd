@@ -44,7 +44,7 @@ mif(object, \dots)
     If \code{particles} is not supplied by the user, the default behavior is to draw the particles from a multivariate normal distribution with mean \code{center} and standard deviation \code{sd}.
   }
   \item{rw.sd}{
-    numeric vector; the intensity of the random walk to be applied to parameters.
+    numeric vector with names; the intensity of the random walk to be applied to parameters.
     The random walk is only applied to parameters named in \code{pars}.
     The algorithm requires that the random walk be nontrivial.
     Thus, each element in \code{rw.sd[pars]} must be positive.
@@ -129,7 +129,7 @@ mif(object, \dots)
   In particular, when \code{sd=0}, the \code{particles} should return matrices with \code{Np} identical columns, each corresponding to the parameters specified in \code{center}.
 }
 \references{
-  E. L. Ionides, C. Bret{\'o}, & A. A. King,
+  E. L. Ionides, C. Bret\'o, & A. A. King,
   Inference for nonlinear dynamical systems,
   Proc. Natl. Acad. Sci. U.S.A., 103:18438--18443, 2006.
 }

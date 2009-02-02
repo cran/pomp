@@ -1,3 +1,17 @@
+NEW IN VERSION 0.22-1:
+    
+    o  the nonlinear forecasting method of Kendall, Ellner, et al. is now implemented in the package.  This is an "indirect inference" method using quasi-likelihood as an objective function.
+
+NEW IN VERSION 0.21-4:
+
+    o  improved documentation in "euler.Rd"
+
+NEW IN VERSION 0.21-3:
+
+    o   trajectories of the deterministic skeleton can now be computed via the method "trajectory"
+
+    o	bug fix in stochastic Euler algorithm
+
 NEW IN VERSION 0.20-8:
 
     o   better error handling in mif
