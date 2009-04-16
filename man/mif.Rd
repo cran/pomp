@@ -15,12 +15,10 @@
 \usage{
 mif(object, \dots)
 \S4method{mif}{pomp}(object, Nmif = 1, start, pars, ivps = character(0),
-    particles, rw.sd, alg.pars, weighted = TRUE,
-    tol = 1e-17, warn = TRUE, max.fail = 0, verbose = FALSE, .ndone = 0)
-\S4method{mif}{mif}(object, Nmif, start, pars, ivps, rw.sd, alg.pars,
-    weighted = TRUE, tol = 1e-17, warn = TRUE, max.fail = 0,
-    verbose = FALSE, .ndone = 0)
-\S4method{continue}{mif}(object, Nmif, \dots)
+    particles, rw.sd, Np, cooling.factor, var.factor, ic.lag, alg.pars, weighted = TRUE,
+    tol = 1e-17, warn = TRUE, max.fail = 0, verbose = FALSE)
+\S4method{mif}{mif}(object, Nmif, \dots)
+\S4method{continue}{mif}(object, Nmif = 1, \dots)
 }
 \arguments{
   \item{object}{
@@ -34,12 +32,13 @@ mif(object, \dots)
     This must be a named vector.
   }
   \item{pars}{
-    character vector;
-    names of ordinary parameters to be estimated.
+    optional character vector naming the ordinary parameters to be estimated.
+    Every parameter named in \code{pars} must have a positive random-walk standard deviation specified in \code{rw.sd}.
+    Leaving \code{pars} unspecified is equivalent to setting it equal to the names of all parameters with a positive value of \code{rw.sd} that are not \code{ivps}.
   }
   \item{ivps}{
-    character vector;
-    names of initial-value parameters to be estimated.
+    optional character vector naming the initial-value parameters to be estimated.
+    Every parameter named in \code{ivps} must have a positive random-walk standard deviation specified in \code{rw.sd}.
   }
   \item{particles}{
     Function of prototype \code{particles(Np,center,sd,...)} which sets up the initial particle matrix by drawing a sample of size \code{Np} from the initial particle distribution centered at \code{center} and of width \code{sd}.
@@ -47,33 +46,35 @@ mif(object, \dots)
   }
   \item{rw.sd}{
     numeric vector with names; the intensity of the random walk to be applied to parameters.
-    The random walk is only applied to parameters named in \code{pars}.
-    The algorithm requires that the random walk be nontrivial.
-    Thus, each element in \code{rw.sd[pars]} must be positive.
+    The random walk is only applied to parameters named in \code{pars} (i.e., not to those named in \code{ivps}).
+    The algorithm requires that the random walk be nontrivial, so each element in \code{rw.sd[pars]} must be positive.
     \code{rw.sd} is also used to scale the initial-value parameters (via the \code{particles} function).
     Therefore, each element of \code{rw.sd[ivps]} must be positive.
+    The following must be satisfied:
+    \code{names(rw.sd)} must be a subset of \code{names(start)},
+    \code{rw.sd} must be non-negative (zeros are simply ignored),
+    the name of every positive element of \code{rw.sd} must be in either \code{pars} or \code{ivps}.
+  }
+  \item{Np}{
+    a positive integer;
+    the number of particles to use in filtering
+  }
+  \item{ic.lag}{
+    a positive integer;
+    the timepoint for fixed-lag smoothing of initial-value parameters
+  }
+  \item{var.factor}{
+    a positive number;
+    the scaling coefficient relating the width of the initial particle distribution to \code{rw.sd}
+  }
+  \item{cooling.factor}{
+    a positive number not greater than 1;
+    the exponential cooling factor, \code{alpha}.
   }
   \item{alg.pars}{
-    A named list of algorithm parameters.
-    This consists of
-    \describe{
-      \item{Np}{
-	a positive integer;
-	the number of particles to use in filtering
-      }
-      \item{ic.lag}{
-	a positive integer;
-	the timepoint for fixed-lag smoothing of initial-value parameters
-      }
-      \item{var.factor}{
-	a positive number;
-	the scaling coefficient relating the width of the initial particle distribution to \code{rw.sd}
-      }
-      \item{cooling.factor}{
-	a positive number not greater than 1;
-	the exponential cooling factor, \code{alpha}.
-      }
-    }
+    optional; a named list of the algorithm parameters \code{Np}, \code{cooling.factor}, \code{var.factor}, \code{ic.lag}.
+    The use of \code{alg.pars} is now deprecated and generates a warning.
+    It will be removed in the near future.
   }
   \item{weighted}{
     Should a weighted average be used?
@@ -94,10 +95,6 @@ mif(object, \dots)
   \item{verbose}{
     logical; if TRUE, print progress reports.
   }
-  \item{.ndone}{
-    for internal use by \code{continue}.
-    do not meddle with this!
-  }
   \item{\dots}{
     Additional arguments that can be used to override the defaults.
   }
@@ -107,15 +104,15 @@ mif(object, \dots)
   The call sequence is \code{mif(object)}.
   By default, the same parameters used for the original MIF run are re-used.
   If one does specify additional arguments, these will override the defaults.
-  An exception is that one cannot override the \code{particles} function.
 }
 \section{Continuing MIF Iterations}{
   One can continue a series of MIF iterations from where one left off.
   The call sequence is \code{continue(object, Nmif)}.
   This will perform \code{Nmif} additional MIF iterations on the \code{mif} object \code{object}.
   A call to \code{mif} to perform \code{Nmif=m} iterations followed by a call to \code{continue} to perform \code{Nmif=n} iterations will produce precisely the same effect as a single call to \code{mif} to perform \code{Nmif=m+n} iterations.
-  Additional arguments are passed to \code{mif}.
-  This feature can be used to change any of the parameters (except the \code{particles} function).
+  By default, all the algorithmic parameters are the same as used in the original call to \code{mif}.
+  Additional arguments will override the defaults.
+  This feature can be used to change any of the parameters.
 }
 \section{Details}{
   \strong{It is the user's responsibility to ensure that, if the optional \code{particles} argument is given, that the \code{particles} function satisfies the following conditions:}
