@@ -4,7 +4,7 @@
 #include <R_ext/Constants.h>
 
 // take nstep Euler-Poisson steps from t1 to t2
-static void euler_simulator (euler_step_sim *estep,
+static void euler_simulator (pomp_onestep_sim *estep,
 			     double *x, double *xstart, double *times, double *params, 
 			     int *ndim, double *deltat,
 			     int *stateindex, int *parindex, int *covindex, int *zeroindex,
@@ -92,41 +92,97 @@ static void euler_simulator (euler_step_sim *estep,
   }
 }
 
-// these global objects will pass the needed information to the user-defined function (see 'default_euler_step_fn')
-// each of these is allocated once, globally, and refilled many times
-static SEXP euler_step_Xvec;	// state variable vector
-static SEXP euler_step_Pvec;	// parameter vector
-static SEXP euler_step_Cvec;	// covariate vector
-static SEXP euler_step_time;	// time
-static SEXP euler_step_dt;	// stepsize
-static int  euler_step_nvar;	// number of state variables
-static int  euler_step_npar;	// number of parameters
-static SEXP euler_step_envir;	// function's environment
-static SEXP euler_step_fcall;	// function call
-static int  euler_step_first;	// first evaluation?
-static SEXP euler_step_vnames;	// names of state variables
-static int *euler_step_vindex;	// indices of state variables
+// take one step from t1 to t2
+static void onestep_simulator (pomp_onestep_sim *estep,
+			       double *x, double *xstart, double *times, double *params, 
+			       int *ndim, 
+			       int *stateindex, int *parindex, int *covindex, int *zeroindex,
+			       double *time_table, double *covar_table)
+{
+  double t, *xp, *pp;
+  int nvar = ndim[0];
+  int npar = ndim[1];
+  int nrep = ndim[2];
+  int ntimes = ndim[3];
+  int covlen = ndim[4];
+  int covdim = ndim[5];
+  int nzero = ndim[6];
+  double covar_fn[covdim];
+  int j, k, p, step, neuler;
+  double dt, tol;
 
-#define FIRST   (euler_step_first)
-#define VNAMES  (euler_step_vnames)
-#define VINDEX  (euler_step_vindex)
-#define XVEC    (euler_step_Xvec)
-#define PVEC    (euler_step_Pvec)
-#define CVEC    (euler_step_Cvec)
-#define TIME    (euler_step_time)
-#define DT      (euler_step_dt)
-#define NVAR    (euler_step_nvar)
-#define NPAR    (euler_step_npar)
-#define RHO     (euler_step_envir)
-#define FCALL   (euler_step_fcall)
+  struct lookup_table covariate_table = {covlen, covdim, 0, time_table, covar_table};
+
+  // copy the start values into the result array
+  for (p = 0; p < nrep; p++)
+    for (k = 0; k < nvar; k++) 
+      x[k+nvar*p] = xstart[k+nvar*p];
+  
+  // loop over times
+  for (step = 1; step < ntimes; step++) {
+
+    R_CheckUserInterrupt();
+
+    t = times[step-1];
+    dt = times[step]-t;
+
+    // interpolate the covar functions for the covariates
+    if (covdim > 0) 
+      table_lookup(&covariate_table,t,covar_fn,0);
+    
+    for (p = 0; p < nrep; p++) {
+      xp = &x[nvar*(p+nrep*step)];
+      // copy in the previous values of the state variables
+      for (k = 0; k < nvar; k++)
+	xp[k] = x[k+nvar*(p+nrep*(step-1))];
+      // set some variables to zero
+      for (k = 0; k < nzero; k++)
+	xp[zeroindex[k]] = 0.0;
+      
+      pp = &params[npar*p];
+      xp = &x[nvar*(p+nrep*step)];
+
+      (*estep)(xp,pp,stateindex,parindex,covindex,covdim,covar_fn,t,dt);
+      
+    }
+  }
+}
+
+// these global objects will pass the needed information to the user-defined function (see 'default_onestep_sim_fn')
+// each of these is allocated once, globally, and refilled many times
+static SEXP _onestep_internal_Xvec;	// state variable vector
+static SEXP _onestep_internal_Pvec;	// parameter vector
+static SEXP _onestep_internal_Cvec;	// covariate vector
+static SEXP _onestep_internal_time;	// time
+static SEXP _onestep_internal_dt;	// stepsize
+static int  _onestep_internal_nvar;	// number of state variables
+static int  _onestep_internal_npar;	// number of parameters
+static SEXP _onestep_internal_envir;	// function's environment
+static SEXP _onestep_internal_fcall;	// function call
+static int  _onestep_internal_first;	// first evaluation?
+static SEXP _onestep_internal_vnames;	// names of state variables
+static int *_onestep_internal_vindex;	// indices of state variables
+
+#define FIRST   (_onestep_internal_first)
+#define VNAMES  (_onestep_internal_vnames)
+#define VINDEX  (_onestep_internal_vindex)
+#define XVEC    (_onestep_internal_Xvec)
+#define PVEC    (_onestep_internal_Pvec)
+#define CVEC    (_onestep_internal_Cvec)
+#define TIME    (_onestep_internal_time)
+#define DT      (_onestep_internal_dt)
+#define NVAR    (_onestep_internal_nvar)
+#define NPAR    (_onestep_internal_npar)
+#define RHO     (_onestep_internal_envir)
+#define FCALL   (_onestep_internal_fcall)
 
 // this is the euler step function that is evaluated when the user supplies an R function
 // (and not a native routine)
 // Note that stateindex, parindex, covindex are ignored.
-static void default_euler_step_fn (double *x, const double *p, 
-				   const int *stateindex, const int *parindex, const int *covindex,
-				   int ncovar, const double *covar,
-				   double t, double dt)
+static void default_onestep_sim_fn (double *x, const double *p, 
+				    const int *stateindex, const int *parindex, const int *covindex,
+				    int ncovar, const double *covar,
+				    double t, double dt)
 {
   int nprotect = 0;
   int *op, k;
@@ -174,7 +230,7 @@ static void default_euler_step_fn (double *x, const double *p,
 
 SEXP euler_model_simulator (SEXP func, 
 			    SEXP xstart, SEXP times, SEXP params, 
-			    SEXP dt, 
+			    SEXP dt, SEXP method,
 			    SEXP statenames, SEXP paramnames, SEXP covarnames, SEXP zeronames,
 			    SEXP tcovar, SEXP covar, SEXP args) 
 {
@@ -187,15 +243,18 @@ SEXP euler_model_simulator (SEXP func,
   int nparams = LENGTH(paramnames);
   int ncovars = LENGTH(covarnames);
   int nzeros = LENGTH(zeronames);
-  euler_step_sim *ff = NULL;
+  pomp_onestep_sim *ff = NULL;
   SEXP X, pindex, sindex, cindex, zindex;
   int *sidx, *pidx, *cidx, *zidx;
   SEXP fn, Pnames, Cnames;
+  int do_euler = 1, *meth;
 
   dim = INTEGER(GET_DIM(xstart)); nvar = dim[0]; nrep = dim[1];
   dim = INTEGER(GET_DIM(params)); npar = dim[0];
   dim = INTEGER(GET_DIM(covar)); covlen = dim[0]; covdim = dim[1];
   ntimes = LENGTH(times);
+
+  if (*(INTEGER(AS_INTEGER(method)))) do_euler = 0;
 
   PROTECT(VNAMES = GET_ROWNAMES(GET_DIMNAMES(xstart))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
@@ -211,7 +270,7 @@ SEXP euler_model_simulator (SEXP func,
   }
     
   if (use_native) {
-    ff = (euler_step_sim *) R_ExternalPtrAddr(func);
+    ff = (pomp_onestep_sim *) R_ExternalPtrAddr(func);
     VINDEX = 0;
   } else {
     PROTECT(fn = func); nprotect++;
@@ -238,7 +297,7 @@ SEXP euler_model_simulator (SEXP func,
     PROTECT(FCALL = LCONS(XVEC,FCALL)); nprotect++;
     SET_TAG(FCALL,install("x"));
     PROTECT(FCALL = LCONS(fn,FCALL)); nprotect++;
-    ff = (euler_step_sim *) default_euler_step_fn;
+    ff = (pomp_onestep_sim *) default_onestep_sim_fn;
     VINDEX = (int *) Calloc(nvar,int);
     FIRST = 1;
   }
@@ -277,10 +336,16 @@ SEXP euler_model_simulator (SEXP func,
 
   if (use_native) GetRNGstate();
 
-  euler_simulator(ff,REAL(X),REAL(xstart),REAL(times),REAL(params),
-		  ndim,REAL(dt),sidx,pidx,cidx,zidx,
-		  REAL(tcovar),REAL(covar));
-
+  if (do_euler) {
+    euler_simulator(ff,REAL(X),REAL(xstart),REAL(times),REAL(params),
+		    ndim,REAL(dt),sidx,pidx,cidx,zidx,
+		    REAL(tcovar),REAL(covar));
+  } else {
+    onestep_simulator(ff,REAL(X),REAL(xstart),REAL(times),REAL(params),
+		      ndim,sidx,pidx,cidx,zidx,
+		      REAL(tcovar),REAL(covar));
+  }
+  
   if (use_native) PutRNGstate();
 
   if (VINDEX != 0) Free(VINDEX);
@@ -304,7 +369,7 @@ SEXP euler_model_simulator (SEXP func,
 #undef VINDEX
 
 // compute pdf of a sequence of Euler steps
-static void euler_densities (euler_step_pdf *estep,
+static void euler_densities (pomp_onestep_pdf *estep,
 			     double *f, 
 			     double *x, double *times, double *params, 
 			     int *ndim,
@@ -353,7 +418,7 @@ static void euler_densities (euler_step_pdf *estep,
   }
 }
 
-// these global objects will pass the needed information to the user-defined function (see 'default_euler_dens_fn')
+// these global objects will pass the needed information to the user-defined function (see 'default_onestep_dens_fn')
 // each of these is allocated once, globally, and refilled many times
 static SEXP euler_dens_Xvec1;	// state variable vector
 static SEXP euler_dens_Xvec2;	// state variable vector
@@ -380,9 +445,9 @@ static SEXP euler_dens_fcall;	// function call
 // this is the euler dens function that is evaluated when the user supplies an R function
 // (and not a native routine)
 // Note that stateindex, parindex, covindex are ignored.
-static void default_euler_dens_fn (double *f, double *x1, double *x2, double t1, double t2, const double *p, 
-				   const int *stateindex, const int *parindex, const int *covindex,
-				   int ncovar, const double *covar)
+static void default_onestep_dens_fn (double *f, double *x1, double *x2, double t1, double t2, const double *p, 
+				     const int *stateindex, const int *parindex, const int *covindex,
+				     int ncovar, const double *covar)
 {
   int nprotect = 0;
   int k;
@@ -419,7 +484,7 @@ SEXP euler_model_density (SEXP func,
   int nstates = LENGTH(statenames);
   int nparams = LENGTH(paramnames);
   int ncovars = LENGTH(covarnames);
-  euler_step_pdf *ff = NULL;
+  pomp_onestep_pdf *ff = NULL;
   SEXP F, pindex, sindex, cindex;
   int *pidx, *sidx, *cidx;
   SEXP fn, Xnames, Pnames, Cnames;
@@ -434,7 +499,7 @@ SEXP euler_model_density (SEXP func,
   PROTECT(Cnames = GET_COLNAMES(GET_DIMNAMES(covar))); nprotect++;
 
   if (inherits(func,"NativeSymbol")) {
-    ff = (euler_step_pdf *) R_ExternalPtrAddr(func);
+    ff = (pomp_onestep_pdf *) R_ExternalPtrAddr(func);
   } else if (isFunction(func)) {
     PROTECT(fn = func); nprotect++;
     PROTECT(RHO = (CLOENV(fn))); nprotect++;
@@ -464,7 +529,7 @@ SEXP euler_model_density (SEXP func,
     PROTECT(FCALL = LCONS(X1VEC,FCALL)); nprotect++;
     SET_TAG(FCALL,install("x1"));
     PROTECT(FCALL = LCONS(fn,FCALL)); nprotect++;
-    ff = (euler_step_pdf *) default_euler_dens_fn;
+    ff = (pomp_onestep_pdf *) default_onestep_dens_fn;
   } else {
     UNPROTECT(nprotect);
     error("illegal input: supplied function must be either an R function or a compiled native function");
