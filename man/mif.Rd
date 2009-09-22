@@ -15,7 +15,7 @@
 \usage{
 mif(object, \dots)
 \S4method{mif}{pomp}(object, Nmif = 1, start, pars, ivps = character(0),
-    particles, rw.sd, alg.pars, Np, ic.lag, var.factor, cooling.factor,
+    particles, rw.sd, Np, ic.lag, var.factor, cooling.factor,
     weighted = TRUE, tol = 1e-17, warn = TRUE, max.fail = 0,
     verbose = FALSE)
 \S4method{mif}{mif}(object, Nmif, \dots)
@@ -55,11 +55,6 @@ mif(object, \dots)
     \code{names(rw.sd)} must be a subset of \code{names(start)},
     \code{rw.sd} must be non-negative (zeros are simply ignored),
     the name of every positive element of \code{rw.sd} must be in either \code{pars} or \code{ivps}.
-  }
-  \item{alg.pars}{
-    optional; a named list of the algorithm parameters \code{Np}, \code{cooling.factor}, \code{var.factor}, \code{ic.lag}.
-    The use of \code{alg.pars} is now deprecated and generates a warning.
-    It will be removed in the near future.
   }
   \item{Np}{
     a positive integer;
@@ -103,14 +98,11 @@ mif(object, \dots)
 }
 \section{Re-running MIF Iterations}{
   To re-run a sequence of MIF iterations, one can use the \code{mif} method on a \code{mif} object.
-  The call sequence is \code{mif(object)}.
   By default, the same parameters used for the original MIF run are re-used (except for \code{weighted}, \code{tol}, \code{warn}, \code{max.fail}, and \code{verbose}, the defaults of which are shown above).
   If one does specify additional arguments, these will override the defaults.
 }
 \section{Continuing MIF Iterations}{
-  One can continue a series of MIF iterations from where one left off.
-  The call sequence is \code{continue(object, Nmif)}.
-  This will perform \code{Nmif} additional MIF iterations on the \code{mif} object \code{object}.
+  One can continue a series of MIF iterations from where one left off using the \code{continue} method.
   A call to \code{mif} to perform \code{Nmif=m} iterations followed by a call to \code{continue} to perform \code{Nmif=n} iterations will produce precisely the same effect as a single call to \code{mif} to perform \code{Nmif=m+n} iterations.
   By default, all the algorithmic parameters are the same as used in the original call to \code{mif}.
   Additional arguments will override the defaults.

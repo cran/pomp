@@ -47,6 +47,52 @@ setMethod(
           }
           )
 
+## modify the time
+setMethod(
+          "time<-",
+          "pomp",
+          function (object, include.t0 = FALSE, ..., value) {
+            if (!is.numeric(value))
+              stop(sQuote("value")," must be a numeric vector",call.=TRUE)
+            storage.mode(value) <- "double"
+            tt0 <- object@t0
+            tt <- object@times
+            dd <- object@data
+            ss <- object@states
+            if (include.t0) {
+              object@t0 <- value[1]
+              object@times <- value[-1]
+            } else {
+              object@times <- value
+            }
+            if (!all(diff(object@times)>0))
+              stop("the times specified must be an increasing sequence",call.=TRUE)
+            if (object@t0>object@times[1])
+              stop("the zero-time ",sQuote("t0")," must occur no later than the first observation",call.=TRUE)
+            object@data <- array(
+                                 data=NA,
+                                 dim=c(nrow(dd),length(object@times)),
+                                 dimnames=list(rownames(dd),NULL)
+                                 )
+            object@data[,object@times%in%tt] <- dd[,tt%in%object@times]
+            if (length(ss)>0) {
+               object@states <- array(
+                                     data=NA,
+                                     dim=c(nrow(ss),length(object@times)+1),
+                                     dimnames=list(rownames(ss),NULL)
+                                     )
+               if (ncol(ss)>length(tt)) tt <- c(tt0,tt)
+               nt <- c(object@t0,object@times)
+               for (kt in seq(length=length(nt))) {
+                 wr <- which(nt[kt]==tt)
+                 if (length(wr)>0)
+                   object@states[,kt] <- ss[,wr[1]]
+               }
+             }
+            object
+          }
+          )
+
 ## extract the coefficients
 setMethod(
           'coef',
@@ -121,7 +167,7 @@ setMethod(
           'pomp',
           function (object) {
             print(object)
-            cat("zero time, t0 = ",object@t0,"\n")
+            cat("zero time, t0 = ",object@t0,"\n",sep="")
             if (length(coef(object))>0) {
               cat("parameter(s):\n")
               print(coef(object))
@@ -133,9 +179,23 @@ setMethod(
             cat("process model density, dprocess = \n")
             print(object@dprocess)
             cat("measurement model simulator, rmeasure = \n")
-            print(object@rmeasure)
+            if (object@rmeasure@use==2) {
+              cat("native function, '",object@rmeasure@native.fun,"'",sep="")
+              if (length(object@rmeasure@PACKAGE)>0)
+                cat(", PACKAGE = '",object@rmeasure@PACKAGE,"'",sep="")
+              cat ("\n")
+            } else {
+              print(object@rmeasure@R.fun)
+            }
             cat("measurement model density, dmeasure = \n")
-            print(object@dmeasure)
+            if (object@dmeasure@use==2) {
+              cat("native function, '",object@dmeasure@native.fun,"'",sep="")
+              if (length(object@dmeasure@PACKAGE)>0)
+                cat(", PACKAGE = '",object@dmeasure@PACKAGE,"'",sep="")
+              cat ("\n")
+            } else {
+              print(object@dmeasure@R.fun)
+            }
             cat("initializer = \n")
             print(object@initializer)
             cat("userdata = \n")

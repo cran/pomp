@@ -123,6 +123,8 @@ po <- pomp(
            }
            )
 
+show(po)
+
 set.seed(3049953)
 ## simulate from the model
 tic <- Sys.time()
@@ -186,6 +188,8 @@ print(h1[c("S","I","R"),,],digits=4)
 
 data(euler.sir)
 
+show(euler.sir)
+
 set.seed(3049953)
 ## simulate from the model
 tic <- Sys.time()
@@ -242,4 +246,11 @@ print(max(abs(f2-f1),na.rm=T),digits=4)
 print(max(abs(g2-g1),na.rm=T),digits=4)
 print(max(abs(h2-h1),na.rm=T),digits=4)
 
+data(euler.sir)
+states(euler.sir)[,1:2]
+time(euler.sir) <- seq(0,1,by=1/52)
+states(euler.sir)[,1:3]
+states(simulate(euler.sir))[,1:3]
+
 dev.off()
+
