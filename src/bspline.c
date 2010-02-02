@@ -2,29 +2,37 @@
 
 #include "pomp_internal.h"
 
+void periodic_bspline_basis_eval (double x, double period, int degree, int nbasis, double *y);
 static void bspline_internal (double *y, const double *x, int nx, int i, int p, const double *knots, int nknots);
 
 // B-spline basis
 
-SEXP bspline_basis (SEXP x, SEXP degree, SEXP knots) {
+SEXP bspline_basis (SEXP x, SEXP nbasis, SEXP degree) {
   int nprotect = 0;
-  SEXP y, xr, kr, di;
+  SEXP y, xr;
   int nx = length(x);
-  int nknots = length(knots);
-  int deg;
-  int nbasis;
-  double *ydata;
+  int nb = INTEGER_VALUE(nbasis);
+  int deg = INTEGER_VALUE(degree);
+  int nk = nb+deg+1;
+  double dx, minx, maxx;
+  double knots[nk];
+  double *xdata, *ydata;
   int i;
-  PROTECT(di = AS_INTEGER(degree)); nprotect++;
-  deg = INTEGER_VALUE(di);
-  if (deg < 0) error("must have degree > 0 in 'bspline.basis'");
-  nbasis = nknots-deg-1;
+  if (deg < 0) error("bspline.basis error: must have degree > 0");
+  if (nb <= deg) error("bspline.basis error: must have nbasis > degree");
   PROTECT(xr = AS_NUMERIC(x)); nprotect++;
-  PROTECT(kr = AS_NUMERIC(knots)); nprotect++;
-  PROTECT(y = allocMatrix(REALSXP,nx,nbasis)); nprotect++;
+  PROTECT(y = allocMatrix(REALSXP,nx,nb)); nprotect++;
+  xdata = REAL(xr);
   ydata = REAL(y);
-  for (i = 0; i < nbasis; i++) {
-    bspline_internal(ydata,REAL(xr),nx,i,deg,REAL(kr),nknots);
+  for (i = 1, minx = maxx = xdata[0]; i < nx; i++) {
+    minx = (minx > xdata[i]) ? xdata[i] : minx;
+    maxx = (maxx < xdata[i]) ? xdata[i] : maxx;
+  }
+  dx = (maxx-minx)/((double) (nb-deg));
+  knots[0] = minx-deg*dx;
+  for (i = 1; i < nk; i++) knots[i] = knots[i-1]+dx;
+  for (i = 0; i < nb; i++) {
+    bspline_internal(ydata,xdata,nx,i,deg,&knots[0],nk);
     ydata += nx;
   }
   UNPROTECT(nprotect);
@@ -48,6 +56,61 @@ SEXP bspline_basis_function (SEXP x, SEXP i, SEXP degree, SEXP knots) {
   return(y);
 }
 
+
+SEXP periodic_bspline_basis (SEXP x, SEXP nbasis, SEXP degree, SEXP period) {
+  int nprotect = 0;
+  SEXP y, xr;
+  int nx = length(x);
+  int nb = INTEGER_VALUE(nbasis);
+  int deg = INTEGER_VALUE(degree);
+  double pd = NUMERIC_VALUE(period);
+  int j, k;
+  double *xrd, *ydata, *val;
+  if (deg < 0) error("periodic_bspline_basis error: must have degree >= 0");
+  if (nb <= 0) error("periodic_bspline_basis error: must have nbasis > 0");
+  if (deg > nb) error("periodic_bspline_basis error: must have degree <= nbasis");
+  if (pd <= 0.0) error("periodic_bspline_basis error: must have period > 0");
+  PROTECT(xr = AS_NUMERIC(x)); nprotect++;
+  xrd = REAL(xr);
+  PROTECT(y = allocMatrix(REALSXP,nx,nb)); nprotect++;
+  ydata = REAL(y);
+  val = (double *) Calloc(nb,double);
+  for (j = 0; j < nx; j++) {
+    periodic_bspline_basis_eval(xrd[j],pd,deg,nb,val);
+    for (k = 0; k < nb; k++) ydata[j+nx*k] = val[k];
+  }
+  Free(val);
+  UNPROTECT(nprotect);
+  return y;
+}
+
+void periodic_bspline_basis_eval (double x, double period, int degree, int nbasis, double *y)
+{
+  int nknots = nbasis+2*degree+1;
+  int shift = (degree-1)/2;
+  double knots[nknots];
+  double yy[nknots];
+  double dx;
+  int j, k;
+  if (period <= 0.0) error("periodic_bspline_basis_eval error: must have period > 0");
+  if (nbasis <= 0) error("periodic_bspline_basis_eval error: must have nbasis > 0");
+  if (degree < 0) error("periodic_bspline_basis_eval error: must have degree >= 0");
+  if (nbasis < degree) error("periodic_bspline_basis_eval error: must have nbasis >= degree");
+  dx = period/((double) nbasis);
+  for (k = -degree; k <= nbasis+degree; k++) {
+    knots[degree+k] = k*dx;
+  }
+  x = fmod(x,period);
+  if (x < 0.0) x += period;
+  for (k = 0; k < nknots; k++) {
+    bspline_internal(&yy[k],&x,1,k,degree,&knots[0],nknots);
+  }
+  for (k = 0; k < degree; k++) yy[k] += yy[nbasis+k];
+  for (k = 0; k < nbasis; k++) {
+    j = (shift+k)%nbasis;
+    y[k] = yy[j];
+  }
+}
 
 static void bspline_internal (double *y, const double *x, int nx, int i, int p, const double *knots, int nknots)
 {
