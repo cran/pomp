@@ -1,5 +1,70 @@
+2010-04-29  kingaa
+
+	* [r218] tests/pfilter.R, tests/pfilter.Rout.save: - tests for
+	  'pfilter'
+	* [r217] inst/ChangeLog: - version 0.28-4
+	* [r216] DESCRIPTION, R/pfilter.R, R/trajmatch.R,
+	  data/euler.sir.rda, data/ou2.rda, data/rw2.rda,
+	  data/verhulst.rda, inst/ChangeLog, inst/data-R/ou2.R,
+	  man/trajmatch.Rd, src/skeleton.c, tests/examples.R,
+	  tests/logistic.Rout.save, tests/ou2-forecast.Rout.save,
+	  tests/ou2-kalman.Rout.save, tests/ou2-nlf.Rout.save,
+	  tests/ou2-simulate.Rout.save, tests/ou2-trajmatch.Rout.save,
+	  tests/rw2.Rout.save, tests/sir.Rout.save: - change the
+	  trajectory-matching algorithm so that it depends on 'trajectory':
+	  it is no longer to set the process noise to zero manually in
+	  order to use this method
+	  - clean up error handling in 'pfilter'
+	  - update .Rout.save files in 'tests'
+	  - make 'skeleton' sensitive to variable names
+	* [r215] R/compare.mif.R, R/mif.R, R/nlf-funcs.R, R/nlf-guts.R,
+	  R/nlf.R, R/pfilter-mif.R, R/pfilter.R, R/plot-pomp.R,
+	  R/pomp-methods.R, R/pomp.R, R/slice.R, R/trajectory-pomp.R,
+	  man/pfilter.Rd: - replace ':' construct with 'seq' and 'seq_len'
+	  throughout
+	  - add 'seed' argument to 'pfilter'
+	* [r214] R/nlf-funcs.R, R/nlf-lql.R, R/nlf-objfun.R, R/nlf.R,
+	  man/dmeasure-pomp.Rd, man/dprocess-pomp.Rd,
+	  man/init.state-pomp.Rd, man/mif-class.Rd, man/nlf.Rd,
+	  man/particles-mif.Rd, man/pomp-class.Rd, man/rmeasure-pomp.Rd,
+	  man/rprocess-pomp.Rd, man/skeleton-pomp.Rd: - nlf now takes an
+	  optional argument 'transform' which transforms the data before
+	  fitting
+	  - the low-level interface documentation now has keyword
+	  'internal' which keeps it out of the manual
+
+2010-04-07  kingaa
+
+	* [r213] DESCRIPTION, inst/ChangeLog,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.pdf:
+	  - version 0.28-3
+	* [r212] man/LondonYorke.Rd: - improve documentation slightly
+
+2010-04-06  kingaa
+
+	* [r211] man/pomp-package.Rd: - include version message
+
+2010-03-15  kingaa
+
+	* [r210] inst/data-R/make.R: - not needed
+	* [r209] inst/data-R/dacca-census.q, inst/data-R/dacca-cholera.q,
+	  inst/data-R/dacca-mle.q, inst/data-R/dacca.R: - dacca data-object
+	  not yet ready for prime time
+	* [r208] DESCRIPTION, inst/data-R, inst/data-src,
+	  tests/ou2-forecast.Rout.save, tests/sir.Rout.save: - rename
+	  data-src data-R
+	  - update the test .Rout.save files
+	* [r207] inst/data-src, inst/data-src/dacca-census.q,
+	  inst/data-src/dacca-cholera.q, inst/data-src/dacca-mle.q,
+	  inst/data-src/dacca.R, inst/data-src/euler.sir.R,
+	  inst/data-src/make.R, inst/data-src/ou2.R, inst/data-src/rw2.R,
+	  inst/data-src/verhulst.R: - add source code for the
+	  data()-loadable examples
+
 2010-03-13  kingaa
 
+	* [r206] inst/ChangeLog, inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/intro_to_pomp.pdf: - version 0.28-1
 	* [r205] DESCRIPTION: - go back to LazyData: false to avoid some
 	  ugly problems
 	* [r204] R/pomp.R, data/euler.sir.R, data/euler.sir.rda,

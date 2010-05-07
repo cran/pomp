@@ -1,5 +1,5 @@
 
-R version 2.9.1 (2009-06-26)
+R version 2.10.1 (2009-12-14)
 Copyright (C) 2009 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
@@ -105,6 +105,7 @@ Loading required package: mvtnorm
 +             )
 > 
 > show(rw2)
+data and states:
     time y1 y2
 1      1  0  0
 2      2  0  0
@@ -206,6 +207,12 @@ Loading required package: mvtnorm
 98    98  0  0
 99    99  0  0
 100  100  0  0
+
+call:
+pomp(data = rbind(y1 = rep(0, 100), y2 = rep(0, 100)), times = 1:100, 
+    t0 = 0, useless = 23, rprocess = rw.rprocess, dprocess = rw.dprocess, 
+    measurement.model = list(y1 ~ norm(mean = x1, sd = tau), 
+        y2 ~ norm(mean = x2, sd = tau)), initializer = bad.initializer)
 zero time, t0 = 0
 parameter(s) unspecified
 process model simulator, rprocess = 
@@ -245,18 +252,18 @@ function (x, t, params, covars, ...)
 {
     y <- numeric(length = nobs)
     names(y) <- obsnames
-    for (k in 1:nobs) {
+    for (k in seq_len(nobs)) {
         y[k] <- eval(rcalls[[k]], envir = as.list(c(x, params, 
             covars, t = t)))
     }
     y
 }
-<environment: 0x27c8440>
+<environment: 0x160cbd8>
 measurement model density, dmeasure = 
 function (y, x, t, params, log, covars, ...) 
 {
     f <- 0
-    for (k in 1:nobs) {
+    for (k in seq_len(nobs)) {
         f <- f + eval(dcalls[[k]], envir = as.list(c(y, x, params, 
             covars, t = t)))
     }
@@ -264,7 +271,7 @@ function (y, x, t, params, log, covars, ...)
         f
     else exp(f)
 }
-<environment: 0x27c8440>
+<environment: 0x160cbd8>
 initializer = 
 function (params, t0, ...) 
 {

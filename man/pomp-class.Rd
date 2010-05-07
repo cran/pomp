@@ -1,7 +1,8 @@
 \name{pomp-class}
 \docType{class}
 \alias{pomp-class}
-\title{Partially-observed Markov process}
+\keyword{internal}
+\title{Partially-observed Markov process class}
 \description{
   The class \code{pomp} encodes a partially-observed Markov process.
   This page documents the structure of the class:
@@ -61,6 +62,9 @@
     \item{userdata}{
       A list containing any objects the user desires.
       Using this mechanism, the user can store additional information necessary for the definition of the model.
+    }
+    \item{call}{
+      The call that created the \code{pomp} object.
     }
   }
 }
