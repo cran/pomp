@@ -18,7 +18,28 @@ double dot_product (int dim, const double *basis, const double *coef);
 // facility for computing evaluating a basis of periodic bsplines
 void periodic_bspline_basis_eval (double x, double period, int degree, int nbasis, double *y);
 
-// Prototype for one-step simulator, as used by "euler.simulate" and "onestep.simulate":
+// Prototype for stochastic simulation algorithm reaction-rate function, as used by "gillespie.sim":
+typedef double pomp_ssa_rate_fn(int j, double t, const double *x, const double *p,
+				int *stateindex, int *parindex, int *covindex,
+				int ncovar, double *covars);
+// Description:
+//  on input:
+// j          = integer specifying the number of the reaction whose rate is desired
+// t          = time at which the rates are to be evaluated
+// x          = vector of state variables
+// p          = vector of parameters
+// stateindex = pointer to vector of integers pointing to the states in 'x' in the order specified by 
+//                the 'statenames' argument of 'SSA.simulator'
+// parindex   = pointer to vector of integers pointing to the parameters in 'p' in the order specified by 
+//                the 'paramnames' argument of 'SSA.simulator'
+// covindex   = pointer to vector of integers pointing to the covariates in 'covars' in the order 
+//                specified by the 'covarnames' argument of 'SSA.simulator'
+// ncovars    = number of covariates
+// covars     = pointer to a vector containing the values of the covariates at time t, as interpolated 
+//                from the covariate table supplied to 'SSA.simulator'
+//  returns the rate of the j-th reaction
+
+// Prototype for one-step simulator, as used by "euler.sim" and "onestep.sim":
 typedef void pomp_onestep_sim(double *x, const double *p, 
 			      const int *stateindex, const int *parindex, const int *covindex,
 			      int ncovars, const double *covars,
@@ -46,7 +67,7 @@ typedef void pomp_onestep_sim(double *x, const double *p,
 //     Inclusion of these calls in the user-defined function may result in significant slowdown.
 
 
-// Prototype for one-step log probability density function, as used by "onestep.density":
+// Prototype for one-step log probability density function, as used by "onestep.dens":
 typedef void pomp_onestep_pdf(double *f, 
 			      double *x1, double *x2, double t1, double t2, const double *p, 
 			      const int *stateindex, const int *parindex, const int *covindex,
@@ -94,12 +115,14 @@ typedef void pomp_vectorfield_map (double *f, double *x, double *p,
 
 // Prototype for measurement model simulation
 typedef void pomp_measure_model_simulator (double *y, double *x, double *p, 
-					   int *stateindex, int *parindex, int *covindex,
+					   int *obsindex, int *stateindex, int *parindex, int *covindex,
 					   int ncovars, double *covars, double t);
 // Description:
 //  on input:
 // x          = pointer to state vector at time t
 // p          = pointer to parameter vector
+// obsindex   = pointer to vector of integers indexing the variables in 'y' in the order specified by 
+//                the 'obsnames' slot
 // stateindex = pointer to vector of integers indexing the states in 'x' in the order specified by 
 //                the 'statenames' slot
 // parindex   = pointer to vector of integers indexing the parameters in 'p' in the order specified by 
@@ -120,7 +143,7 @@ typedef void pomp_measure_model_simulator (double *y, double *x, double *p,
 
 // Prototype for measurement model density evaluator
 typedef void pomp_measure_model_density (double *lik, double *y, double *x, double *p, int give_log,
-					 int *stateindex, int *parindex, int *covindex,
+					 int *obsindex, int *stateindex, int *parindex, int *covindex,
 					 int ncovars, double *covars, double t);
 // Description:
 //  on input:
@@ -128,6 +151,8 @@ typedef void pomp_measure_model_density (double *lik, double *y, double *x, doub
 // x          = pointer to state vector at time t
 // p          = pointer to parameter vector
 // give_log   = should the log likelihood be returned?
+// obsindex   = pointer to vector of integers indexing the variables in 'y' in the order specified by 
+//                the 'obsnames' slot
 // stateindex = pointer to vector of integers indexing the states in 'x' in the order specified by 
 //                the 'statenames' slot
 // parindex   = pointer to vector of integers indexing the parameters in 'p' in the order specified by 

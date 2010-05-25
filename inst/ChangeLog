@@ -1,3 +1,152 @@
+2010-05-23  kingaa
+
+	* [r263] man/mif-class.Rd, man/mif-methods.Rd, man/mif.Rd: - trying
+	  to get Carles' name right
+	* [r257] DESCRIPTION:
+
+2010-05-22  kingaa
+
+	* [r256] DESCRIPTION:
+
+2010-05-21  kingaa
+
+	* [r255] inst/ChangeLog:
+	* [r254] inst/NEWS: - documenting changes
+	* [r253] inst/CHANGES_0.29-1.txt: - word wrap
+	* [r252] inst/CHANGES_0.29-1.txt: - describe the changes in version
+	  0.29-1
+
+2010-05-20  kingaa
+
+	* [r251] inst/ChangeLog:
+	* [r250] R/aaa.R, R/pomp.R, data/euler.sir.rda,
+	  data/gillespie.sir.rda, data/ou2.rda, data/rw2.rda,
+	  data/verhulst.rda, inst/ChangeLog, inst/data-R/euler.sir.R,
+	  inst/data-R/gillespie.sir.R, inst/data-R/ou2.R,
+	  inst/doc/advanced_topics_in_pomp.Rnw,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.pdf,
+	  inst/doc/ou2-first-mif.rda, inst/doc/ou2-trajmatch.rda,
+	  inst/examples/sir.R, inst/examples/sir.c, inst/include/pomp.h,
+	  man/pomp-class.Rd, man/pomp.Rd, src/dmeasure.c, src/ou2.c,
+	  src/pomp.h, src/rmeasure.c, src/sir.c, tests/sir.R,
+	  tests/sir.Rout.save: - add 'obsnames' slot to the 'pomp' class
+	  - change 'dmeasure' and 'rmeasure' functions to make use of
+	  'obsnames' in the case of user-supplied native routines
+	  - modify prototypes of user-supplied native routines for
+	  measurement models in keeping with this
+	  - modify source code for SIR and OU2 models
+	* [r249] src/pomp_internal.h: - initialize arrays with NA
+
+2010-05-19  kingaa
+
+	* [r248] inst/ChangeLog:
+	* [r247] DESCRIPTION, inst/doc/advanced_topics_in_pomp.Rnw,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.Rnw,
+	  inst/doc/intro_to_pomp.pdf, inst/examples/euler_sir.R,
+	  inst/examples/logistic.R, inst/examples/rw2.R,
+	  inst/examples/sir.R, inst/examples/sir.c, src/sir.c: - improve
+	  the vignettes
+	  - improve the examples
+
+2010-05-18  kingaa
+
+	* [r246] NAMESPACE, R/plugins.R, data/euler.sir.rda,
+	  data/gillespie.sir.rda, data/ou2.rda, data/rw2.rda,
+	  data/verhulst.rda, inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/intro_to_pomp.Rnw, inst/doc/intro_to_pomp.pdf,
+	  inst/doc/ou2-first-mif.rda, inst/doc/ou2-trajmatch.rda,
+	  man/plugins.Rd: - add the rprocess plugin 'discrete.time.sim',
+	  which is essentially identical to 'euler.sim'
+
+2010-05-17  kingaa
+
+	* [r245] inst/examples/euler_sir.R: - slight change to euler_sir
+	  example
+	* [r243] DESCRIPTION, inst/doc/intro_to_pomp.Rnw,
+	  inst/doc/intro_to_pomp.pdf: - cosmetology
+	* [r242] inst/doc/intro_to_pomp.Rnw, inst/doc/intro_to_pomp.pdf: -
+	  minor edits to intro vignette
+	* [r241] man/LondonYorke.Rd: - cosmetology
+	* [r240] man/trajectory-pomp.Rd: - index by the new generic
+	  'trajectory'
+	* [r239] inst/ChangeLog, inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/intro_to_pomp.Rnw, inst/doc/intro_to_pomp.pdf,
+	  inst/doc/ou2-trajmatch.rda, inst/doc/pomp.bib: - add section on
+	  trajectory matching to the intro vignette
+
+2010-05-16  kingaa
+
+	* [r237] inst/doc/intro_to_pomp.Rnw, inst/doc/intro_to_pomp.pdf: -
+	  some minor additions to the intro vignette
+
+2010-05-11  kingaa
+
+	* [r236] man/eulermultinom.Rd, man/plugins.Rd, man/pomp.Rd: -
+	  update documentation
+	* [r235] DESCRIPTION: - added Helen Wearing as an author for her
+	  work with the stochastic simulation algorithms
+
+2010-05-10  kingaa
+
+	* [r234] inst/ChangeLog, inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/intro_to_pomp.pdf: - updated vignettes
+	* [r233] man/euler.Rd: - the old plugins are deprecated: move their
+	  man pages to 'internal'
+	* [r232] inst/doc/ou2-first-mif.rda: - binary file with saved
+	  results
+	* [r231] man/euler.sir.Rd, man/sir.Rd: - tidying up
+	* [r230] R/euler.R: - preserve backward compatibility
+	* [r229] inst/ChangeLog:
+	* [r228] data/euler.sir.rda, inst/ChangeLog,
+	  inst/data-R/euler.sir.R, inst/doc/Makefile,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/ecology.bst,
+	  inst/doc/intro_to_pomp.Rnw, inst/doc/intro_to_pomp.pdf,
+	  inst/doc/pomp.bib: - improve the "intro_to_pomp" vignette
+	* [r227] tests/gillespie.R, tests/gillespie.Rout.save: - tests for
+	  new gillespie simulator
+	* [r226] DESCRIPTION: - new version
+	* [r225] NAMESPACE: - new functions exported
+	* [r224] inst/include/pomp.h, man/euler.sir.Rd, man/ou2.Rd,
+	  man/pomp-package.Rd, man/pomp.Rd, man/verhulst.Rd,
+	  tests/logistic.R, tests/logistic.Rout.save, tests/ou2-kalman.R,
+	  tests/ou2-kalman.Rout.save, tests/ou2-mif.R,
+	  tests/ou2-mif.Rout.save, tests/ou2-nlf.R,
+	  tests/ou2-nlf.Rout.save, tests/ou2-trajmatch.R,
+	  tests/ou2-trajmatch.Rout.save, tests/pfilter.Rout.save,
+	  tests/sir.R, tests/sir.Rout.save: - tests and man pages
+	  corresponding to last changes
+	* [r223] R/euler.R, data/euler.sir.rda, data/gillespie.sir.rda,
+	  data/ou2.rda, data/rw2.rda, data/verhulst.rda, inst/NEWS,
+	  inst/data-R/euler.sir.R, inst/data-R/gillespie.sir.R,
+	  inst/data-R/ou2.R, inst/data-R/rw2.R, inst/data-R/verhulst.R,
+	  inst/doc/advanced_topics_in_pomp.Rnw,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/examples/euler_sir.R,
+	  inst/examples/euler_sir.c, inst/examples/logistic.R,
+	  inst/examples/rw2.R, inst/examples/sir.c, src/SSA.f,
+	  src/SSA_wrapper.c, src/euler.c, src/euler_sir.c,
+	  src/euler_sir_density.c, src/pomp.h, src/sir.c: - encoding models
+	  is now much easier through the use of "plugin" modules.
+	  - old plugins are now deprecated.
+	  - several example pomps are now loadable via the data() command.
+	  - new gillespie simulator (most of the work due to Helen Wearing)
+	* [r222] R/trajmatch.R: - purely cosmetic
+	* [r221] R/euler.R, man/euler.Rd: - old euler plugins
+	* [r220] R/euler.R, R/plugins.R, man/euler.Rd, man/plugins.Rd: -
+	  rename these files
+
+2010-05-06  kingaa
+
+	* [r219] DESCRIPTION, R/aaa.R, R/pfilter.R, R/pomp-fun.R,
+	  R/pomp-methods.R, R/pomp.R, data/euler.sir.rda, data/ou2.rda,
+	  data/rw2.rda, data/verhulst.rda, inst/ChangeLog,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.pdf,
+	  man/pfilter.Rd, man/pomp-class.Rd, man/pomp-fun.Rd,
+	  tests/rw2.Rout.save, tests/sir.Rout.save: - add a new slot,
+	  'call', to the pomp class
+	  - improve the way that pomps are printed and 'show'n
+	  - streamline pomp construction using pomp.fun
+	  - save Np and tol in the list returned by 'pfilter'
+
 2010-04-29  kingaa
 
 	* [r218] tests/pfilter.R, tests/pfilter.Rout.save: - tests for
