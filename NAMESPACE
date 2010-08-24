@@ -18,22 +18,23 @@ useDynLib(
           )
 
 importFrom(graphics,plot)		
-importFrom(stats,simulate,time,coef,logLik)
+importFrom(stats,simulate,time,coef,logLik,window)
 importFrom(mvtnorm,dmvnorm,rmvnorm)
 importFrom(deSolve,lsoda)
 importFrom(subplex,subplex)
 
-exportClasses('pomp','mif','pmcmc')
+exportClasses('pomp','mif','pmcmc','probed.pomp','probe.matched.pomp','spect.pomp','spect.matched.pomp')
 
 exportMethods(
               'plot','show','print','coerce',
               'dprocess','rprocess','rmeasure','dmeasure','init.state','skeleton',
-              'data.array','coef','logLik','time','time<-',
+              'data.array','summary','coef','logLik','time','time<-','timezero','timezero<-','window',
               'simulate','pfilter',
               'particles','mif','continue','coef<-','states','trajectory',
               'pred.mean','pred.var','filter.mean','conv.rec',
               'bsmc',
-              'pmcmc','dprior'
+              'pmcmc','dprior',
+              'spect','probe'
               )
 
 export(
@@ -55,5 +56,15 @@ export(
        periodic.bspline.basis,
        compare.mif,
        nlf,
-       traj.match
+       traj.match,
+       probe.mean,
+       probe.var,
+       probe.sd,
+       probe.period,
+       probe.quantile,
+       probe.acf,
+       probe.cov,
+       probe.cor,
+       probe.match,
+       spect.match
        )
