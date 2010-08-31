@@ -1,3 +1,67 @@
+2010-08-30  kingaa
+
+	* [r311] DESCRIPTION, NAMESPACE, R, data, inst, man,
+	  pomp/DESCRIPTION, pomp/NAMESPACE, pomp/R, pomp/data, pomp/inst,
+	  pomp/man, pomp/src, pomp/tests, src, tests: - put everything in
+	  pkg/pomp back into pkg
+	* [r310] pomp/DESCRIPTION, pomp/inst/ChangeLog,
+	  pomp/inst/doc/advanced_topics_in_pomp.pdf,
+	  pomp/inst/doc/intro_to_pomp.pdf: - update the vignettes
+
+2010-08-26  kingaa
+
+	* [r309] DESCRIPTION, NAMESPACE, R, data, inst, man, pomp,
+	  pomp/DESCRIPTION, pomp/NAMESPACE, pomp/R, pomp/data, pomp/inst,
+	  pomp/man, pomp/src, pomp/tests, src, tests: - move everything in
+	  pkg/ to pkg/pomp
+	* [r308] inst/examples/sir.R, inst/examples/sir.c: - simplify the
+	  SIR example using compiled code
+	* [r307] DESCRIPTION, src/R_init_pomp.c: - register C-callable
+	  routines
+
+2010-08-25  kingaa
+
+	* [r306] DESCRIPTION, R/probe.R, tests/ou2-probe-match.R,
+	  tests/ou2-probe-match.Rout.save: - bug fix in 'probe'
+
+2010-08-24  kingaa
+
+	* [r305] data/euler.sir.rda, data/gillespie.sir.rda, data/ou2.rda,
+	  data/ricker.rda, inst/ChangeLog, inst/data-R/euler.sir.R,
+	  inst/data-R/gillespie.sir.R, inst/data-R/ou2.R,
+	  inst/data-R/ricker.R, inst/doc/advanced_topics_in_pomp.Rnw,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.pdf,
+	  inst/examples/sir.R, inst/examples/sir.c, src/cholmodel.c,
+	  src/ou2.c, src/ricker.c, src/sir.c: - change names of C routines
+	  to keep namespace open (prepend C symbols in the package with
+	  "_")
+	* [r304] inst/ChangeLog: - update changelog
+	* [r303] DESCRIPTION, data/dacca.rda, data/euler.sir.rda,
+	  data/gillespie.sir.rda, data/ou2.rda, data/ricker.rda,
+	  inst/ChangeLog, inst/data-R/ricker.R,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.Rnw,
+	  inst/doc/intro_to_pomp.pdf, man/ricker.Rd, src/ricker.c,
+	  tests/ricker.R, tests/ricker.Rout.save: - include a
+	  Poisson-Ricker example
+	  - update the vignettes
+	* [r302] R/trajectory-pomp.R: - modify the algorithm in the case of
+	  a discrete-time map so that the assumption that 'times' are
+	  consecutive is no longer implicitly made
+	* [r301] R/euler.R, R/plugins.R, R/pomp-fun.R, R/pomp.R,
+	  man/plugins.Rd: - modify 'pomp.fun' so that the prototype is
+	  passed as an unevaluated call rather than as a character string
+	  (thus avoiding issues with escaped characters"
+	  - modify the plug-in 'discrete.time.sim' so that delta.t=1 is
+	  enforced
+	* [r299] inst/doc/pomp.bib: - update bibliography
+
+2010-08-23  kingaa
+
+	* [r297] R/basic-probes.R: - another minor bug fix
+	* [r296] R/basic-probes.R: - bug fix in 'probe.acf'
+	* [r295] DESCRIPTION:
+	* [r293] inst/ChangeLog, inst/NEWS: - update NEWS and ChangeLog
+
 2010-08-19  kingaa
 
 	* [r291] DESCRIPTION, NAMESPACE, R/bsmc.R, tests/ou2-probe-match.R,
