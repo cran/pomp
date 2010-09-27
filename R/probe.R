@@ -26,57 +26,6 @@ setMethod(
 
 setGeneric("probe",function(object,probes,...)standardGeneric("probe"))
 
-apply.probe.data <- function (object, probes) {
-  val <- vector(mode="list",length=length(probes))
-  names(val) <- names(probes)
-  yy <- data.array(object)
-  for (p in seq_along(probes)) {
-    f <- probes[[p]]
-    if (length(formals(f))>1)
-      stop("each element of ",sQuote("probes")," must be a function of a single argument")
-    vv <- f(yy)
-    val[[p]] <- vv
-  }
-  do.call(c,val)
-}
-
-apply.probe.sim <- function (object, probes, params, nsim, seed) {
-  if (!is.numeric(nsim)||(length(nsim)>1)||(nsim<=0))
-    stop(sQuote("nsim")," must be a positive integer")
-  nsim <- as.integer(nsim)
-
-  y <- simulate(
-                object,
-                nsim=nsim,
-                seed=seed,
-                params=params,
-                times=time(object,t0=TRUE),
-                obs=TRUE
-                )[,,-1,drop=FALSE]
-  nmy <- dimnames(y)
-  dy <- dim(y)
-  yy <- array(dim=dy[c(1,3)],dimnames=nmy[c(1,3)])
-
-  val <- vector(mode="list",length=length(probes))
-  names(val) <- names(probes)
-  for (s in seq_len(nsim)) {
-    yy[,] <- y[,s,]
-    for (p in seq_along(probes)) {
-      f <- probes[[p]]
-      vv <- f(yy)
-       if (s==1) {
-         val[[p]] <- array(dim=c(nsim,length(vv)))
-       } else {
-        if (length(vv)!=ncol(val[[p]]))
-      if (length(vv)!=ncol(val))
-        stop("the size of the vector returned by a probe must not vary")
-      }
-      val[[p]][s,] <- vv
-    }
-  }
-  do.call(cbind,val)
-}
-
 setMethod(
           "probe",
           signature(object="pomp"),
@@ -84,6 +33,8 @@ setMethod(
             if (!is.list(probes)) probes <- list(probes)
             if (!all(sapply(probes,is.function)))
               stop(sQuote("probes")," must be a function or a list of functions")
+            if (!all(sapply(probes,function(f)length(formals(f))==1)))
+              stop("each probe must be a function of a single argument")
             if (is.null(seed)) {
               if (exists('.Random.seed',where=.GlobalEnv)) {
                 seed <- get(".Random.seed",pos=.GlobalEnv)
@@ -91,24 +42,27 @@ setMethod(
             }
             
             ## apply probes to data
-            datval <- apply.probe.data(object,probes=probes) 
+            datval <- .Call(apply_probe_data,object,probes)
             ## apply probes to model simulations
-            simval <- apply.probe.sim(
-                                      object,
-                                      probes=probes,
-                                      params=coef(object),
-                                      nsim=nsim,
-                                      seed=seed
-                                      )
-
+            simval <- .Call(
+                            apply_probe_sim,
+                            object,
+                            nsim,
+                            coef(object),
+                            seed,
+                            probes,
+                            datval
+                            )
+                            
             nprobes <- length(datval)
             pvals <- numeric(nprobes)
             names(pvals) <- names(datval)
             quants <- numeric(nprobes)
             names(quants) <- names(datval)
             for (k in seq_len(nprobes)) {
-              tails <- c(sum(simval[,k]>datval[k]),sum(simval[,k]<datval[k])+1)/(nsim+1)
-              pvals[k] <- min(c(2*tails,1))
+              r <- min(sum(simval[,k]>datval[k]),sum(simval[,k]<datval[k]))
+              tails <- (r+1)/(nsim+1)
+              pvals[k] <- min(2*tails,1)
               quants[k] <- sum(simval[,k]<datval[k])/nsim
             }
 
