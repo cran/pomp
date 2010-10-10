@@ -3,6 +3,8 @@
 ## functions to extract or call the components of a "pomp" object
 setGeneric("data.array",function(object,...)standardGeneric("data.array"))
 
+setGeneric("obs",function(object,...)standardGeneric("obsns"))
+
 setGeneric("time<-",function(object,...,value)standardGeneric("time<-"))  
 
 setGeneric("coef<-",function(object,...,value)standardGeneric("coef<-"))
@@ -22,19 +24,32 @@ setAs(
         names(x) <- c("time",rownames(from@data))
         if (length(from@states)>0) {
           nm <- names(x)
-          x <- cbind(x,t(from@states[,-1,drop=FALSE]))
+          x <- cbind(x,t(from@states))
           names(x) <- c(nm,rownames(from@states))
         }
         x
       }
       )
 
-as.data.frame.pomp <- function (x)
-  as(x,"data.frame")
+as.data.frame.pomp <- function (x, row.names, optional, ...) as(x,"data.frame")
 
 ## a simple method to extract the data array
 setMethod(
           "data.array",
+          "pomp",
+          function (object, vars, ...) {
+            varnames <- rownames(object@data)
+            if (missing(vars))
+              vars <- varnames
+            else if (!all(vars%in%varnames))
+              stop("some elements of ",sQuote("vars")," correspond to no observed variable")
+            object@data[vars,,drop=FALSE]
+          }
+          )
+
+## a simple method to extract the data array
+setMethod(
+          "obs",
           "pomp",
           function (object, vars, ...) {
             varnames <- rownames(object@data)
@@ -95,19 +110,17 @@ setMethod(
                                  )
             object@data[,object@times%in%tt] <- dd[,tt%in%object@times]
             if (length(ss)>0) {
-               object@states <- array(
+              object@states <- array(
                                      data=NA,
-                                     dim=c(nrow(ss),length(object@times)+1),
+                                     dim=c(nrow(ss),length(object@times)),
                                      dimnames=list(rownames(ss),NULL)
                                      )
-               if (ncol(ss)>length(tt)) tt <- c(tt0,tt)
-               nt <- c(object@t0,object@times)
-               for (kt in seq_len(length(nt))) {
-                 wr <- which(nt[kt]==tt)
-                 if (length(wr)>0)
-                   object@states[,kt] <- ss[,wr[1]]
-               }
-             }
+              for (kt in seq_along(object@times)) {
+                wr <- which(object@times[kt]==tt)
+                if (length(wr)>0)
+                  object@states[,kt] <- ss[,wr[1]]
+              }
+            }
             object
           }
           )
@@ -170,37 +183,36 @@ setMethod(
           "coef<-",
           "pomp",
           function (object, pars, ..., value) {
-            if (length(object@params)==0) {
-              if (missing(pars)) {
-                pars <- names(value)
-                if (is.null(pars))
-                  stop("in ",sQuote("coef<-"),": ",sQuote("value")," must be a named vector")
-              } else {
-                if (length(pars)!=length(value))
-                  stop("in ",sQuote("coef<-"),": ",sQuote("pars")," and ",sQuote("value")," must be of the same length")
-              }
-              object@params <- as.numeric(value)
+            if (missing(pars)) {          ## replace the whole params slot with 'value'
+              pars <- names(value)
+              if (is.null(pars))
+                stop("in ",sQuote("coef<-"),": ",sQuote("value")," must be a named vector")
+              object@params <- numeric(length(pars))
               names(object@params) <- pars
-            } else {
-              if (missing(pars)) {
-                pars <- names(object@params)
-                if (is.null(pars))
-                  stop("bad ",sQuote("pomp")," object: slot ",sQuote("params")," should be a named vector")
-              } else {
-                excl <- !(pars%in%names(object@params))
-                if (any(excl)) {
-                  stop(
-                       "in ",sQuote("coef<-"),": name(s) ",
-                       paste(sapply(pars[excl],sQuote),collapse=","),
-                       " correspond to no parameter(s)"
-                       )
-                }
-              }
-              if (length(pars)!=length(value))
-                stop("in ",sQuote("coef<-"),": ",sQuote("pars")," and ",sQuote("value")," must be of the same length")
-              if (!is.null(names(value)))
+              object@params[] <- as.numeric(value)
+            } else { ## replace or append only the parameters named in 'pars'
+              if (!is.null(names(value))) ## we ignore the names of 'value'
                 warning("in ",sQuote("coef<-"),": names of ",sQuote("value")," are being discarded",call.=FALSE)
-              object@params[pars] <- as.numeric(value)
+              if (length(object@params)==0) { ## no pre-existing 'params' slot
+                object@params <- numeric(length(pars))
+                names(object@params) <- pars
+                object@params[] <- as.numeric(value)
+              } else { ## pre-existing params slot
+                excl <- !(pars%in%names(object@params)) ## new parameters
+                if (any(excl)) {                        ## append parameters
+                  warning(
+                          "in ",sQuote("coef<-"),": name(s) ",
+                          paste(sQuote(pars[excl]),collapse=","),
+                          " are not existing parameter(s);",
+                          " they are being concatenated",
+                          call.=FALSE
+                          )
+                  x <- c(object@params,numeric(length(excl)))
+                  names(x) <- c(names(object@params),pars[excl])
+                  object@params <- x
+                }
+                object@params[pars] <- as.numeric(value)
+              }
             }
             object
           }

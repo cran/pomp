@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical inference for partially observed Markov processes
-Version: 0.33-1
-Date: 2010-09-25
+Version: 0.34-1
+Date: 2010-10-07
 Author: Aaron A. King, Edward L. Ionides, Carles Breto, Steve Ellner,
         Bruce Kendall, Helen Wearing, Matthew J. Ferrari, Michael
         Lavine, Daniel C. Reuman
@@ -14,17 +14,18 @@ Imports: mvtnorm, subplex, deSolve
 License: GPL (>= 2)
 LazyLoad: true
 LazyData: false
-Collate: eulermultinom.R euler.R plugins.R slice.R sobol.R bsplines.R
-        pomp-fun.R pomp.R pomp-methods.R rmeasure-pomp.R
-        rprocess-pomp.R dmeasure-pomp.R dprocess-pomp.R simulate-pomp.R
-        skeleton-pomp.R trajectory-pomp.R plot-pomp.R init.state-pomp.R
+Collate: aaa.R eulermultinom.R plugins.R slice-design.R
+        profile-design.R sobol.R bsplines.R pomp-fun.R pomp.R
+        pomp-methods.R rmeasure-pomp.R rprocess-pomp.R
+        init-state-pomp.R dmeasure-pomp.R dprocess-pomp.R
+        skeleton-pomp.R simulate-pomp.R trajectory-pomp.R plot-pomp.R
         pfilter.R traj-match.R bsmc.R mif-class.R particles-mif.R
-        pfilter-mif.R mif.R mif-methods.R compare.mif.R pmcmc.R
-        pmcmc-methods.R compare.pmcmc.R nlf-funcs.R nlf-guts.R
-        nlf-lql.R nlf-objfun.R nlf.R probe.R probe-match.R
-        basic-probes.R spect.R spect-match.R
+        pfilter-mif.R mif.R mif-methods.R compare-mif.R pmcmc.R
+        pmcmc-methods.R compare-pmcmc.R nlf-funcs.R nlf-guts.R
+        nlf-objfun.R nlf.R probe.R probe-match.R basic-probes.R spect.R
+        spect-match.R
 Repository: CRAN
 Repository/R-Forge/Project: pomp
-Repository/R-Forge/Revision: 329
-Date/Publication: 2010-09-27 17:15:36
-Packaged: 2010-09-26 20:43:04 UTC; rforge
+Repository/R-Forge/Revision: 374
+Date/Publication: 2010-10-10 17:30:26
+Packaged: 2010-10-07 20:45:16 UTC; rforge

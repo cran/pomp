@@ -19,7 +19,7 @@ static void euler_simulator (pomp_onestep_sim *estep,
   int covdim = ndim[5];
   int nzero = ndim[6];
   double covar_fn[covdim];
-  int j, k, p, step, neuler;
+  int j, k, p, step, neuler = 0;
   double dt, tol;
 
   struct lookup_table covariate_table = {covlen, covdim, 0, time_table, covar_table};
@@ -297,7 +297,7 @@ SEXP euler_model_simulator (SEXP func,
     SET_TAG(FCALL,install("x"));
     PROTECT(FCALL = LCONS(fn,FCALL)); nprotect++;
     ff = (pomp_onestep_sim *) default_onestep_sim_fn;
-    VINDEX = (int *) Calloc(nvar,int);
+    VINDEX = (int *) R_alloc(nvar,sizeof(int));
     FIRST = 1;
   }
 
@@ -347,7 +347,6 @@ SEXP euler_model_simulator (SEXP func,
   
   if (use_native) PutRNGstate();
 
-  if (VINDEX != 0) Free(VINDEX);
   VINDEX = 0;
 
   UNPROTECT(nprotect);

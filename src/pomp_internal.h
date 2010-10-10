@@ -26,23 +26,33 @@ struct lookup_table {
 // setting dydt = 0 in the call to 'table_lookup' will bypass computation of the derivative
 void table_lookup (struct lookup_table *tab, double x, double *y, double *dydt);
 
-/* bspline.c */
+// bspline.c
 SEXP bspline_basis(SEXP x, SEXP degree, SEXP knots);
 SEXP bspline_basis_function(SEXP x, SEXP i, SEXP degree, SEXP knots);
 
-/* dsobol.c */
+// dsobol.c
 SEXP sobol_sequence(SEXP dim);
 
-/* pomp_fun.c */
+// pomp_fun.c
 SEXP pomp_fun_handler (SEXP pfun, int *use_native);
 
-/* lookup_table.c */
+// lookup_table.c
 SEXP lookup_in_table (SEXP ttable, SEXP xtable, SEXP t, int *index);
 
-/* resample.c */
+// resample.c
 SEXP systematic_resampling(SEXP weights);
 
-static inline SEXP makearray (int rank, int *dim) {
+// initstate.c
+SEXP do_init_state (SEXP object, SEXP params, SEXP t0);
+
+// rprocess.c
+SEXP do_rprocess (SEXP object, SEXP xstart, SEXP times, SEXP params, SEXP offset);
+
+// rmeasure.c
+SEXP do_rmeasure (SEXP object, SEXP x, SEXP times, SEXP params);
+
+
+static R_INLINE SEXP makearray (int rank, int *dim) {
   int nprotect = 0;
   int *dimp, k;
   double *xp;
@@ -57,7 +67,7 @@ static inline SEXP makearray (int rank, int *dim) {
   return x;
 }
 
-static inline SEXP matchnames (SEXP x, SEXP names) {
+static R_INLINE SEXP matchnames (SEXP x, SEXP names) {
   int nprotect = 0;
   int n = length(names);
   int *idx, k;
@@ -73,7 +83,7 @@ static inline SEXP matchnames (SEXP x, SEXP names) {
   return index;
 }
 
-static inline SEXP match_char_to_names (SEXP x, int n, char **names) {
+static R_INLINE SEXP match_char_to_names (SEXP x, int n, char **names) {
   int nprotect = 0;
   int *idx, k;
   SEXP index, nm;
@@ -94,7 +104,7 @@ static inline SEXP match_char_to_names (SEXP x, int n, char **names) {
   return index;
 }
 
-static inline void setrownames (SEXP x, SEXP names, int n) {
+static R_INLINE void setrownames (SEXP x, SEXP names, int n) {
   int nprotect = 0;
   SEXP dimnms, nm;
   PROTECT(nm = AS_CHARACTER(names)); nprotect++;
@@ -104,11 +114,11 @@ static inline void setrownames (SEXP x, SEXP names, int n) {
   UNPROTECT(nprotect);
 }
 
-static inline double expit (double x) {
+static R_INLINE double expit (double x) {
   return 1.0/(1.0 + exp(-x));
 }
 
-static inline double logit (double x) {
+static R_INLINE double logit (double x) {
   return log(x/(1-x));
 }
 
@@ -148,9 +158,5 @@ public:
 };
 
 #endif
-
-void pomp_backsolve(double *, int *, int *, double *, double *, int *);
-void pomp_qr(double *, int *, int *, int *, double *);
-void pomp_qrqy(double *, double *, double *, int *, int *, int *, int *, int *);
 
 #endif

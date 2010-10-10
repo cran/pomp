@@ -1,0 +1,229 @@
+
+R version 2.11.1 (2010-05-31)
+Copyright (C) 2010 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(pomp)
+> set.seed(1066L)
+> 
+> data(ou2)
+> 
+> pm.ou2 <- probe(
++                 ou2,
++                 probes=list(
++                   y1.mean=probe.mean(var="y1"),
++                   y2.mean=probe.mean(var="y2"),
++                   y1.sd=probe.sd(var="y1"),
++                   y2.sd=probe.sd(var="y2")
++                   ),
++                 nsim=500
++                 )
+> pm.po <- probe(
++                ou2,
++                params=c(
++                  alpha.1=0.1,alpha.2=-0.5,alpha.3=0.3,alpha.4=0.2,
++                  sigma.1=3,sigma.2=-0.5,sigma.3=2,
++                  tau=1,
++                  x1.0=0,x2.0=0
++                  ),
++                probes=list(
++                  y1.mean=probe.mean(var="y1"),
++                  y2.mean=probe.mean(var="y2"),
++                  y1.sd=probe.sd(var="y1"),
++                  y2.sd=probe.sd(var="y2")
++                  ),
++                nsim=500
++                )
+> 
+> summary(pm.ou2)
+$coef
+alpha.1 alpha.2 alpha.3 alpha.4 sigma.1 sigma.2 sigma.3     tau    x1.0    x2.0 
+    0.8    -0.5     0.3     0.9     3.0    -0.5     2.0     1.0    -3.0     4.0 
+
+$nsim
+[1] 500
+
+$quantiles
+y1.mean y2.mean   y1.sd   y2.sd 
+  0.122   0.542   0.020   0.050 
+
+$pvals
+   y1.mean    y2.mean      y1.sd      y2.sd 
+0.24750499 0.91816367 0.04391218 0.10379242 
+
+> summary(pm.po)
+$coef
+alpha.1 alpha.2 alpha.3 alpha.4 sigma.1 sigma.2 sigma.3     tau    x1.0    x2.0 
+    0.1    -0.5     0.3     0.2     3.0    -0.5     2.0     1.0     0.0     0.0 
+
+$nsim
+[1] 500
+
+$quantiles
+y1.mean y2.mean   y1.sd   y2.sd 
+  0.074   0.650   1.000   1.000 
+
+$pvals
+    y1.mean     y2.mean       y1.sd       y2.sd 
+0.151696607 0.702594810 0.003992016 0.003992016 
+
+> 
+> plot(pm.ou2)
+> plot(pm.po)
+> 
+> pm.ou2 <- probe(
++                 ou2,
++                 probes=list(
++                   y1acf=probe.acf(var="y1",lag.max=2,type="corr"),
++                   y2acf=probe.acf(var=c("y2"),lag.max=2),
++                   y12ccf=probe.ccf(var=c("y2","y1"),lags=c(3,8))
++                   ),
++                 nsim=500
++                 )
+>                 
+> summary(pm.ou2)
+$coef
+alpha.1 alpha.2 alpha.3 alpha.4 sigma.1 sigma.2 sigma.3     tau    x1.0    x2.0 
+    0.8    -0.5     0.3     0.9     3.0    -0.5     2.0     1.0    -3.0     4.0 
+
+$nsim
+[1] 500
+
+$quantiles
+y1acf.acf.1.y1 y1acf.acf.2.y1 y2acf.acf.0.y2 y2acf.acf.1.y2 y2acf.acf.2.y2 
+         0.084          0.036          0.050          0.044          0.044 
+  y12ccf.ccf.3   y12ccf.ccf.8 
+         0.048          0.326 
+
+$pvals
+y1acf.acf.1.y1 y1acf.acf.2.y1 y2acf.acf.0.y2 y2acf.acf.1.y2 y2acf.acf.2.y2 
+    0.17165669     0.07584830     0.10379242     0.09181637     0.09181637 
+  y12ccf.ccf.3   y12ccf.ccf.8 
+    0.09980040     0.65469062 
+
+> 
+> pb <- probe(
++             ou2,
++             probes=list(
++               y1=probe.quantile(var="y1",prob=seq(0.1,0.9,by=0.1)),
++               probe.acf(var=c("y1","y2"),lag.max=4,transform=identity),
++               pd=probe.period(var="y1",kernel.width=3)
++               ),
++             nsim=200
++             )
+> summary(pb)
+$coef
+alpha.1 alpha.2 alpha.3 alpha.4 sigma.1 sigma.2 sigma.3     tau    x1.0    x2.0 
+    0.8    -0.5     0.3     0.9     3.0    -0.5     2.0     1.0    -3.0     4.0 
+
+$nsim
+[1] 200
+
+$quantiles
+  y1.10%   y1.20%   y1.30%   y1.40%   y1.50%   y1.60%   y1.70%   y1.80% 
+   0.755    0.760    0.800    0.620    0.355    0.125    0.025    0.010 
+  y1.90% acf.0.y1 acf.1.y1 acf.2.y1 acf.3.y1 acf.4.y1 acf.0.y2 acf.1.y2 
+   0.005    0.020    0.035    0.025    0.100    0.835    0.060    0.070 
+acf.2.y2 acf.3.y2 acf.4.y2       pd 
+   0.070    0.090    0.430    0.060 
+
+$pvals
+    y1.10%     y1.20%     y1.30%     y1.40%     y1.50%     y1.60%     y1.70% 
+0.49751244 0.48756219 0.40796020 0.76616915 0.71641791 0.25870647 0.05970149 
+    y1.80%     y1.90%   acf.0.y1   acf.1.y1   acf.2.y1   acf.3.y1   acf.4.y1 
+0.02985075 0.01990050 0.04975124 0.07960199 0.05970149 0.20895522 0.33830846 
+  acf.0.y2   acf.1.y2   acf.2.y2   acf.3.y2   acf.4.y2         pd 
+0.12935323 0.14925373 0.14925373 0.18905473 0.86567164 0.12935323 
+
+> 
+> po <- ou2
+> coef(po,c("alpha.2","alpha.3")) <- c(0,0)
+> coef(po,c("sigma.2","sigma.1","sigma.3")) <- c(0,0.0,0.0)
+> coef(po,c("tau")) <- c(0.0)
+> po <- simulate(po)
+> pb <- probe(
++             po,
++             probes=list(
++               probe.acf(var=c("y1","y2"),lag.max=1,type="cor"),
++               probe.nlar("y1",lags=1,powers=1),
++               probe.nlar("y2",lags=1,powers=1)
++               ),
++             nsim=1000,
++             seed=1066L
++             )
+> x <- as.data.frame(po)
+> x <- sweep(x,2,mean(x))
+> y1 <- head(x$y1,-1)
+> z1 <- tail(x$y1,-1)
+> y2 <- head(x$y2,-1)
+> z2 <- tail(x$y2,-1)
+> max(abs(pb@datvals-c(mean(y1*z1)/mean(x$y1^2),mean(y2*z2)/mean(x$y2^2),mean(y1*z1)/mean(y1*y1),mean(y2*z2)/mean(y2*y2))))
+[1] 4.440892e-16
+> 
+> po <- simulate(ou2)
+> pb <- probe(
++             po,
++             probes=list(
++               probe.acf(var=c("y1"),lag.max=2,type="cov"),
++               probe.ccf(vars=c("y1","y1"),lags=c(0,1,2))
++               ),
++             nsim=1000,
++             seed=1066L
++             )
+> plot(pb)
+> summary(pb)
+$coef
+alpha.1 alpha.2 alpha.3 alpha.4 sigma.1 sigma.2 sigma.3     tau    x1.0    x2.0 
+    0.8    -0.5     0.3     0.9     3.0    -0.5     2.0     1.0    -3.0     4.0 
+
+$nsim
+[1] 1000
+
+$quantiles
+acf.0.y1 acf.1.y1 acf.2.y1    ccf.0    ccf.1    ccf.2 
+   0.095    0.111    0.224    0.095    0.111    0.224 
+
+$pvals
+ acf.0.y1  acf.1.y1  acf.2.y1     ccf.0     ccf.1     ccf.2 
+0.1918082 0.2237762 0.4495504 0.1918082 0.2237762 0.4495504 
+
+> 
+> pb <- probe(
++             po,
++             probes=probe.ccf(vars=c("y1","y2"),lags=c(-5,-3,1,4,8)),
++             nsim=1000,
++             seed=1066L
++             )
+> plot(pb)
+> summary(pb)
+$coef
+alpha.1 alpha.2 alpha.3 alpha.4 sigma.1 sigma.2 sigma.3     tau    x1.0    x2.0 
+    0.8    -0.5     0.3     0.9     3.0    -0.5     2.0     1.0    -3.0     4.0 
+
+$nsim
+[1] 1000
+
+$quantiles
+ccf.-5 ccf.-3  ccf.1  ccf.4  ccf.8 
+ 0.203  0.193  0.955  0.808  0.185 
+
+$pvals
+   ccf.-5    ccf.-3     ccf.1     ccf.4     ccf.8 
+0.4075924 0.3876124 0.0919081 0.3856144 0.3716284 
+
+> 
+> 
+> 
+> 

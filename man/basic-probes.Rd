@@ -7,9 +7,9 @@
 \alias{probe.period}
 \alias{probe.quantile}
 \alias{probe.acf}
-\alias{probe.cov}
-\alias{probe.cor}
+\alias{probe.ccf}
 \alias{probe.marginal}
+\alias{probe.nlar}
 \title{Some probes for partially-observed Markov processes}
 \description{
   Several simple and configurable probes are provided in the package.
@@ -21,17 +21,15 @@ probe.median(var, na.rm = TRUE)
 probe.var(var, transform = identity, na.rm = TRUE)
 probe.sd(var, transform = identity, na.rm = TRUE)
 probe.marginal(var, ref, order = 3, diff = 1, transform = identity)
+probe.nlar(var, lags, powers, transform = identity)
 probe.acf(var, lag.max, type = c("covariance", "correlation"),
           transform = identity)
-probe.cov(vars, lag, method = c("pearson", "kendall", "spearman"),
-                 transform = identity)
-probe.cor(vars, lag, method = c("pearson", "kendall", "spearman"),
-                 transform = identity)
+probe.ccf(vars, lags, transform = identity)
 probe.period(var, kernel.width, transform = identity)
 probe.quantile(var, prob, transform = identity)
 }
 \arguments{
-  \item{var}{
+  \item{var, vars}{
     character; the name(s) of the observed variable(s).
   }
   \item{trim}{
@@ -53,18 +51,20 @@ probe.quantile(var, prob, transform = identity)
   \item{lag.max}{
     The maximum lag at which the ACF is computed.
   }
-  \item{lag}{
-    In \code{probe.cov} and \code{probe.cor}, the lag between time series.
+  \item{lags}{
+    In \code{probe.ccf}, a vector of lags between time series.
+    Positive lags correspond to \code{x} advanced relative to \code{y};
+    negative lags, to the reverse.
+
+    In \code{probe.nlar}, a vector of lags present in the nonlinear autoregressive model that will be fit to the actual and simulated data.
+    See Details, below, for a precise description.
+  }
+  \item{powers}{
+    the powers of each term (corresponding to \code{lags}) in the the nonlinear autoregressive model that will be fit to the actual and simulated data.
+    See Details, below, for a precise description.
   }
   \item{type}{
     Compute autocorrelation or autocovariance?
-  }
-  \item{vars}{
-    length-2 character vector;
-    the names or indices of the observed variables between which covariance or correlation is to be computed.
-  }
-  \item{method}{
-    The type of covariance or correlation to compute: see \code{\link{cov}} and \code{\link{cor}}.
   }
   \item{ref}{
     empirical reference distribution.
@@ -102,6 +102,13 @@ probe.quantile(var, prob, transform = identity)
       If \code{diff>0}, the data and the reference distribution are first differenced \code{diff} times and centered.
       Polynomial regression of order \code{order} is used.
       This probe returns \code{order} regression coefficients (the intercept is zero).
+    }
+    \item{\code{probe.nlar}}{
+      returns a function that
+      fit a nonlinear (polynomial) autoregressive model to the univariate series (variable \code{var}).
+      Specifically, a model of the form \eqn{y_t = \sum \beta_k y_{t-\tau_k}^{p_k}+\epsilon_t}{y[t] = \sum beta[k] y[t-tau[k]]^p[k]+e[t]} will be fit, where \eqn{\tau_k}{tau[k]} are the \code{lags} and \eqn{p_k}{p[k]} are the \code{powers}.
+      The data are first centered.
+      This function returns the regression coefficients, \eqn{\beta_k}{beta[k]}.
     }
     \item{\code{probe.acf}}{
       returns a function that,

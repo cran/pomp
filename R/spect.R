@@ -91,16 +91,17 @@ compute.spect.data <- function (object, vars, transform, detrend, ker) {
   list(freq=freq,spec=datspec)
 }
 
-compute.spect.sim <- function (object, vars, params, nsim, seed, transform, detrend, ker) {
+compute.spect.sim <- function (object, params, vars, nsim, seed, transform, detrend, ker) {
   sims <- try(
               simulate(
                        object,
                        nsim=nsim,
                        seed=seed,
                        params=params,
-                       times=time(object,t0=TRUE),
-                       obs=TRUE
-                       )[,,-1,drop=FALSE],
+                       obs=TRUE,
+                       times=time(object,t0=FALSE),
+                       t0=timezero(object)
+                       ),
               silent=FALSE
               )
   if (inherits(sims,"try-error"))
@@ -140,9 +141,12 @@ setGeneric("spect",function(object,...)standardGeneric("spect"))
 setMethod(
           "spect",
           signature(object="pomp"),
-          function (object, vars, kernel.width, nsim, seed = NULL, transform = identity,
+          function (object, params, vars, kernel.width, nsim, seed = NULL,
+                    transform = identity,
                     detrend = c("none","mean","linear","quadratic"),
                     ...) {
+
+            if (missing(params)) params <- coef(object)
 
             if (missing(vars))
               vars <- rownames(object@data)
@@ -172,8 +176,8 @@ setMethod(
             datspec <- ds$spec
             simspec <- compute.spect.sim(
                                          object,
+                                         params=params,
                                          vars=vars,
-                                         params=coef(object),
                                          nsim=nsim,
                                          seed=seed,
                                          transform=transform,
@@ -200,6 +204,8 @@ setMethod(
             }
             pvals[length(vars)+1] <- (nsim+1-sum(totsimdist<totdatdist))/(nsim+1)
 
+            coef(object) <- params
+
             new(
                 "spect.pomp",
                 object,
@@ -218,7 +224,8 @@ setMethod(
 setMethod(
           "spect",
           signature(object="spect.pomp"),
-          function (object, vars, kernel.width, nsim, seed = NULL, transform, detrend, ...) {
+          function (object, params, vars, kernel.width, nsim, seed = NULL, transform, detrend, ...) {
+            if (missing(params)) params <- coef(object)
             if (missing(vars)) probes <- rownames(object@datspec)
             if (missing(kernel.width)) kernel.width <- object@kernel.width
             if (missing(nsim)) nsim <- nrow(object@simspec)
@@ -231,6 +238,7 @@ setMethod(
             if (missing(detrend)) detrend <- object@detrend
             spect(
                   as(object,"pomp"),
+                  params=params,
                   vars=vars,
                   kernel.width=kernel.width,
                   nsim=nsim,

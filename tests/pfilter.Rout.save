@@ -1,6 +1,6 @@
 
-R version 2.10.1 (2009-12-14)
-Copyright (C) 2009 The R Foundation for Statistical Computing
+R version 2.11.1 (2010-05-31)
+Copyright (C) 2010 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -16,9 +16,6 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(pomp)
-Loading required package: deSolve
-Loading required package: subplex
-Loading required package: mvtnorm
 > 
 > data(ou2)
 > 
@@ -29,7 +26,7 @@ Loading required package: mvtnorm
 > cat("particle filter log likelihood at truth\n")
 particle filter log likelihood at truth
 > print(pf$loglik,digits=4)
-[1] -481.1
+[1] -476.6
 > 
 > data(euler.sir)
 > pf <- pfilter(euler.sir,Np=200,seed=394343L)

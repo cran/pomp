@@ -1,9 +1,8 @@
 // -*- mode: C++ -*-
 
 #include "pomp_internal.h"
+#include "pomp_mat.h"
 #include <stdio.h>
-#include <R_ext/Linpack.h>
-#include <R_ext/Lapack.h>
 
 static void order_reg_solve (double *beta, double *x, double *mm, double *tau, int *pivot, int n, int np, int diff);
 static void order_reg_model_matrix (double *z, double *X, double *tau, int *pivot, int n, int np, int diff);
@@ -44,7 +43,6 @@ SEXP probe_marginal_setup (SEXP ref, SEXP order, SEXP diff) {
 
 SEXP probe_marginal_solve (SEXP x, SEXP setup, SEXP diff) {
   int nprotect = 0;
-  SEXP dimx, dimm;
   SEXP X, mm, tau, pivot, beta, beta_names;
   int n, nx, np, df;
   int i;
@@ -58,9 +56,8 @@ SEXP probe_marginal_solve (SEXP x, SEXP setup, SEXP diff) {
   PROTECT(tau = VECTOR_ELT(setup,1)); nprotect++; // diagonals
   PROTECT(pivot = VECTOR_ELT(setup,2)); nprotect++; // pivots
 
-  PROTECT(dimm = GET_DIM(mm)); nprotect++;
-  nx = INTEGER(dimm)[0];	// nx = number of rows in model matrix
-  np = INTEGER(dimm)[1];	// np = order of polynomial
+  nx = INTEGER(GET_DIM(mm))[0];	// nx = number of rows in model matrix
+  np = INTEGER(GET_DIM(mm))[1];	// np = order of polynomial
   
   if (n-df != nx) error("length of 'ref' must equal length of data");
   PROTECT(X = duplicate(AS_NUMERIC(x))); nprotect++; 
@@ -68,7 +65,7 @@ SEXP probe_marginal_solve (SEXP x, SEXP setup, SEXP diff) {
   PROTECT(beta = NEW_NUMERIC(np)); nprotect++;
   PROTECT(beta_names = NEW_STRING(np)); nprotect++;
   for (i = 0; i < np; i++) {
-    snprintf(tmp,BUFSIZ,"od.%ld",i+1);
+    snprintf(tmp,BUFSIZ,"marg.%d",i+1);
     SET_STRING_ELT(beta_names,i,mkChar(tmp));
   }
   SET_NAMES(beta,beta_names);
@@ -113,15 +110,14 @@ static void order_reg_model_matrix (double *z, double *X, double *tau, int *pivo
     for (j = 0; j < nx; j++) X2[j] = X1[j]*z[j];
 
   // QR decompose the model matrix 
-  for (i = 0; i < np; i++) pivot[i] = 0;
-  pomp_qr(X,&nx,&np,pivot,tau);
+  pomp_qr(X,nx,np,pivot,tau);
   
 }
 
 // thanks to Simon N. Wood for the original version of the following code
 static void order_reg_solve (double *beta, double *x, double *mm, double *tau, int *pivot, int n, int np, int diff) {
-  int nx, one = 1;
-  double xx, coef[np];
+  int nx;
+  double xx;
   int i, j;
 
   for (i = 0, nx = n; i < diff; i++) { // differencing loop
@@ -139,10 +135,10 @@ static void order_reg_solve (double *beta, double *x, double *mm, double *tau, i
   R_qsort(x,1,nx);
 
   // solve R b = Q'x for b
-  pomp_qrqy(x,mm,tau,&nx,&one,&np,&one,&one); // y <- Q'y
-  pomp_backsolve(mm,&nx,&np,x,coef,&one); // b <- R^{-1} Q'y
+  pomp_qrqy(x,mm,tau,nx,1,np,1,1); // y <- Q'y
+  pomp_backsolve(mm,nx,np,x,1);   // y <- R^{-1} Q'y 
 
-  // unpivot beta
-  for (i = 0; i < np; i++) beta[i] = coef[pivot[i]];
+  // unpivot and store the coefficients in beta
+  for (i = 0; i < np; i++) beta[pivot[i]] = x[i];
 
 }

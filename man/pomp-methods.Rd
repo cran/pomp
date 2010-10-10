@@ -20,6 +20,9 @@
 \alias{timezero<--pomp}
 \alias{window,pomp-method}
 \alias{window--pomp}
+\alias{obs,pomp-method}
+\alias{obs-pomp}
+\alias{obs}
 \alias{data.array,pomp-method}
 \alias{data.array-pomp}
 \alias{data.array}
@@ -39,6 +42,7 @@
 \usage{
 \S4method{coef}{pomp}(object, pars, \dots)
 \S4method{coef}{pomp}(object, pars, \dots) <- value
+\S4method{obs}{pomp}(object, vars, \dots)
 \S4method{data.array}{pomp}(object, vars, \dots)
 \S4method{states}{pomp}(object, vars, \dots)
 \S4method{time}{pomp}(x, t0 = FALSE, \dots)
@@ -48,7 +52,7 @@
 \S4method{window}{pomp}(x, start, end, \dots)
 \S4method{show}{pomp}(object)
 \S4method{as}{pomp}(object, class)
-as.data.frame.pomp(x)
+as.data.frame.pomp(x, row.names, optional, \dots)
 \S4method{coerce}{pomp,data.frame}(from, to = "data.frame", strict = TRUE)
 \S4method{print}{pomp}(x, \dots)
 \S4method{plot}{pomp}(x, y, variables, panel = lines,
@@ -112,6 +116,9 @@ as.data.frame.pomp(x)
     logical;
     indicates if x- and y- axes should be drawn.
   }
+  \item{row.names, optional}{
+    ignored.
+  }
   \item{\dots}{
     Further arguments (either ignored or passed to underlying functions).
   }
@@ -124,18 +131,17 @@ as.data.frame.pomp(x)
     }
     \item{coef<-}{
       Assigns values to the \code{params} slot of the \code{pomp} object.
-      If \code{coef(object)} exists, then \code{coef(object) <- value} has the effect of replacing the parameters of \code{object} with \code{value};
-      the names of \code{value} will be ignored and the names of \code{coef(object)} will be unchanged.
-      If \code{coef(object)} does not exist, then \code{coef(object) <- value} assigns \code{value} to the parameters of \code{object};
-      the names of \code{coef(object)} will be those of \code{value} and an error will be generated if \code{value} does not have names.
+      \code{coef(object) <- value} has the effect of replacing the parameters of \code{object} with \code{value}.
       If \code{coef(object)} exists, then \code{coef(object,pars) <- value} replaces those parameters of \code{object} named in \code{pars} with the elements of \code{value};
       the names of \code{value} are ignored.
+      If some of the names in \code{pars} do not already name parameters in \code{coef(object)}, then they are concatenated.
       If \code{coef(object)} does not exist, then \code{coef(object,pars) <- value} assigns \code{value} to the parameters of \code{object};
       in this case, the names of \code{object} will be \code{pars} and the names of \code{value} will be ignored.
     }
-    \item{data.array}{
-      \code{data.array(object)} returns the array of observations.
-      \code{data.array(object,vars)} gives just the observations of variables named \code{vars}.
+    \item{obs, data.array}{
+      These functions are synonymous.
+      \code{obs(object)} returns the array of observations.
+      \code{obs(object,vars)} gives just the observations of variables named \code{vars}.
       \code{vars} may specify the variables by position or by name.
     }
     \item{states}{
