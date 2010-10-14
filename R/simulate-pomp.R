@@ -37,8 +37,20 @@ simulate.internal <- function (object, nsim = 1, seed = NULL, params,
     set.seed(seed)
   }
   
+  if (!obs && !states)
+    object <- as(object,"pomp")
+
   retval <- try(
-                .Call(simulation_computations,object,params,times,t0,nsim,obs,states),
+                .Call(
+                      simulation_computations,
+                      object,
+                      params,
+                      times,
+                      t0,
+                      nsim,
+                      obs,
+                      states
+                      ),
                 silent=FALSE
                 )
 

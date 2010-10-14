@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical inference for partially observed Markov processes
-Version: 0.34-1
-Date: 2010-10-07
+Version: 0.34-2
+Date: 2010-10-10
 Author: Aaron A. King, Edward L. Ionides, Carles Breto, Steve Ellner,
         Bruce Kendall, Helen Wearing, Matthew J. Ferrari, Michael
         Lavine, Daniel C. Reuman
@@ -26,6 +26,6 @@ Collate: aaa.R eulermultinom.R plugins.R slice-design.R
         spect-match.R
 Repository: CRAN
 Repository/R-Forge/Project: pomp
-Repository/R-Forge/Revision: 374
-Date/Publication: 2010-10-10 17:30:26
-Packaged: 2010-10-07 20:45:16 UTC; rforge
+Repository/R-Forge/Revision: 382
+Date/Publication: 2010-10-14 13:47:42
+Packaged: 2010-10-13 20:50:13 UTC; rforge

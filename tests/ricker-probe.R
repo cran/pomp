@@ -146,6 +146,8 @@ system.time(
                               )
             )
 plot(pm)
+plot(as(pm,"pomp"),variables="y")
+plot(simulate(pm),variables="y")
 
 cbind(truth=coef(ricker),est=coef(pm),guess=coef(po))
 
@@ -252,7 +254,7 @@ try(
           probes=list(
             mn=probe.mean("y",transform=sqrt,trim=0.1),
             md=function(y)median(as.numeric(y)),
-            wacko=function(y) if (y[29]==98) c(1,2) else 1
+            wacko=function(y) if (y[28]==107) c(1,2) else 1
             ),
           nsim=20,
           seed=838775L
