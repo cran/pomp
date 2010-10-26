@@ -3,11 +3,11 @@ setClass(
          contains="pomp",
          representation(
                         probes="list",
-                        seed="integer",
                         datvals="numeric",
                         simvals="array",
                         quantiles="numeric",
-                        pvals="numeric"
+                        pvals="numeric",
+                        synth.loglik="numeric"
                         )
          )
 
@@ -19,7 +19,8 @@ setMethod(
                  coef=coef(object),
                  nsim=nrow(object@simvals),
                  quantiles=object@quantiles,
-                 pvals=object@pvals
+                 pvals=object@pvals,
+                 synth.loglik=object@synth.loglik
                  )
           }
           )
@@ -39,12 +40,6 @@ setMethod(
 
             if (missing(params)) params <- coef(object)
 
-            if (is.null(seed)) {
-              if (exists('.Random.seed',where=.GlobalEnv)) {
-                seed <- get(".Random.seed",pos=.GlobalEnv)
-              }
-            }
-            
             ## apply probes to data
             datval <- .Call(apply_probe_data,object,probes)
             ## apply probes to model simulations
@@ -70,17 +65,19 @@ setMethod(
               quants[k] <- sum(simval[,k]<datval[k])/nsim
             }
 
+            ll <- .Call(synth_loglik,simval,datval)
+
             coef(object) <- params
-            
+
             new(
                 "probed.pomp",
                 object,
                 probes=probes,
-                seed=as.integer(seed),
                 datvals=datval,
                 simvals=simval,
                 quantiles=quants,
-                pvals=pvals
+                pvals=pvals,
+                synth.loglik=ll
                 )
           }
           )
@@ -96,12 +93,6 @@ setMethod(
               stop(sQuote("probes")," must be a function or a list of functions")
 
             if (missing(params)) params <- coef(object)
-
-            if (is.null(seed)) {
-              if (exists('.Random.seed',where=.GlobalEnv)) {
-                seed <- get(".Random.seed",pos=.GlobalEnv)
-              }
-            }
 
             if (missing(nsim)) nsim <- nrow(object@simvals)
 

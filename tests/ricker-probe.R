@@ -73,7 +73,7 @@ pb <- probe(
                                ),
               probe.acf(
                         var="y",
-                        lag.max=5
+                        lags=c(0,1,3,5)
                         ),
               mean=probe.mean(var="y",transform=sqrt)
               ),
@@ -172,7 +172,7 @@ pb <- probe(
             probes=probe.acf(
               var="y",
               transform=sqrt,
-              lag.max=5,
+              lags=seq.int(from=0,to=5),
               type="cov"
               ),
             nsim=1000,
@@ -187,7 +187,7 @@ pb <- probe(
             probes=probe.acf(
               var="y",
               transform=sqrt,
-              lag.max=5,
+              lags=seq.int(from=1,to=5),
               type="cor"
               ),
             nsim=1000,
@@ -204,7 +204,7 @@ pb <- probe(
               probe.acf(
                         var="y",
                         transform=sqrt,
-                        lag.max=2,
+                        lags=c(0,1,2),
                         type="cov"
                         ),
               probe.nlar(
@@ -240,7 +240,7 @@ try(
           probes=list(
             mn=probe.mean("y",transform=sqrt,trim=0.1),
             md=function(y)median(as.numeric(y)),
-            wacko=function(y) if (y[1]==69) 1 else c(1,2)
+            wacko=function(y) if (y[1]==68) 1 else c(1,2)
             ),
           nsim=100,
           seed=838775L
