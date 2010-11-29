@@ -1,29 +1,72 @@
 \name{traj.match}
 \alias{traj.match}
+\alias{traj.match-pomp}
+\alias{traj.match,pomp-method}
+\alias{traj.match-traj.matched.pomp}
+\alias{traj.match,traj.matched.pomp-method}
+\alias{logLik,traj.matched.pomp-method}
+\alias{logLik-traj.matched.pomp}
+\alias{$,traj.matched.pomp-method}
+\alias{$-traj.matched.pomp}
+\alias{summary,traj.matched.pomp-method}
+\alias{summary-traj.matched.pomp}
+\alias{traj.matched.pomp-class}
 \title{Trajectory matching}
 \description{
-  Match trajectories.
+  Match trajectories to data.
 }
 \usage{
-traj.match(object, start, est, method = "Nelder-Mead", gr = NULL, \dots)
+  \S4method{traj.match}{pomp}(object, start, est,
+           method = c("Nelder-Mead", "sannbox", "subplex"),
+           gr = NULL, eval.only = FALSE, \dots)
+  \S4method{traj.match}{traj.matched.pomp}(object, start, est,
+           method = c("Nelder-Mead", "sannbox", "subplex"),
+           gr = NULL, eval.only = FALSE, \dots)
 }
 \arguments{
   \item{object}{A \code{pomp} object.}
-  \item{start}{Initial guess for parameters.}
-  \item{est}{Character vector containing the names of parameters to be estimated.}
+  \item{start}{initial guess for parameters.}
+  \item{est}{character vector containing the names of parameters to be estimated.}
   \item{method}{
-    One of the optimization methods recognized by \code{\link{optim}}.
+    Optimization method.
+    Choices are \code{\link[subplex]{subplex}}, \dQuote{sannbox}, and any of the methods used by \code{\link{optim}}.
   }
   \item{gr}{
     Passed to \code{\link{optim}}.
   }
+  \item{eval.only}{
+    logical;
+    if \code{TRUE}, no optimization is attempted and the log likelihood value is evaluated at the \code{start} parameters.
+  }
   \item{\dots}{
-    Arguments that will be passed to \code{\link{optim}} in the \code{control} list.
+    Arguments that will be passed to \code{\link{optim}} in its \code{control} list.
   }
 }
 \details{
   Trajectory matching is accomplished using \code{\link{optim}}.
   The \code{\link{trajectory}} method is used for this, which in turn uses the \code{skeleton} slot of the \code{pomp} object.
+  The quantity maximized is the likelihood of the data given the trajectory, as returned by \code{\link{dmeasure}}.
+}
+\value{
+  An object of class \code{traj.matched.pomp}.
+  This class inherits from class \code{\link[=pomp-class]{pomp}} and contains the following additional slots:
+  \describe{
+    \item{evals}{
+      number of function and gradient evaluations by the optimizer.
+      See \code{\link{optim}}.
+    }
+    \item{value}{
+      value of the objective function.
+      Larger values indicate better fit (i.e., \code{traj.match} attempts to maximize this quantity.
+    }
+    \item{convergence, msg}{
+      convergence code and message from the optimizer.
+      See \code{\link{optim}}.
+    }
+  }
+
+  Available methods for objects of this type include \code{summary} and \code{logLik}.
+  The other slots of this object can be accessed via the \code{$} operator.
 }
 \examples{
   data(ou2)
@@ -44,12 +87,19 @@ traj.match(object, start, est, method = "Nelder-Mead", gr = NULL, \dots)
 		    reltol=1e-8
 		    )
 
+  summary(res)
+
+  plot(range(time(res)),range(c(obs(res),states(res))),type='n',xlab="time",ylab="x,y")
+  points(y1~time,data=as(res,"data.frame"),col='blue')
+  points(y2~time,data=as(res,"data.frame"),col='red')
+  lines(x1~time,data=as(res,"data.frame"),col='blue')
+  lines(x2~time,data=as(res,"data.frame"),col='red')
 }
 \seealso{
-  \code{\link{optim}},
   \code{\link{trajectory}},
   \code{\link{pomp}},
-  \code{\link{pomp-class}}
+  \code{\link{optim}},
+  \code{\link[subplex]{subplex}}
 }
 \keyword{models}
 \keyword{ts}

@@ -1,18 +1,11 @@
-dmeasure <- function (object, y, x, times, params, log = FALSE, ...)
-  stop("function ",sQuote("dmeasure")," is undefined for objects of class ",sQuote(class(object)))
-setGeneric('dmeasure')  
+setGeneric("dmeasure",function(object,...)standardGeneric("dmeasure"))
 
 ## evaluate the measurement model density function
 setMethod(
           'dmeasure',
           'pomp',
           function (object, y, x, times, params, log = FALSE, ...) {
-            val <- try(
-                       .Call(do_dmeasure,object,y,x,times,params,log),
-                       silent=FALSE
-                       )
-            if (inherits(val,'try-error'))
-              stop("dmeasure error: error in user ",sQuote("dmeasure"),call.=FALSE)
-            val
+            fun <- get.pomp.fun(object@dmeasure)
+            .Call(do_dmeasure,object,y,x,times,params,log,fun)
           }
           )

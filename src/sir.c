@@ -46,13 +46,13 @@ static double term_time (double t, double b0, double b1)
 void _sir_binom_dmeasure (double *lik, double *y, double *x, double *p, int give_log,
 			  int *obsindex, int *stateindex, int *parindex, int *covindex,
 			  int ncovars, double *covars, double t) {
-  *lik = dbinom(REPORTS,CASE,exp(LOGRHO),give_log);
+  *lik = dbinom(REPORTS,nearbyint(CASE),exp(LOGRHO),give_log);
 }
 
 void _sir_binom_rmeasure (double *y, double *x, double *p, 
 			  int *obsindex, int *stateindex, int *parindex, int *covindex,
 			  int ncovars, double *covars, double t) {
-  REPORTS = rbinom(CASE,exp(LOGRHO));
+  REPORTS = rbinom(nearbyint(CASE),exp(LOGRHO));
 }
 
 #undef REPORTS
@@ -182,7 +182,7 @@ void _sir_ODE (double *f, double *x, const double *p,
   DSDT = term[0]-term[1]-term[2];
   DIDT = term[1]-term[3]-term[4];
   DRDT = term[3]-term[5];
-  DCDT = term[3];		// cases are cumulative recoveries
+  DCDT = DIDT*gamma/52;		     // roughly the weekly number of new cases
 
 }
 

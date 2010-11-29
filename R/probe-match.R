@@ -2,10 +2,11 @@ setClass(
          "probe.matched.pomp",
          contains="probed.pomp",
          representation=representation(
+           est="character",
            weights="numeric",
            fail.value="numeric",
-           evals="integer",
            value="numeric",
+           evals="integer",
            convergence="integer",
            msg="character"
            )
@@ -18,6 +19,7 @@ setMethod(
             c(
               summary(as(object,"probed.pomp")),
               list(
+                   est=object@est,
                    weights=object@weights,
                    value=object@value,
                    eval=object@evals,
@@ -91,20 +93,15 @@ neg.synth.loglik <- function (par, est, object, probes, params,
   -ll
 }
 
-probe.match <- function(object, start, est = character(0),
-                        probes, weights,
-                        nsim, seed = NULL,
-                        method = c("subplex","Nelder-Mead","SANN"),
-                        verbose = getOption("verbose"), 
-                        eval.only = FALSE, fail.value = NA, ...) {
+probe.match.internal <- function(object, start, est,
+                                 probes, weights,
+                                 nsim, seed,
+                                 method, verbose,
+                                 eval.only, fail.value, ...) {
 
   obj.fn <- neg.synth.loglik
 
-  if (!is(object,"pomp"))
-    stop(sQuote("object")," must be of class ",sQuote("pomp"))
-
-  if (missing(start))
-    start <- coef(object)
+  if (!is.list(probes)) probes <- list(probes)
 
   if (!eval.only&&(length(est)<1))
     stop("parameters to be estimated must be specified in ",sQuote("est"))
@@ -112,29 +109,11 @@ probe.match <- function(object, start, est = character(0),
     stop(sQuote("est")," must refer to parameters named in ",sQuote("start"))
   par.index <- which(names(start)%in%est)
   
-  if (missing(probes)) {
-    if (is(object,"probed.pomp"))
-      probes <- object@probes
-    else
-      stop(sQuote("probes")," must be supplied")
-  }
-  if (!is.list(probes)) probes <- list(probes)
   if (!all(sapply(probes,is.function)))
     stop(sQuote("probes")," must be a function or a list of functions")
   if (!all(sapply(probes,function(f)length(formals(f))==1)))
     stop("each probe must be a function of a single argument")            
-
-  if (missing(nsim)) {
-    if (is(object,"probed.pomp"))
-      nsim <- nrow(object@simvals)
-    else
-      stop(sQuote("nsim")," must be supplied")
-  }
-
-  if (missing(weights)) weights <- 1
-
-  method <- match.arg(method)
-
+  
   params <- start
   guess <- params[par.index]
 
@@ -153,7 +132,7 @@ probe.match <- function(object, start, est = character(0),
                   datval=datval,
                   fail.value=fail.value
                   )
-    conv <- 0
+    conv <- NA
     evals <- as.integer(c(1,0))
     msg <- paste("no optimization performed")
   } else {
@@ -205,6 +184,7 @@ probe.match <- function(object, start, est = character(0),
             nsim=nsim,
             seed=seed
             ),
+      est=as.character(est),
       weights=weights,
       fail.value=as.numeric(fail.value),
       value=val,
@@ -213,3 +193,126 @@ probe.match <- function(object, start, est = character(0),
       msg=as.character(msg)
       )
 }
+
+setGeneric("probe.match",function(object,...)standardGeneric("probe.match"))
+
+setMethod(
+          "probe.match",
+          signature=signature(object="pomp"),
+          function(object, start, est = character(0),
+                   probes, weights,
+                   nsim, seed = NULL,
+                   method = c("subplex","Nelder-Mead","SANN"),
+                   verbose = getOption("verbose"), 
+                   eval.only = FALSE, fail.value = NA, ...) {
+            
+            if (missing(start)) start <- coef(object)
+
+            if (missing(probes))
+              stop(sQuote("probes")," must be supplied")
+
+            if (missing(nsim))
+              stop(sQuote("nsim")," must be supplied")
+
+            if (missing(weights)) weights <- 1
+
+            method <- match.arg(method)
+            
+            probe.match.internal(
+                                 object=object,
+                                 start=start,
+                                 est=est,
+                                 probes=probes,
+                                 weights=weights,
+                                 nsim=nsim,
+                                 seed=seed,
+                                 method=method,
+                                 verbose=verbose,
+                                 eval.only=eval.only,
+                                 fail.value=fail.value,
+                                 ...
+                                 )
+          }
+          )
+
+setMethod(
+          "probe.match",
+          signature=signature(object="probed.pomp"),
+          function(object, start, est = character(0),
+                   probes, weights,
+                   nsim, seed = NULL,
+                   method = c("subplex","Nelder-Mead","SANN"),
+                   verbose = getOption("verbose"), 
+                   eval.only = FALSE, fail.value = NA, ...) {
+            
+            if (missing(start)) start <- coef(object)
+
+            if (missing(probes))
+              probes <- object@probes
+
+            if (missing(nsim))
+              nsim <- nrow(object@simvals)
+            
+            if (missing(weights)) weights <- 1
+
+            method <- match.arg(method)
+            
+            probe.match.internal(
+                                 object=object,
+                                 start=start,
+                                 est=est,
+                                 probes=probes,
+                                 weights=weights,
+                                 nsim=nsim,
+                                 seed=seed,
+                                 method=method,
+                                 verbose=verbose,
+                                 eval.only=eval.only,
+                                 fail.value=fail.value,
+                                 ...
+                                 )
+          }
+          )
+
+setMethod(
+          "probe.match",
+          signature=signature(object="probe.matched.pomp"),
+          function(object, start, est,
+                   probes, weights,
+                   nsim, seed = NULL,
+                   method = c("subplex","Nelder-Mead","SANN"),
+                   verbose = getOption("verbose"), 
+                   eval.only = FALSE, fail.value, ...) {
+            
+            if (missing(start)) start <- coef(object)
+
+            if (missing(est)) est <- object@est
+
+            if (missing(probes))
+              probes <- object@probes
+
+            if (missing(nsim))
+              nsim <- nrow(object@simvals)
+            
+            if (missing(weights)) weights <- 1
+
+            if (missing(fail.value)) fail.value <- object@fail.value
+
+            method <- match.arg(method)
+            
+            probe.match.internal(
+                                 object=object,
+                                 start=start,
+                                 est=est,
+                                 probes=probes,
+                                 weights=weights,
+                                 nsim=nsim,
+                                 seed=seed,
+                                 method=method,
+                                 verbose=verbose,
+                                 eval.only=eval.only,
+                                 fail.value=fail.value,
+                                 ...
+                                 )
+          }
+          )

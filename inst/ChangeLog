@@ -1,5 +1,177 @@
+2010-11-24  kingaa
+
+	* [r428] R/pomp.R: - set storage.mode of 'covar' and 'tcovar' to
+	  'double'
+	* [r427] DESCRIPTION, NAMESPACE, R/aaa.R, R/probe-match.R,
+	  R/traj-match.R, inst/NEWS, man/probe.Rd: - make 'probe.match'
+	  into a method
+	  - tinker with generics
+	* [r426] inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/intro_to_pomp.pdf, inst/doc/ou2-first-mif.rda,
+	  inst/doc/ou2-trajmatch.rda: - update vignettes
+
+2010-11-23  kingaa
+
+	* [r425] inst/ChangeLog, inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/intro_to_pomp.pdf, src/dmeasure.c: - cosmetics
+	  - update ChangeLog & vignettes
+	* [r424] man/trajectory-pomp.Rd, tests/fhn.Rout.save,
+	  tests/ou2-trajmatch.R, tests/ou2-trajmatch.Rout.save: - update
+	  the tests
+	  - fix the example in 'trajectory'
+	  - the deterministic skeleton for 'euler.sir' now includes a state
+	  variable for the approximate number of cases (not cumulative
+	  cases as before)
+	* [r423] DESCRIPTION, NAMESPACE, R/aaa.R, R/dmeasure-pomp.R,
+	  R/pomp-fun.R, R/pomp.R, R/rmeasure-pomp.R, R/skeleton-pomp.R,
+	  R/traj-match.R, R/trajectory-pomp.R, data/dacca.rda,
+	  data/gillespie.sir.rda, data/ou2.rda, data/ricker.rda,
+	  data/rw2.rda, data/verhulst.rda, inst/ChangeLog, inst/NEWS,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.pdf,
+	  man/traj-match.Rd, man/trajectory-pomp.Rd, src/dmeasure.c,
+	  src/pomp_fun.c, src/pomp_internal.h, src/rmeasure.c,
+	  src/simulate.c, src/skeleton.c, src/trajectory.c: - when PACKAGE
+	  is undefined in 'pomp' or 'pomp.fun', the default is now ""
+	  (rather than 'character(0)')
+	  - rewrite 'simulate' and 'trajectory' to minimize extraction from
+	  'pomp.fun' objects (and consequent lookup of dynamically-loaded
+	  symbols).
+	  - rewrite 'skeleton', 'rmeasure', and 'dmeasure' in keeping with
+	  above
+	  - rewrite 'traj.match' internals
+	  - add 'sannbox' box-constrained simulated annealing algorithm to
+	  'traj.match' suite of optimizers
+	  - 'traj.match' generates an error when 'est' is not supplied and
+	  'eval.only=FALSE'
+	  - for continuous-time POMPs, 'trajectory' computation is now done
+	  by a single call to 'deSolve::ode' (vs. one call for each
+	  parameter set as before)
+	  - new .Call-able function 'get_pomp_fun' to extract from
+	  'pomp.fun' objects
+	  - iteration of discrete-time deterministic skeleton maps is now
+	  done in C for speed (new file 'trajectory.c')
+	* [r422] R/dprocess-pomp.R: - fix bug
+	* [r421] R/sannbox.R: - add a simulated annealing algorithm with
+	  box constraints
+
+2010-11-17  kingaa
+
+	* [r420] src/dmeasure.c, src/rmeasure.c, src/skeleton.c: - remove
+	  some redundant/unnecessary lines
+
+2010-11-16  kingaa
+
+	* [r419] R/skeleton-pomp.R: - remove one layer of try/catch
+	* [r418] src/skeleton.c: - minor tweaks
+
+2010-11-14  kingaa
+
+	* [r417] DESCRIPTION, NAMESPACE, R/aaa.R, R/bsmc.R,
+	  R/dmeasure-pomp.R, R/dprocess-pomp.R, R/init-state-pomp.R,
+	  R/mif.R, R/rmeasure-pomp.R, R/rprocess-pomp.R, inst/ChangeLog,
+	  man/dmeasure-pomp.Rd, man/dprocess-pomp.Rd,
+	  man/init.state-pomp.Rd, man/pomp-methods.Rd,
+	  man/rmeasure-pomp.Rd, man/rprocess-pomp.Rd, man/skeleton-pomp.Rd,
+	  man/traj-match.Rd, man/trajectory-pomp.Rd: - make declarations of
+	  generics uniform
+
+2010-11-09  kingaa
+
+	* [r416] DESCRIPTION, R/traj-match.R,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.pdf:
+	  - revert version dependence to R>=2.10.1
+	  - fix bug in 'traj.match'
+	* [r415] DESCRIPTION, R/traj-match.R,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.pdf,
+	  tests/ou2-trajmatch.R, tests/ou2-trajmatch.Rout.save: - fix bug
+	  in 'traj.match'
+
+2010-11-08  kingaa
+
+	* [r414] DESCRIPTION, R/traj-match.R, data/euler.sir.rda,
+	  inst/data-R/euler.sir.R, man/traj-match.Rd, src/sir.c,
+	  tests/sir.R, tests/sir.Rout.save: - 'traj.match' is now
+	  implemented as a generic with methods for 'pomp' and
+	  'traj.matched.pomp' objects
+	  - the 'euler.sir' example has a different skeleton, one for which
+	  'cases' gives the approximate weekly number of new cases
+	* [r413] DESCRIPTION, NAMESPACE, R/probe-match.R, R/spect-match.R,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.pdf,
+	  man/pfilter.Rd, man/pmcmc-class.Rd, man/pmcmc.Rd, man/probe.Rd,
+	  man/probed-pomp-class.Rd, man/spect-pomp-class.Rd, man/spect.Rd,
+	  man/traj-match.Rd, tests/ricker-probe.R,
+	  tests/ricker-probe.Rout.save, tests/ricker-spect.R,
+	  tests/ricker-spect.Rout.save: - arrange for all classes to be
+	  exported
+	  - rearrange documentation for classes; now it's together with the
+	  constructors
+	  - fix bug in 'spect.match' with eval.only=TRUE
+	  - add slot in 'probe.matched.pomp' to make it parallel with
+	  'spect.matched.pomp'
+
+2010-11-07  kingaa
+
+	* [r412] R/traj-match.R, inst/ChangeLog,
+	  inst/doc/intro_to_pomp.pdf, inst/doc/ou2-first-mif.rda,
+	  inst/doc/ou2-trajmatch.rda: - streamline 'traj.match' slightly
+	* [r411] R/nlf-objfun.R, R/spect.R, inst/doc/intro_to_pomp.Rnw,
+	  man/basic-probes.Rd, man/spect.Rd: - replace 'data.array' with
+	  'obs' as the preferred method
+	* [r410] R/traj-match.R, R/trajectory-pomp.R, inst/ChangeLog,
+	  src/sir.c: - fix traj-match objective function
+	  - minor tweak to trajectory generic
+	  - make the variables 'cases' in SIR trajectories integer-valued
+	* [r409] src/probe_acf.c, src/synth_lik.c: - get rid of some unused
+	  varibles
+
+2010-11-05  kingaa
+
+	* [r407] DESCRIPTION, R/mif-class.R, R/mif.R, R/particles-mif.R,
+	  R/pfilter-mif.R, R/pfilter.R, R/pmcmc.R, data/dacca.rda,
+	  data/euler.sir.rda, data/gillespie.sir.rda, data/ou2.rda,
+	  data/rw2.rda, data/verhulst.rda, inst/ChangeLog, inst/NEWS,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.pdf,
+	  inst/doc/ou2-first-mif.rda, inst/doc/ou2-trajmatch.rda,
+	  man/bsmc.Rd, man/mif-class.Rd, man/mif-methods.Rd, man/mif.Rd,
+	  man/pfilter.Rd, man/pmcmc-class.Rd, man/pmcmc-methods.Rd,
+	  man/pmcmc.Rd, man/probe.Rd, man/probed-pomp-methods.Rd,
+	  man/spect.Rd, man/traj-match.Rd, man/trajectory-pomp.Rd,
+	  tests/ou2-forecast.R, tests/ou2-forecast.Rout.save,
+	  tests/ou2-mif.R, tests/ou2-mif.Rout.save, tests/ou2-pmcmc.R,
+	  tests/ou2-pmcmc.Rout.save: - create new class 'pfilterd.pomp' to
+	  hold results of 'pfilter'
+	  - the classes 'mif' and 'pmcmc' now inherit from 'pfilterd.pomp'
+	  - changed the internal representation of 'mif' object (expanded
+	  'alg.pars' list to separate slots)
+	  - the arguments to the generic 'dprior' have changed
+	  - rearrange internal structure of 'mif' algorithm
+	  - rearrange internal structure of 'pmcmc' algorithm
+	  - add 'mif' and 'pmcmc' methods for 'pfilterd.pomp' objects
+	  - remove 'pfilter' method for 'mif' objects: the 'pfilter' method
+	  for 'pfilterd.pomp' objects does the job now
+	  - change output of 'pfilter' when 'save.states=TRUE': now states
+	  at final time are stored in slot 'last.states'
+	  - it is now allowed to call 'pfilter' with 'save.states=TRUE' on
+	  a 'mif' object.
+	  - the internal man pages for various of the classes have yet to
+	  be updated
+	* [r405] DESCRIPTION, NAMESPACE, R/aaa.R, R/probe-match.R,
+	  R/spect-match.R, R/traj-match.R, man/traj-match.Rd,
+	  tests/ou2-trajmatch.R, tests/ou2-trajmatch.Rout.save: - if
+	  eval.only=TRUE in traj.match, spect.match, or probe.match, the
+	  returned convergence field is now NA and the message says "no
+	  optimization performed"
+	  - traj.match now returns an object of class traj.matched.pomp, a
+	  new class that inherits from 'pomp'
+	  - the 'states' slot in the 'traj.matched.pomp' object is now
+	  filled with the trajectory
+	  - more optimization methods are now provided in 'traj.match'
+	  - the only class now exported is 'pomp'.
+
 2010-10-25  kingaa
 
+	* [r404] inst/ChangeLog, inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/intro_to_pomp.pdf: - version 0.35-1
 	* [r403] DESCRIPTION, NAMESPACE, R/spect-match.R, R/spect.R,
 	  inst/NEWS, man/mif.Rd, man/probe.Rd, tests/ou2-mif.R,
 	  tests/ou2-mif.Rout.save, tests/ricker.R, tests/ricker.Rout.save:

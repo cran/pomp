@@ -9,6 +9,8 @@
 \alias{spect.match-pomp}
 \alias{spect.match,spect.pomp-method}
 \alias{spect.match-spect.pomp}
+\alias{spect.pomp-class}
+\alias{spect.matched.pomp-class}
 \title{Power spectrum computation for partially-observed Markov processes.}
 \description{
   \code{spect} estimates the power spectrum of time series data and model simulations and compares the results.
@@ -18,11 +20,12 @@
   It calls an optimizer to adjust model parameters to minimize the discrepancy between simulated and actual data.
 }
 \usage{
-  spect(object, \dots)
-  \S4method{spect}{pomp}(object, params, vars, kernel.width, nsim, seed = NULL, transform = identity,
-           detrend = c("none","mean","linear","quadratic"), \dots)
+  \S4method{spect}{pomp}(object, params, vars, kernel.width, nsim, seed = NULL,
+      transform = identity,
+      detrend = c("none","mean","linear","quadratic"),
+      \dots)
   \S4method{spect}{spect.pomp}(object, params, vars, kernel.width, nsim, seed = NULL, transform,
-           detrend, \dots)
+      detrend, \dots)
   spect.match(object, start, est = character(0),
               vars, nsim, seed = NULL,
               kernel.width, transform = identity, 
@@ -41,7 +44,7 @@
   }
   \item{vars}{
     optional; names of observed variables for which the power spectrum will be computed.
-    This must be a subset of \code{rownames(data.array(object))}.
+    This must be a subset of \code{rownames(obs(object))}.
     By default, the spectrum will be computed for all observables.
   }
   \item{kernel.width}{
@@ -104,8 +107,35 @@
   The results, including coefficients of the fitted model and power spectra of fitted model and data, are stored in an object of class \code{\link[=spect.matched.pomp-class]{spect.matched.pomp}}.
 }
 \value{
-  \code{spect} returns an object of class \code{\link[=spect.pomp-class]{spect.pomp}}.
-  \code{spect.match} returns an object of class \code{\link[=spect.matched.pomp-class]{spect.matched.pomp}}.
+  \code{spect} returns an object of class \code{spect.pomp}, which is derived from class \code{\link[=pomp-class]{pomp}} and therefore has all the slots of that class.
+  In addition, \code{spect.pomp} objects have the following slots:
+  \describe{
+    \item{kernel.width}{width parameter of the smoothing kernel used.}
+    \item{transform}{transformation function used.}
+    \item{freq}{numeric vector of the frequencies at which the power spectrum is estimated.}
+    \item{datspec, simspec}{estimated power spectra for data and simulations, respectively.}
+    \item{pvals}{
+      one-sided p-values:
+      fraction of the simulated spectra that differ more from the mean simulated spectrum than does the data.
+      The metric used is \eqn{L^2}{L2} distance.
+    }
+    \item{detrend}{detrending option used.}
+  }
+  
+  \code{spect.match} returns an object of class \code{spect.matched.pomp}, which is derived from class \code{{spect.pomp}} and therefore has all the slots of that class.
+  In addition, \code{spect.matched.pomp} objects have the following slots:
+  \describe{
+    \item{est, weights, fail.value}{values of the corresponding arguments in the call to \code{spect.match}.}
+    \item{evals}{
+      number of function and gradient evaluations by the optimizer.
+      See \code{\link{optim}}.
+    }
+    \item{value}{Value of the objective function.}
+    \item{convergence, msg}{
+      Convergence code and message from the optimizer.
+      See \code{\link{optim}}.
+    }
+  }  
 }
 \references{
   D.C. Reuman, R.A. Desharnais, R.F. Costantino, O. Ahmad, J.E. Cohen (2006)
@@ -155,7 +185,3 @@ plot(bad)
 }
 \keyword{models}
 \keyword{ts}
-
-
-
-

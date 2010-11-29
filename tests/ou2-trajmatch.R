@@ -1,10 +1,11 @@
 library(pomp)
 
+set.seed(93885485L)
+
 data(ou2)
 true.p <- coef(ou2)
 simdata <- simulate(ou2,nsim=5,params=true.p,seed=394885)
 guess.p <- true.p
-guess.p[grep('sigma',names(guess.p))] <- 0
 
 x <- sapply(
             simdata,
@@ -16,7 +17,7 @@ x <- sapply(
                                 maxit=2000,
                                 reltol=1e-8
                                 )
-              c(conv=res$convergence,loglik=res$value,res$params)
+              c(conv=res$convergence,loglik=logLik(res),coef(res))
             }
             )
 range(x['conv',])
@@ -30,3 +31,9 @@ print(
             ),
       digits=4
       )
+
+summary(traj.match(ou2,est=c('alpha.1','alpha.4','x1.0','x2.0','tau'),method="subplex",maxit=100))
+
+summary(traj.match(ou2,est=c('alpha.1','alpha.4','x1.0','x2.0','tau'),method="sannbox",trace=3,parscale=0.1,maxit=100))
+
+summary(traj.match(ou2,est=c('alpha.1','alpha.4','x1.0','x2.0','tau'),eval.only=T))
