@@ -68,6 +68,7 @@
     }
     \item{logLik}{
       returns the synthetic likelihood for the probes.
+      NB: in general, this is not the same as the likelihood.
     }
     \item{as}{
       when a \sQuote{probed.pomp} is coerced to a \sQuote{data.frame}, the first row gives the probes applied to the data; the rest of the rows give the probes evaluated on simulated data.
