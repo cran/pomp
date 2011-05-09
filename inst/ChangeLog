@@ -1,3 +1,57 @@
+2011-05-05  kingaa
+
+	* [r457] DESCRIPTION, data/blowflies.rda, data/dacca.rda,
+	  inst/ChangeLog, inst/data-R/blowflies.R,
+	  inst/data-R/blowflies.csv, inst/data-R/dacca.R,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.pdf,
+	  man/blowflies.Rd, man/dacca.Rd, src/tsir.c: - add blowflies
+	  example
+	  - fix bug in tsir code
+	  - rearrange 'dacca' example
+
+2011-05-04  kingaa
+
+	* [r456] R/aaa.R, R/mif-methods.R, R/pfilter-methods.R,
+	  R/pfilter.R, man/mif-methods.Rd, man/pfilter-methods.Rd,
+	  man/pfilter.Rd: - 'pred.mean', 'pred.var', and 'filter.mean'
+	  methods are now defined for 'pfilterd.pomp' objects (and not just
+	  'mif' objects)
+	* [r455] R/trajectory-pomp.R: - 'trajectory' now gives a more
+	  informative error when no skeleton is present
+	* [r454] DESCRIPTION, data/dacca.rda, data/euler.sir.rda,
+	  data/gillespie.sir.rda, data/gompertz.rda, data/ou2.rda,
+	  data/ricker.rda, data/rw2.rda, data/verhulst.rda, inst/ChangeLog,
+	  inst/NEWS, inst/data-R/dacca.R, inst/data-R/euler.sir.R,
+	  inst/data-R/gillespie.sir.R, inst/data-R/gompertz.R,
+	  inst/data-R/ou2.R, inst/data-R/ricker.R, inst/data-R/rw2.R,
+	  inst/data-R/verhulst.R, src/blowfly.c, src/probe_acf.c: - fix bug
+	  in error message in 'probe_acf.c'
+	  - update data()-loadable examples
+
+2011-05-03  kingaa
+
+	* [r453] inst/doc/intro_to_pomp.pdf:
+	* [r452] inst/doc/intro_to_pomp.Rnw, inst/doc/intro_to_pomp.pdf: -
+	  minor improvement to 'compare.mif' figure
+	* [r451] tests/filtfail.R, tests/filtfail.Rout.save,
+	  tests/sir-icfit.R, tests/sir-icfit.Rout.save: - two new tests:
+	  'sir-icfit' and 'filtfail'
+	* [r450] DESCRIPTION, R/pfilter.R, inst/ChangeLog,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.Rnw,
+	  inst/doc/intro_to_pomp.pdf, src/pfilter.c, src/resample.c,
+	  tests/ou2-probe.Rout.save, tests/ricker-probe.Rout.save,
+	  tests/ricker.Rout.save: - move resampling and random-walking
+	  inside 'pfilter.internal' into C (pfilter.c)
+	  - move resampling codes from 'resample.c' to 'pfilter.c'
+	  - update test .save files
+	  - minor corrections in 'intro_to_pomp' vignette
+	* [r449] R/bsplines.R, man/bsplines.Rd: - add 'names' argument
+
+2011-04-27  kingaa
+
+	* [r448] inst/ChangeLog, inst/NEWS: - version 0.36-5
+	  - update NEWS file and Changelog
+
 2011-04-24  kingaa
 
 	* [r447] inst/ChangeLog, inst/doc/advanced_topics_in_pomp.pdf,
