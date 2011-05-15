@@ -1,5 +1,92 @@
+2011-05-13  kingaa
+
+	* [r477] data/blowflies.rda, data/dacca.rda, data/euler.sir.rda,
+	  data/gillespie.sir.rda, data/ou2.rda, data/rw2.rda,
+	  data/verhulst.rda, inst/NEWS,
+	  inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/gompertz-multi-mif.rda, inst/doc/gompertz-trajmatch.rda,
+	  inst/doc/intro_to_pomp.pdf, inst/doc/ricker-mif.rda,
+	  inst/doc/ricker-probe-match.rda, man/pomp.Rd: - update vignettes
+	  - update data()-loadable objects
+	  - minor tweak to pomp man page
+	  - tweak to NEWS file
+
+2011-05-12  kingaa
+
+	* [r476] DESCRIPTION: - fix author line
+	* [r475] DESCRIPTION, inst/ChangeLog, inst/NEWS: - update ChangeLog
+	  and NEWS
+
+2011-05-11  kingaa
+
+	* [r474] tests/sir-icfit.R, tests/sir-icfit.Rout.save: - add a test
+	  for the new 'pfilter'-based initial-condition-estimation method
+	* [r473] tests/ou2-forecast.R, tests/ou2-forecast.Rout.save: -
+	  update this test to use new 'save.params' option
+	* [r472] tests/logistic.Rout.save: - minor change
+	* [r471] tests/fhn.Rout.save: - minor change
+	* [r470] R/mif.R, R/pfilter.R, R/pmcmc.R, inst/NEWS,
+	  man/pfilter.Rd: - add new argument 'save.params' to 'pfilter' to
+	  allow saving the parameter portion of the particles
+	  - change the 'pfilterd.pomp' slot name 'last.states' to
+	  'saved.states', which connects with the option name
+	  - add a new slot 'saved.params' to the 'pfilterd.pomp' object
+	  - update 'pmcmc' and 'mif' in accordance with the above changes
+	  - modify 'pfilter' so that
+	  'coef(pfilter(obj,params=theta))==theta' as in 'mif', 'simulate',
+	  etc.
+	* [r469] DESCRIPTION, R/pfilter.R, inst/ChangeLog, inst/NEWS,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/intro_to_pomp.pdf,
+	  src/pfilter.c: - eliminate unnecessary copying of identical
+	  parameter particles
+
+2011-05-10  kingaa
+
+	* [r468] DESCRIPTION:
+
+2011-05-09  kingaa
+
+	* [r467] inst/ChangeLog, inst/NEWS,
+	  inst/doc/advanced_topics_in_pomp.pdf, inst/doc/index.html,
+	  inst/doc/intro_to_pomp.Rnw, inst/doc/intro_to_pomp.pdf: - add a
+	  diagram to intro vignette
+	  - add 'index.html' file for vignettes
+	  - fix NEWS file format
+	* [r464] inst/NEWS: - update
+	* [r463] NAMESPACE, R/pomp.R, data/blowflies.rda, data/dacca.rda,
+	  data/euler.sir.rda, data/gillespie.sir.rda, data/gompertz.rda,
+	  data/ou2.rda, data/ricker.rda, data/rw2.rda, data/verhulst.rda,
+	  inst/ChangeLog, inst/NEWS, inst/data-R/euler.sir.R,
+	  inst/data-R/gompertz.R, inst/data-R/ou2.R, inst/data-R/ricker.R,
+	  inst/data-R/verhulst.R, inst/doc/advanced_topics_in_pomp.Rnw,
+	  inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/gompertz-trajmatch.rda, inst/doc/intro_to_pomp.Rnw,
+	  inst/doc/intro_to_pomp.pdf, inst/examples/gompertz.R,
+	  inst/examples/gompertz.c, inst/examples/logistic.R,
+	  inst/examples/sir.R, inst/include/pomp.h, man/pomp-class.Rd,
+	  man/pomp.Rd, src/pomp.h, src/skeleton.c, tests/fhn.R,
+	  tests/fhn.Rout.save, tests/logistic.R, tests/logistic.Rout.save,
+	  tests/ou2-simulate.Rout.save, tests/pomppomp.R,
+	  tests/pomppomp.Rout.save, tests/ricker.Rout.save, tests/rw2.R,
+	  tests/rw2.Rout.save, tests/sir.R, tests/sir.Rout.save,
+	  tests/skeleton.Rout.save: - the 'pomp' arguments 'skeleton.map'
+	  and 'skeleton.vectorfield' are now deprecated in favor of
+	  'skeleton' and 'skeleton.type'
+	  - 'pomp' is now a generic function with methods for data of type
+	  'numeric', 'matrix', 'data.frame', and 'pomp'. the latter method
+	  allows for copying of 'pomp' objects with modification.
+	* [r462] R/pomp-methods.R: - remove printing of call slot
+	* [r461] src/gompertz.c: - better commenting and some cleanup
+	* [r460] R/pomp-fun.R: - fix bug in error-checking
+	  - allow pass-through of 'pomp.fun' objects
+	* [r459] DESCRIPTION, R/simulate-pomp.R, R/trajectory-pomp.R: -
+	  remove the warnings that were added in 0.34-1 regarding changed
+	  default behavior of 'simulate' and 'trajectory'
+
 2011-05-05  kingaa
 
+	* [r458] inst/ChangeLog, inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/intro_to_pomp.pdf:
 	* [r457] DESCRIPTION, data/blowflies.rda, data/dacca.rda,
 	  inst/ChangeLog, inst/data-R/blowflies.R,
 	  inst/data-R/blowflies.csv, inst/data-R/dacca.R,

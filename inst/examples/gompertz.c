@@ -15,21 +15,21 @@
 #define XPRIME      (f[stateindex[0]]) // new population size (for skeleton function only)
 
 // normal measurement model density
-void _gompertz_normal_dmeasure (double *lik, double *y, double *x, double *p, int give_log,
+void gompertz_normal_dmeasure (double *lik, double *y, double *x, double *p, int give_log,
 				int *obsindex, int *stateindex, int *parindex, int *covindex,
 				int ncovars, double *covars, double t) {
   *lik = dlnorm(Y,log(X),exp(LOG_TAU),give_log);
 }
 
 // normal measurement model simulator
-void _gompertz_normal_rmeasure (double *y, double *x, double *p, 
+void gompertz_normal_rmeasure (double *y, double *x, double *p, 
 				int *obsindex, int *stateindex, int *parindex, int *covindex,
 				int ncovars, double *covars, double t) {
   Y = rlnorm(log(X),exp(LOG_TAU));
 }
 
 // stochastic Gompertz model with log-normal process noise
-void _gompertz_simulator (double *x, const double *p, 
+void gompertz_simulator (double *x, const double *p, 
 			  const int *stateindex, const int *parindex, const int *covindex,
 			  int covdim, const double *covar, 
 			  double t, double dt)
@@ -41,7 +41,7 @@ void _gompertz_simulator (double *x, const double *p,
 }
 
 // the deterministic skeleton
-void _gompertz_skeleton (double *f, double *x, const double *p, 
+void gompertz_skeleton (double *f, double *x, const double *p, 
 			 const int *stateindex, const int *parindex, const int *covindex,
 			 int covdim, const double *covar, double t) 
 {

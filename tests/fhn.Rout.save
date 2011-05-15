@@ -1,7 +1,8 @@
 
-R version 2.11.1 (2010-05-31)
-Copyright (C) 2010 The R Foundation for Statistical Computing
+R version 2.12.2 (2011-02-25)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -28,7 +29,8 @@ Loading required package: deSolve
 +             data=data.frame(time=seq(0,60,by=0.1),Vobs=NA),
 +             times="time",
 +             t0=-0.1,
-+             skeleton.vectorfield=function(x,t,params,...) {
++             skeleton.type="vectorfield",
++             skeleton=function(x,t,params,...) {
 +               with(
 +                    as.list(c(x,params)),
 +                    c(
@@ -55,11 +57,6 @@ V 0.9333333  5.0
 R 0.4500000  0.2
 
 > y <- trajectory(fhn,params=params,hmax=0.1)
-Warning message:
-The default behavior of 'trajectory' has changed.
-See the documentation ("pomp?trajectory") for details
-and set the 'times' and 't0' arguments appropriately to compensate.
- 
 > y[,,599:601]
 , , 1
 
@@ -98,6 +95,8 @@ R 1.103084  0.3661463
 +                 )
 +             }
 +             )
+Warning message:
+the arguments 'skeleton.map' and 'skeleton.vectorfield' are now deprecated. Use 'skeleton' and 'skeleton.type' instead. 
 > 
 > skeleton(fhn,x,t=c(0,3),params=params)
 , , 1
@@ -113,11 +112,6 @@ V -0.6666667  5.0
 R  0.4500000  0.2
 
 > y <- trajectory(fhn,params=params,hmax=0.01)
-Warning message:
-The default behavior of 'trajectory' has changed.
-See the documentation ("pomp?trajectory") for details
-and set the 'times' and 't0' arguments appropriately to compensate.
- 
 > y[,,199:201]
 , , 1
 
