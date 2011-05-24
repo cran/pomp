@@ -221,7 +221,7 @@
 	}
     }
     \item{\code{dmeasure}}{
-      if provided, must take at least the arguments \code{y}, \code{x}, \code{times}, \code{params}, \code{log}, and \code{\dots}.
+      if provided, must take at least the arguments \code{y}, \code{x}, \code{t}, \code{params}, \code{log}, and \code{\dots}.
       \code{y} may be assumed to be a named vector of length \code{nobs} containing (actual or simulated) values of the observed variables;
       \code{x} will be a named vector of length \code{nvar} containing state variables
       \code{params}, a named vector containing parameters;
@@ -276,7 +276,17 @@
 \author{Aaron A. King \email{kingaa at umich dot edu}}
 \seealso{
   \link{pomp-methods},
-  \link[pomp]{plugins}
-}
+  \link[pomp]{plugins},
+  \code{\link[=pomp-methods]{time}},
+  \code{\link[=pomp-methods]{time<-}},
+  \code{\link[=pomp-methods]{timezero}},
+  \code{\link[=pomp-methods]{timezero<-}},
+  \code{\link[=pomp-methods]{coef}},
+  \code{\link[=pomp-methods]{coef<-}},
+  \code{\link[=pomp-methods]{obs}},
+  \code{\link[=pomp-methods]{states}},
+  \code{\link[=pomp-methods]{window}},
+  \code{\link[=pomp-methods]{as.data.frame.pomp}}
+ }
 \keyword{models}
 \keyword{ts}

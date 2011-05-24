@@ -1,0 +1,40 @@
+
+R version 2.12.2 (2011-02-25)
+Copyright (C) 2011 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(pomp)
+Loading required package: mvtnorm
+Loading required package: subplex
+Loading required package: deSolve
+> 
+> data(ou2)
+> 
+> po <- window(ou2,end=10)
+> 
+> set.seed(3434388L)
+> 
+> pmat <- do.call(cbind,rep(list(coef(po)),3))
+> sims <- simulate(po,states=T,obs=T,params=pmat)
+> 
+> dp <- dprocess(po,x=sims$states,times=time(po),params=pmat,log=T)
+> dm <- dmeasure(po,x=sims$states,y=obs(po),times=time(po),params=pmat,log=T)
+> 
+> apply(dp,1,sum)
+[1] -47.20607 -37.35755 -46.26917
+> apply(dm,1,sum)
+[1] -850.6711 -616.1925 -993.1957
+> 
