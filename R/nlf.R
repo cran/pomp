@@ -62,8 +62,8 @@ nlf <- function (object, start, est, lags,
 
   ## Vector of times to output the simulation
   times <- seq(
-               from=t0,
-               length=nconverge+nasymp+1,
+               from=t0+nconverge*dt,
+               length=nasymp,
                by=dt
                )
 
@@ -132,6 +132,7 @@ nlf <- function (object, start, est, lags,
                  )  
   }
 
+  opt$est <- est
   opt$value <- -opt$value
   params[par.index] <- opt$par
   opt$params <- params
