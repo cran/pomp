@@ -1,5 +1,86 @@
+2011-08-17  kingaa
+
+	* [r540] inst/NEWS: - update NEWS file
+	* [r539] man/pomp-methods.Rd, src/dprocess.c: - remove unused
+	  variable in 'dprocess.c'
+	  - use \S3method markup in documentation of 'as.data.frame.pomp'
+	* [r538] DESCRIPTION, inst/ChangeLog: - to upload to CRAN
+	* [r537] inst/doc/intro_to_pomp.Rnw, inst/doc/intro_to_pomp.pdf,
+	  inst/doc/pomp.bib, inst/doc/ricker-probe-plot.jpg: - update
+	  reference in intro vignette
+
+2011-08-15  kingaa
+
+	* [r536] inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/intro_to_pomp.pdf: - update vignettes
+	* [r535] inst/doc/Makefile, inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/intro_to_pomp.pdf, inst/doc/ricker-probe-plot.jpg: -
+	  keep the jpeg files
+
+2011-08-14  kingaa
+
+	* [r534] DESCRIPTION, src/pfilter.c, src/sir.c: - clean up some of
+	  the C code to get rid of annoying warnings
+
+2011-08-08  kingaa
+
+	* [r533] DESCRIPTION, inst/ChangeLog, inst/TODO:
+	* [r532] data/gillespie.sir.rda, inst/data-R/gillespie.sir.R,
+	  inst/examples/gompertz.R, inst/examples/sir.R,
+	  inst/examples/sir.c, man/gompertz.Rd: - include parameter
+	  transformations in 'gillespie.sir'
+	  - bring examples into line with codes in vignettes
+	* [r531] data/verhulst.rda, inst/data-R/verhulst.R,
+	  tests/verhulst.R, tests/verhulst.Rout.save: - re-code verhulst
+	  example with more exemplary style.
+	  - include a new unit-test in tests/verhulst.R
+
+2011-08-02  kingaa
+
+	* [r530] DESCRIPTION, R/mif-methods.R, R/pomp-methods.R,
+	  inst/doc/intro_to_pomp.Rnw, inst/doc/intro_to_pomp.pdf,
+	  man/mif-methods.Rd, tests/gompertz.R, tests/gompertz.Rout.save: -
+	  add 'transform' argument to 'conv.rec' method for 'mif' objects
+	  - add new unit test 'tests/gompertz.R' which tests the
+	  transformation facilities in 'coef', 'coef<-', and 'conv.rec'
+	  - small changes to 'intro_to_pomp' vignette
+	  - bug fix in 'pomp:::pomp.transform'
+
+2011-07-28  kingaa
+
+	* [r529] inst/ChangeLog:
+	* [r528] DESCRIPTION, R/pomp-methods.R, R/pomp.R,
+	  data/blowflies.rda, data/dacca.rda, data/euler.sir.rda,
+	  data/gillespie.sir.rda, data/gompertz.rda, data/ou2.rda,
+	  data/ricker.rda, data/rw2.rda, data/verhulst.rda, inst/ChangeLog,
+	  inst/NEWS, inst/data-R/dacca.R, inst/data-R/euler.sir.R,
+	  inst/data-R/gompertz.R, inst/doc/advanced_topics_in_pomp.Rnw,
+	  inst/doc/advanced_topics_in_pomp.pdf,
+	  inst/doc/gompertz-multi-mif.rda, inst/doc/gompertz-trajmatch.rda,
+	  inst/doc/intro_to_pomp.Rnw, inst/doc/intro_to_pomp.pdf,
+	  inst/doc/nlf-block-boot.rda, inst/doc/nlf-boot.rda,
+	  inst/doc/nlf-fit-from-truth.rda, inst/doc/nlf-fits.rda,
+	  inst/doc/nlf-lag-tests.rda, inst/doc/nlf-multi-short.rda,
+	  inst/doc/ricker-mif.rda, inst/doc/ricker-probe-match.rda,
+	  man/dacca.Rd, man/pomp-class.Rd, man/pomp-methods.Rd,
+	  man/pomp.Rd, src/sir.c, tests/ricker.Rout.save,
+	  tests/rw2.Rout.save, tests/sir-icfit.Rout.save, tests/sir.R,
+	  tests/sir.Rout.save: - add facility for parameter transformations
+	  to pomp:
+	  - 'pomp' takes two new optional arguments: 'parameter.transform',
+	  'parameter.inv.transform'
+	  - 'coef' and 'coef<-' methods take new optional argument
+	  'transform' which applies the appropriate transform when TRUE
+	  - all data()-loadable objects are changed accordingly:
+	  'euler.sir', 'dacca', and 'gompertz' make use of this facility
+	  - the section on parameter transformation in the 'intro_to_pomp'
+	  vignette has been changed accordingly
+	  - add a section on byte-compiled code to the advanced topics
+	  vignette
+
 2011-07-24  kingaa
 
+	* [r527] inst/ChangeLog: - update ChangeLog
 	* [r526] DESCRIPTION, src/SSA.f, tests/fhn.Rout.save,
 	  tests/filtfail.Rout.save, tests/gillespie.Rout.save,
 	  tests/logistic.Rout.save, tests/ou2-bsmc.Rout.save,
