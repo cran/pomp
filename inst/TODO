@@ -16,3 +16,13 @@
   prediction variances, prediction means?
 
 * Add plugin for adaptive tau leaping algorithm.
+
+* Parallel 'pfilter' algorithm.
+
+* Add LPA model example.
+
+* Extended Kalman filter.
+
+* Plugin for compartmental models.
+
+* Adaptive particle numbers in pfilter.

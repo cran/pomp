@@ -14,11 +14,20 @@ setMethod(
             vars <- names(X)
             tpos <- match("time",vars)
             if (is.na(tpos))
-              stop(sQuote("pomp")," plot error: no data variable labeled ",sQuote("time"),call.=FALSE)
-            if (missing(variables))
+              stop(
+                   sQuote("pomp"),
+                   " plot error: no data variable labeled ",
+                   sQuote("time"),
+                   call.=FALSE
+                   )
+            if (missing(variables)) {
               vars <- vars[-tpos]
-            else
+              vars <- setdiff(vars,colnames(x@covar))
+              ylabels <- NULL
+            } else {
               vars <- variables
+              ylabels <- names(variables)
+            }
             plotpomp <- function (x, time, 
                                   xy.labels, xy.lines, panel = lines, nc, xlabel,
                                   type = "l", xlim = NULL, ylim = NULL, xlab = "time",
@@ -41,7 +50,9 @@ setMethod(
                 stop(sQuote("pomp")," plot error: cannot plot more than 10 series as ",dQuote("multiple"),call.=FALSE)
               if (is.null(main))
                 main <- xlabel
-              nm <- colnames(x)
+              nm <- ylab
+              if (is.null(nm))
+                nm <- colnames(x)
               if (is.null(nm))
                 nm <- paste("Series", 1:nser)
               if (is.null(nc))
@@ -87,6 +98,7 @@ setMethod(
               plotpomp(
                        x=X[vv],
                        time=X[[tpos]],
+                       ylab=ylabels,
                        xy.labels=FALSE,
                        xlabel=deparse(substitute(x,env=parent.frame(1))),
                        panel=panel,
