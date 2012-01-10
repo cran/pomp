@@ -47,10 +47,7 @@ po <- pomp(
              x0 <- numeric(length(snames))
              names(x0) <- snames
              x0[comp.names] <- round(params['pop']*fracs/sum(fracs))
-             ## since 'cases' is in 'zeronames' above, the IC for this variable
-             ## will only matter in trajectory computations
-             ## In trajectory computations, however, 'cases' will be roughly the weekly number of new cases
-             x0["cases"] <- x0["I"]*exp(params["gamma"])/52 
+             x0["cases"] <- 0
              x0
            }
            )
@@ -65,4 +62,4 @@ coef(po,transform=TRUE) <- c(gamma=26,mu=0.02,iota=0.01,
 
 simulate(po,nsim=1,seed=329348545L) -> euler.sir
 
-save(euler.sir,file="euler.sir.rda")
+save(euler.sir,file="euler.sir.rda",compress="xz")

@@ -3,7 +3,44 @@
 #include "pomp_internal.h"
 #include <R_ext/Constants.h>
 
-// take nstep Euler-Poisson steps from t1 to t2
+int num_euler_steps (double t1, double t2, double *dt) {
+  double tol = sqrt(DOUBLE_EPS);
+  int nstep;
+  // nstep will be the number of Euler steps to take in going from t1 to t2.
+  // note also that the stepsize changes.
+  // this choice is meant to be conservative
+  // (i.e., so that the actual dt does not exceed the specified dt 
+  // by more than the relative tolerance 'tol')
+  // and to counteract roundoff error.
+  // It seems to work well, but is not guaranteed: 
+  // suggestions would be appreciated.
+  
+  if (t1 >= t2) {
+    *dt = 0.0;
+    nstep = 0;
+  } else if (t1+*dt >= t2) {
+    *dt = t2-t1; 
+    nstep = 1;
+  } else {
+    nstep = (int) ceil((t2-t1)/(*dt)/(1+tol));
+    *dt = (t2-t1)/((double) nstep);
+  }
+  return nstep;
+}
+
+int num_map_steps (double t1, double t2, double dt) {
+  double tol = sqrt(DOUBLE_EPS);
+  int nstep;
+  // nstep will be the number of discrete-time steps to take in going from t1 to t2.
+  if (t1+dt > t2) {
+    nstep = 0;
+  } else {
+    nstep = (int) ceil((t2-t1)/dt/(1+tol));
+  }
+  return nstep;
+}
+
+// take Euler-Poisson steps of size at most deltat from t1 to t2
 static void euler_simulator (pomp_onestep_sim *estep,
 			     double *x, double *xstart, double *times, double *params, 
 			     int *ndim, double *deltat,
@@ -19,12 +56,10 @@ static void euler_simulator (pomp_onestep_sim *estep,
   int covdim = ndim[5];
   int nzero = ndim[6];
   double covar_fn[covdim];
-  int j, k, p, step, neuler = 0;
-  double dt, tol;
+  int j, k, p, step, nstep = 0;
+  double dt;
 
   struct lookup_table covariate_table = {covlen, covdim, 0, time_table, covar_table};
-
-  tol = sqrt(DOUBLE_EPS); // relative tolerance in choosing Euler stepsize
 
   // copy the start values into the result array
   for (p = 0; p < nrep; p++)
@@ -39,28 +74,11 @@ static void euler_simulator (pomp_onestep_sim *estep,
     t = times[step-1];
     dt = *deltat;
 
-    // neuler is the number of Euler steps to take in going from
-    // times[step-1] to times[step].
-    // this choice is meant to be conservative
-    // (i.e., so that the actual dt does not exceed the specified dt 
-    // by more than the relative tolerance 'tol')
-    // and to counteract roundoff error.
-    // It seems to work well, but is not guaranteed: 
-    // suggestions would be appreciated.
-
     if (t > times[step]) {
       error("'times' is not an increasing sequence");
     }
-    else if (t == times[step]) {
-      dt = 0.0;
-      neuler = 0;
-    } else if (t+dt >= times[step]) {
-      dt = times[step] - t; 
-      neuler = 1;
-    } else {
-      neuler = (int) ceil((times[step]-t)/dt/(1+tol));
-      dt = (times[step]-t)/((double) neuler);
-    }
+
+    nstep = num_euler_steps(t,times[step],&dt);
 
     for (p = 0; p < nrep; p++) {
       xp = &x[nvar*(p+nrep*step)];
@@ -72,7 +90,7 @@ static void euler_simulator (pomp_onestep_sim *estep,
 	xp[zeroindex[k]] = 0.0;
     }
 
-    for (j = 0; j < neuler; j++) { // loop over Euler steps
+    for (j = 0; j < nstep; j++) { // loop over Euler steps
 
       // interpolate the covar functions for the covariates
       if (covdim > 0) 
@@ -89,10 +107,77 @@ static void euler_simulator (pomp_onestep_sim *estep,
 
       t += dt;
 
-      if (j == neuler-2) {	// penultimate step
+      if (j == nstep-2) {	// penultimate step
 	dt = times[step]-t;
 	t = times[step]-dt;
       }
+
+    }
+  }
+}
+
+// take discrete steps of size deltat from t1 to t2
+static void discrete_time_simulator (pomp_onestep_sim *estep,
+				     double *x, double *xstart, double *times, double *params, 
+				     int *ndim, double *deltat,
+				     int *stateindex, int *parindex, int *covindex, int *zeroindex,
+				     double *time_table, double *covar_table)
+{
+  double t, *xp, *pp;
+  int nvar = ndim[0];
+  int npar = ndim[1];
+  int nrep = ndim[2];
+  int ntimes = ndim[3];
+  int covlen = ndim[4];
+  int covdim = ndim[5];
+  int nzero = ndim[6];
+  double covar_fn[covdim];
+  int j, k, p, step, nstep = 0;
+  double dt;
+
+  struct lookup_table covariate_table = {covlen, covdim, 0, time_table, covar_table};
+
+  // copy the start values into the result array
+  for (p = 0; p < nrep; p++)
+    for (k = 0; k < nvar; k++) 
+      x[k+nvar*p] = xstart[k+nvar*p];
+  
+  dt = *deltat;
+  t = times[0];
+
+  // loop over times
+  for (step = 1; step < ntimes; step++) {
+
+    R_CheckUserInterrupt();
+
+    nstep = num_map_steps(t,times[step],dt);
+
+    for (p = 0; p < nrep; p++) {
+      xp = &x[nvar*(p+nrep*step)];
+      // copy in the previous values of the state variables
+      for (k = 0; k < nvar; k++)
+	xp[k] = x[k+nvar*(p+nrep*(step-1))];
+      // set some variables to zero
+      for (k = 0; k < nzero; k++)
+	xp[zeroindex[k]] = 0.0;
+    }
+
+    for (j = 0; j < nstep; j++) { // loop over steps
+
+      // interpolate the covar functions for the covariates
+      if (covdim > 0) 
+	table_lookup(&covariate_table,t,covar_fn,0);
+
+      for (p = 0; p < nrep; p++) { // loop over replicates
+      
+	pp = &params[npar*p];
+	xp = &x[nvar*(p+nrep*step)];
+
+	(*estep)(xp,pp,stateindex,parindex,covindex,covdim,covar_fn,t,dt);
+
+      }
+
+      t += dt;
 
     }
   }
@@ -254,14 +339,14 @@ SEXP euler_model_simulator (SEXP func,
   SEXP X, pindex, sindex, cindex, zindex;
   int *sidx, *pidx, *cidx, *zidx;
   SEXP fn, Pnames, Cnames;
-  int do_euler = 1;
+  int meth = 0;
 
   dim = INTEGER(GET_DIM(xstart)); nvar = dim[0]; nrep = dim[1];
   dim = INTEGER(GET_DIM(params)); npar = dim[0];
   dim = INTEGER(GET_DIM(covar)); covlen = dim[0]; covdim = dim[1];
   ntimes = LENGTH(times);
 
-  if (*(INTEGER(AS_INTEGER(method)))) do_euler = 0;
+  meth = *(INTEGER(AS_INTEGER(method))); // 0 = Euler, 1 = one-step, 2 = fixed step
 
   PROTECT(VNAMES = GET_ROWNAMES(GET_DIMNAMES(xstart))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
@@ -335,14 +420,22 @@ SEXP euler_model_simulator (SEXP func,
 
   if (use_native) GetRNGstate();
 
-  if (do_euler) {
+  switch (meth) {
+  case 0:
     euler_simulator(ff,REAL(X),REAL(xstart),REAL(times),REAL(params),
 		    ndim,REAL(dt),sidx,pidx,cidx,zidx,
 		    REAL(tcovar),REAL(covar));
-  } else {
+    break;
+  case 1:
     onestep_simulator(ff,REAL(X),REAL(xstart),REAL(times),REAL(params),
 		      ndim,sidx,pidx,cidx,zidx,
 		      REAL(tcovar),REAL(covar));
+    break;
+  case 2:
+    discrete_time_simulator(ff,REAL(X),REAL(xstart),REAL(times),REAL(params),
+			    ndim,REAL(dt),sidx,pidx,cidx,zidx,
+			    REAL(tcovar),REAL(covar));
+    break;
   }
   
   if (use_native) PutRNGstate();

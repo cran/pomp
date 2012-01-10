@@ -40,6 +40,9 @@
     \item{skeleton}{
       an object of class \dQuote{pomp.fun} which encodes the deterministic skeleton.
     }
+    \item{skelmap.delta.t}{
+      a floating-point number indicating the size of timestep associated with one iteration of the deterministic skeleton when the latter is a map.
+    }
     \item{initializer}{
       Function of prototype \code{initializer(params,t0,\dots)} which gives a vector of initial conditions when given a vector of parameters, \code{params}, and a time \code{t0}.
     }
@@ -55,6 +58,9 @@
     \item{obsnames, statenames, paramnames, covarnames}{
       Names of observables, state variables, parameters, and covariates, respectively.
       These are used to make the interface with native routines more robust.
+    }
+    \item{zeronames}{
+      Names of accumulator variables.
     }
     \item{par.trans, par.untrans}{
       The forward and inverse parameter transformations.

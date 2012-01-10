@@ -11,6 +11,7 @@ setClass(
                         rmeasure = 'pomp.fun',
                         skeleton.type = 'character',
                         skeleton = 'pomp.fun',
+                        skelmap.delta.t = 'numeric',
                         initializer = 'function',
                         states = 'array',
                         params = 'numeric',
@@ -20,6 +21,7 @@ setClass(
                         statenames = 'character',
                         paramnames = 'character',
                         covarnames = 'character',
+                        zeronames = 'character',
                         par.trans = 'function',
                         par.untrans = 'function',
                         PACKAGE = 'character',
@@ -46,8 +48,9 @@ setGeneric("pomp",function(data,...)standardGeneric("pomp"))
 pomp.constructor <- function (data, times, t0, ..., rprocess, dprocess,
                               rmeasure, dmeasure, measurement.model,
                               skeleton = NULL, skeleton.type = c("map","vectorfield"),
+                              skelmap.delta.t = 1,
                               initializer, covar, tcovar,
-                              obsnames, statenames, paramnames, covarnames,
+                              obsnames, statenames, paramnames, covarnames, zeronames,
                               PACKAGE, parameter.transform, parameter.inv.transform) {
 
   ## check the data
@@ -103,6 +106,9 @@ pomp.constructor <- function (data, times, t0, ..., rprocess, dprocess,
     dmeasure <- function(y,x,t,params,log,covars,...)stop(sQuote("dmeasure")," not specified")
   
   skeleton.type <- match.arg(skeleton.type)
+  skelmap.delta.t <- as.numeric(skelmap.delta.t)
+  if (skelmap.delta.t <= 0)
+    stop(sQuote("skelmap.delta.t")," must be positive")
 
   if (is.null(skeleton)) {
     skeleton <- pomp.fun(f=function(x,t,params,covars,...)stop(sQuote("skeleton")," not specified"))
@@ -154,6 +160,7 @@ pomp.constructor <- function (data, times, t0, ..., rprocess, dprocess,
   if (missing(statenames)) statenames <- character(0)
   if (missing(paramnames)) paramnames <- character(0)
   if (missing(covarnames)) covarnames <- character(0)
+  if (missing(zeronames)) zeronames <- character(0)
   
   if (missing(covar)) {
     covar <- matrix(data=0,nrow=0,ncol=0)
@@ -262,8 +269,9 @@ pomp.constructor <- function (data, times, t0, ..., rprocess, dprocess,
       dprocess = dprocess,
       dmeasure = dmeasure,
       rmeasure = rmeasure,
-      skeleton.type = skeleton.type,
       skeleton = skeleton,
+      skeleton.type = skeleton.type,
+      skelmap.delta.t=skelmap.delta.t,
       data = data,
       times = times,
       t0 = t0,
@@ -274,6 +282,7 @@ pomp.constructor <- function (data, times, t0, ..., rprocess, dprocess,
       statenames = statenames,
       paramnames = paramnames,
       covarnames = covarnames,
+      zeronames = zeronames,
       par.trans = par.trans,
       par.untrans = par.untrans,
       PACKAGE = PACKAGE,
@@ -360,58 +369,16 @@ measform2pomp <- function (formulae) {
        )
 }
 
-## deal with the change-over from 'skeleton.map'/'skeleton.vectorfield' to
-## 'skeleton'/'skeleton.type'
-skeleton.jigger <- function (skeleton = NULL, skeleton.type,
-                             skeleton.map = NULL, skeleton.vectorfield = NULL) {
-  if (!is.null(skeleton.map)) {
-    warning(
-            "the arguments ",sQuote("skeleton.map")," and ",sQuote("skeleton.vectorfield"),
-            " are now deprecated.",
-            " Use ",sQuote("skeleton")," and ",sQuote("skeleton.type")," instead.",
-            call.=FALSE
-            )
-    if (!is.null(skeleton.vectorfield))
-      stop("pomp error: it is not permitted to specify both ",sQuote("skeleton.vectorfield")," and ",sQuote("skeleton.map"))
-    if (!is.null(skeleton))
-      stop("pomp error: it is not permitted to specify both ",sQuote("skeleton.map")," and ",sQuote("skeleton"))
-    skeleton.type <- "map"
-    skeleton <- skeleton.map
-  }
-  if (!is.null(skeleton.vectorfield)) {
-    warning(
-            "the arguments ",sQuote("skeleton.map")," and ",sQuote("skeleton.vectorfield"),
-            " are now deprecated.",
-            " Use ",sQuote("skeleton")," and ",sQuote("skeleton.type")," instead.",
-            call.=FALSE
-            )
-    if (!is.null(skeleton.map))
-      stop("pomp error: it is not permitted to specify both ",sQuote("skeleton.vectorfield")," and ",sQuote("skeleton.map"))
-    if (!is.null(skeleton))
-      stop("pomp error: it is not permitted to specify both ",sQuote("skeleton.vectorfield")," and ",sQuote("skeleton"))
-    skeleton.type <- "vectorfield"
-    skeleton <- skeleton.vectorfield
-  }
-  list(fn=skeleton,type=skeleton.type)
-}
-
-
 setMethod(
           "pomp",
           signature(data="data.frame"),
           function (data, times, t0, ..., rprocess, dprocess,
                     rmeasure, dmeasure, measurement.model,
                     skeleton = NULL, skeleton.type = c("map","vectorfield"),
-                    skeleton.map = NULL, skeleton.vectorfield = NULL,
+                    skelmap.delta.t = 1,
                     initializer, covar, tcovar,
-                    obsnames, statenames, paramnames, covarnames,
+                    obsnames, statenames, paramnames, covarnames, zeronames,
                     PACKAGE, parameter.transform, parameter.inv.transform) {
-            skel <- skeleton.jigger(
-                                    skeleton=skeleton,
-                                    skeleton.type=skeleton.type,
-                                    skeleton.map=skeleton.map,
-                                    skeleton.vectorfield=skeleton.vectorfield
-                                    )
             pomp.constructor(
                              data=data,
                              times=times,
@@ -421,8 +388,9 @@ setMethod(
                              rmeasure=rmeasure,
                              dmeasure=dmeasure,
                              measurement.model=measurement.model,
-                             skeleton=skel$fn,
-                             skeleton.type=skel$type,
+                             skeleton=skeleton,
+                             skeleton.type=skeleton.type,
+                             skelmap.delta.t=skelmap.delta.t,
                              initializer=initializer,
                              covar=covar,
                              tcovar=tcovar,
@@ -430,6 +398,7 @@ setMethod(
                              statenames=statenames,
                              paramnames=paramnames,
                              covarnames=covarnames,
+                             zeronames=zeronames,
                              PACKAGE=PACKAGE,
                              parameter.transform=parameter.transform,
                              parameter.inv.transform=parameter.inv.transform,
@@ -444,16 +413,10 @@ setMethod(
           function (data, times, t0, ..., rprocess, dprocess,
                     rmeasure, dmeasure, measurement.model,
                     skeleton = NULL, skeleton.type = c("map","vectorfield"),
-                    skeleton.map = NULL, skeleton.vectorfield = NULL,
+                    skelmap.delta.t = 1,
                     initializer, covar, tcovar,
-                    obsnames, statenames, paramnames, covarnames,
+                    obsnames, statenames, paramnames, covarnames, zeronames,
                     PACKAGE, parameter.transform, parameter.inv.transform) {
-            skel <- skeleton.jigger(
-                                    skeleton=skeleton,
-                                    skeleton.type=skeleton.type,
-                                    skeleton.map=skeleton.map,
-                                    skeleton.vectorfield=skeleton.vectorfield
-                                    )
             pomp.constructor(
                              data=data,
                              times=times,
@@ -463,8 +426,9 @@ setMethod(
                              rmeasure=rmeasure,
                              dmeasure=dmeasure,
                              measurement.model=measurement.model,
-                             skeleton=skel$fn,
-                             skeleton.type=skel$type,
+                             skeleton=skeleton,
+                             skeleton.type=skeleton.type,
+                             skelmap.delta.t=skelmap.delta.t,
                              initializer=initializer,
                              covar=covar,
                              tcovar=tcovar,
@@ -472,6 +436,7 @@ setMethod(
                              statenames=statenames,
                              paramnames=paramnames,
                              covarnames=covarnames,
+                             zeronames=zeronames,
                              PACKAGE=PACKAGE,
                              parameter.transform=parameter.transform,
                              parameter.inv.transform=parameter.inv.transform,
@@ -487,16 +452,10 @@ setMethod(
           function (data, times, t0, ..., rprocess, dprocess,
                     rmeasure, dmeasure, measurement.model,
                     skeleton = NULL, skeleton.type = c("map","vectorfield"),
-                    skeleton.map = NULL, skeleton.vectorfield = NULL,
+                    skelmap.delta.t = 1,
                     initializer, covar, tcovar,
-                    obsnames, statenames, paramnames, covarnames,
+                    obsnames, statenames, paramnames, covarnames, zeronames,
                     PACKAGE, parameter.transform, parameter.inv.transform) {
-            skel <- skeleton.jigger(
-                                    skeleton=skeleton,
-                                    skeleton.type=skeleton.type,
-                                    skeleton.map=skeleton.map,
-                                    skeleton.vectorfield=skeleton.vectorfield
-                                    )
             pomp.constructor(
                              data=matrix(data,nrow=1,ncol=length(data)),
                              times=times,
@@ -506,8 +465,9 @@ setMethod(
                              rmeasure=rmeasure,
                              dmeasure=dmeasure,
                              measurement.model=measurement.model,
-                             skeleton=skel$fn,
-                             skeleton.type=skel$type,
+                             skeleton=skeleton,
+                             skeleton.type=skeleton.type,
+                             skelmap.delta.t=skelmap.delta.t,
                              initializer=initializer,
                              covar=covar,
                              tcovar=tcovar,
@@ -515,6 +475,7 @@ setMethod(
                              statenames=statenames,
                              paramnames=paramnames,
                              covarnames=covarnames,
+                             zeronames=zeronames,
                              PACKAGE=PACKAGE,
                              parameter.transform=parameter.transform,
                              parameter.inv.transform=parameter.inv.transform,
@@ -528,9 +489,9 @@ setMethod(
           signature(data="pomp"),
           function (data, times, t0, ..., rprocess, dprocess,
                     rmeasure, dmeasure, measurement.model,
-                    skeleton, skeleton.type,
+                    skeleton, skeleton.type, skelmap.delta.t,
                     initializer, covar, tcovar,
-                    obsnames, statenames, paramnames, covarnames,
+                    obsnames, statenames, paramnames, covarnames, zeronames,
                     PACKAGE, parameter.transform, parameter.inv.transform) {
             mmg <- !missing(measurement.model)
             dmg <- !missing(dmeasure)
@@ -559,9 +520,11 @@ setMethod(
             if (missing(statenames)) statenames <- data@statenames
             if (missing(paramnames)) paramnames <- data@paramnames
             if (missing(covarnames)) covarnames <- data@covarnames
+            if (missing(zeronames)) zeronames <- data@zeronames
             if (missing(PACKAGE)) PACKAGE <- data@PACKAGE
             if (missing(skeleton.type)) skeleton.type <- data@skeleton.type
             if (missing(skeleton)) skeleton <- data@skeleton
+            if (missing(skelmap.delta.t)) skelmap.delta.t <- data@skelmap.delta.t
 
             if (missing(parameter.transform)) {
               if (missing(parameter.inv.transform)) {
@@ -597,6 +560,7 @@ setMethod(
                            dmeasure=dmeasure,
                            skeleton=skeleton,
                            skeleton.type=skeleton.type,
+                           skelmap.delta.t=skelmap.delta.t,
                            initializer=initializer,
                            covar=covar,
                            tcovar=tcovar,
@@ -604,6 +568,7 @@ setMethod(
                            statenames=statenames,
                            paramnames=paramnames,
                            covarnames=covarnames,
+                           zeronames=zeronames,
                            PACKAGE=PACKAGE,
                            parameter.transform=par.trans,
                            parameter.inv.transform=par.untrans
@@ -613,4 +578,3 @@ setMethod(
                     )
           }
           )
-

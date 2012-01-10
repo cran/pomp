@@ -86,6 +86,11 @@ trajectory.internal <- function (object, params, times, t0, ...) {
            )
     }
 
+    znames <- object@zeronames
+
+    if (length(znames)>0)
+      x0[znames,,] <- 0
+
     X <- try(
              ode(
                  y=x0,
@@ -103,6 +108,9 @@ trajectory.internal <- function (object, params, times, t0, ...) {
 
     x <- array(data=t(X[-1,-1]),dim=c(nvar,nrep,ntimes),dimnames=list(statenames,NULL,NULL))
 
+    if (length(znames)>0)
+      x[znames,,-1] <- apply(x[znames,,,drop=FALSE],c(1,2),diff)
+    
   } else {
     
     stop("deterministic skeleton not specified")

@@ -15,29 +15,27 @@
 \usage{
 \S4method{pomp}{data.frame}(data, times, t0, \dots, rprocess, dprocess, rmeasure, dmeasure,
        measurement.model,
-       skeleton = NULL, skeleton.type = c("map","vectorfield"),
-       skeleton.map = NULL, skeleton.vectorfield = NULL,
+       skeleton = NULL, skeleton.type = c("map","vectorfield"), skelmap.delta.t = 1,
        initializer, covar, tcovar,
-       obsnames, statenames, paramnames, covarnames,
+       obsnames, statenames, paramnames, covarnames, zeronames,
        PACKAGE, parameter.transform, parameter.inv.transform)
 \S4method{pomp}{numeric}(data, times, t0, \dots, rprocess, dprocess, rmeasure, dmeasure,
        measurement.model,
-       skeleton = NULL, skeleton.type = c("map","vectorfield"),
-       skeleton.map = NULL, skeleton.vectorfield = NULL,
+       skeleton = NULL, skeleton.type = c("map","vectorfield"), skelmap.delta.t = 1,
        initializer, covar, tcovar,
-       obsnames, statenames, paramnames, covarnames,
+       obsnames, statenames, paramnames, covarnames, zeronames,
        PACKAGE, parameter.transform, parameter.inv.transform)
 \S4method{pomp}{matrix}(data, times, t0, \dots, rprocess, dprocess, rmeasure, dmeasure,
        measurement.model,
-       skeleton = NULL, skeleton.type = c("map","vectorfield"),
-       skeleton.map = NULL, skeleton.vectorfield = NULL,
+       skeleton = NULL, skeleton.type = c("map","vectorfield"), skelmap.delta.t = 1,
        initializer, covar, tcovar,
-       obsnames, statenames, paramnames, covarnames,
+       obsnames, statenames, paramnames, covarnames, zeronames,
        PACKAGE, parameter.transform, parameter.inv.transform)
 \S4method{pomp}{pomp}(data, times, t0, \dots, rprocess, dprocess, rmeasure, dmeasure,
-       measurement.model, skeleton, skeleton.type,
+       measurement.model,
+       skeleton, skeleton.type, skelmap.delta.t,
        initializer, covar, tcovar,
-       obsnames, statenames, paramnames, covarnames,
+       obsnames, statenames, paramnames, covarnames, zeronames,
        PACKAGE, parameter.transform, parameter.inv.transform)
 }
 \arguments{
@@ -91,20 +89,18 @@
     See below for an example.
     \strong{NB:} it will typically be possible to acclerate measurement model computations by writing \code{dmeasure} and/or \code{rmeasure} functions directly.
   }
-  \item{skeleton, skeleton.type, skeleton.map, skeleton.vectorfield}{
+  \item{skeleton, skeleton.type, skelmap.delta.t}{
     The function \code{skeleton} specifies the deterministic skeleton of the unobserved Markov process.
     If we are dealing with a discrete-time Markov process, its deterministic skeleton is a map: indicate this by specifying \code{skeleton.type="map"}.
     If we are dealing with a continuous-time Markov process, its deterministic skeleton is a vectorfield: indicate this by specifying \code{skeleton.type="vectorfield"}.
+
     The skeleton function can be specified in one of two ways:
     (1) as an \R function of prototype \code{skeleton(x,t,params,\dots)} that evaluates the deterministic skeleton at state \code{x} and time \code{t} given the parameters \code{params}, or
     (2) as the name of a native (compiled) routine with prototype \dQuote{pomp_skeleton} as defined in the header file \dQuote{pomp.h}.
     If the deterministic skeleton depends on covariates, the optional argument \code{covars} will be filled with interpolated values of the covariates at the time \code{t}.
-    
-    For compatibility with older versions (<0.37-1), one can specify \code{skeleton.map} or \code{skeleton.vectorfield}.
-    Specifying \code{skeleton.map=X} is equivalent to \code{skeleton=X} and \code{skeleton.type="map"}.
-    Specifying \code{skeleton.vectorfield=X} is equivalent to \code{skeleton=X} and \code{skeleton.type="vectorfield"}.
-    A dynamical system cannot be both discrete and continuous, so specifying both \code{skeleton.map} and \code{skeleton.vectorfield} generates an error.
-    Use of these arguments generates a warning; in future releases, these arguments will be removed.
+
+    With a discrete-time skeleton, the default assumption is that time advances 1 unit per iteration of the map;
+    to change this, set \code{skelmap.delta.t} to the appropriate time-step.
   }
   \item{initializer}{
     optional function of prototype \code{initializer(params,t0,\dots)} that yields initial conditions for the state process when given a vector, \code{params}, of parameters.
@@ -125,7 +121,11 @@
     These are only used in the event that one or more of the basic functions (\code{rprocess}, \code{dprocess}, \code{rmeasure}, \code{dmeasure}, \code{skeleton}) are defined using native routines.
     In that case, these name vectors are matched against the corresponding names and the indices of the names are passed to the native routines.
     Using this facility allows one to write one or more of \code{rprocess}, \code{dprocess}, \code{rmeasure}, \code{dmeasure}, \code{skeleton} in native code in a way that does not depend on the order of states, parameters, and covariates at run time.
-    See the \dQuote{advanced_topic_in_pomp} vignette for more on this topic and examples.
+    See the \dQuote{Advanced topics in pomp} vignette for more on this topic and examples.
+  }
+  \item{zeronames}{
+    Optional character vector specifying the names of accumulator variables.
+    See the \dQuote{Advanced topics in pomp} vignette for a discussion of this.
   }
   \item{PACKAGE}{
     An optional string giving the name of the dynamically loaded library in which any native routines are to be found.
@@ -163,11 +163,17 @@
   To use the plugins, consult the help documentation (\code{?\link{plugins}}) and the vignettes.
 
   It is anticipated that, in specific cases, it will be possible to obtain increased computational efficiency by writing custom versions of \code{rprocess} and/or \code{dprocess}.
-  See the \dQuote{Advanced Topics in pomp} vignette for a discussion of this.
+  See the \dQuote{Advanced topics in pomp} vignette for a discussion of this.
   If such custom versions are desired, the following describes how each of these functions should be written in this case.
   \describe{
     \item{\code{rprocess}}{
-      if provided, must have at least the following arguments:
+      In general, the specification of \code{rprocess} can be somewhat nontrivial:
+      for this reason, \code{\link{plugins}} have been developed to streamline this process for the user.
+      Currently, if one's process model evolves in discrete time or one is willing to make such an approximation (e.g., via an Euler approximation), then the \code{\link{euler.sim}} or \code{\link{onestep.sim}} plugin is available.
+      For exact simulation of certain continuous-time Markov chains, an implementation of Gillespie's algorithm is available (see \code{\link{gillespie.sim}}).
+      To use the plugins, consult the help documentation (\code{?\link{plugins}}) and the vignettes.
+
+      If the plugins are not used \code{rprocess} must have at least the following arguments:
       \code{xstart}, \code{times}, \code{params}, and \code{\dots}.
       It can also take additional arguments.
       It is guaranteed that these will be filled with the corresponding elements the user has included as additional arguments in the construction of the \code{pomp} object.
@@ -196,7 +202,12 @@
 	}
     }
     \item{\code{dprocess}}{
-      if provided, must have at least the following arguments:
+      In general, the specification of \code{dprocess} can be somewhat nontrivial:
+      for this reason, \code{\link{plugins}} have been developed to streamline this process for the user.
+      Currently, if one's process model evolves in discrete time or one is willing to make such an approximation (e.g., via an Euler approximation), then the \code{\link{onestep.dens}} plugin for \code{dprocess} is available.
+      To use the plugins, consult the help documentation (\code{?\link{plugins}}) and the vignettes.
+
+      If the plugins are not used, \code{dprocess} must have at least the following arguments:
       \code{x}, \code{times}, \code{params}, \code{log}, and \code{\dots}.
       It may take additional arguments.
       It is guaranteed that these will be filled with the corresponding elements the user has included as additional arguments in the construction of the \code{pomp} object.
