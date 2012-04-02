@@ -2,7 +2,7 @@
 
 simulate.internal <- function (object, nsim = 1, seed = NULL, params,
                                states = FALSE, obs = FALSE,
-                               times, t0, ...) {
+                               times, t0, as.data.frame = FALSE, ...) {
 
   if (missing(times))
     times <- time(object,t0=FALSE)
@@ -14,6 +14,10 @@ simulate.internal <- function (object, nsim = 1, seed = NULL, params,
   else
     t0 <- as.numeric(t0)
   
+  obs <- as.logical(obs)
+  states <- as.logical(states)
+  as.data.frame <- as.logical(as.data.frame)
+
   if (missing(params))
     params <- coef(object)
   
@@ -50,6 +54,56 @@ simulate.internal <- function (object, nsim = 1, seed = NULL, params,
 
   if (!is.null(seed)) {                 # restore the RNG state
     assign('.Random.seed',save.seed,envir=.GlobalEnv)
+  }
+
+  if (as.data.frame) {
+    if (obs && states) {
+      dm <- dim(retval$obs)
+      nsim <- dm[2]
+      ntimes <- dm[3]
+      nm <- rownames(retval$obs)
+      dim(retval$obs) <- c(dm[1],prod(dm[-1]))
+      rownames(retval$obs) <- nm
+      dm <- dim(retval$states)
+      nm <- rownames(retval$states)
+      dim(retval$states) <- c(dm[1],prod(dm[-1]))
+      rownames(retval$states) <- nm
+      retval <- cbind(
+                      as.data.frame(t(retval$obs)),
+                      as.data.frame(t(retval$states))
+                      )
+      retval$sim <- seq_len(nsim)
+      retval$time <- rep(times,each=nsim)
+      retval <- retval[order(retval$sim,retval$time),]
+    } else if (obs || states) {
+      dm <- dim(retval)
+      nsim <- dm[2]
+      ntimes <- dm[3]
+      nm <- rownames(retval)
+      dim(retval) <- c(dm[1],prod(dm[-1]))
+      rownames(retval) <- nm
+      retval <- as.data.frame(t(retval))
+      retval$sim <- seq_len(nsim)
+      retval$time <- rep(times,each=nsim)
+      retval <- retval[order(retval$sim,retval$time),]
+    } else {
+      nsim <- length(retval)
+      if (nsim > 1) {
+        retval <- lapply(
+                         seq_len(nsim),
+                         function (k) {
+                           x <- as.data.frame(retval[[k]])
+                           x$sim <- as.integer(k)
+                           x
+                         }
+                         )
+        retval <- do.call(rbind,retval)
+      } else {
+        retval <- as.data.frame(retval)
+        retval$sim <- 1
+      }
+    }
+    
   }
 
   retval

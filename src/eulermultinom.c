@@ -4,7 +4,6 @@
 
 #include "pomp_internal.h"
 
-// simulate Euler-multinomial transitions
 void reulermultinom (int m, double size, double *rate, double dt, double *trans) {
   double p = 0.0;
   int j, k;
@@ -84,15 +83,19 @@ double deulermultinom (int m, double size, double *rate, double dt, double *tran
 void reulermultinom_multi (int *n, int *ntrans, double *size, double *rate, double *dt, double *trans) {
   int k;
   int m = *ntrans;
-  for (k = 0; k < *n; k++)
-    reulermultinom(*ntrans,*size,rate,*dt,&trans[k*m]);
+  for (k = 0; k < *n; k++) {
+    reulermultinom(*ntrans,*size,rate,*dt,trans);
+    trans += m;
+  }
 }
 
 void deulermultinom_multi (int *n, int *ntrans, double *size, double *rate, double *dt, double *trans, int *give_log, double *f) {
   int k;
   int m = *ntrans;
-  for (k = 0; k < *n; k++)
-    f[k] = deulermultinom(*ntrans,*size,rate,*dt,&trans[k*m],*give_log);
+  for (k = 0; k < *n; k++) {
+    f[k] = deulermultinom(*ntrans,*size,rate,*dt,trans,*give_log);
+    trans += m;
+  }
 }
 
 SEXP R_Euler_Multinom (SEXP n, SEXP size, SEXP rate, SEXP dt) {
@@ -134,3 +137,31 @@ SEXP D_Euler_Multinom (SEXP x, SEXP size, SEXP rate, SEXP dt, SEXP log) {
   UNPROTECT(nprotect);
   return f;
 }
+
+// This function draws a random increment of a gamma whitenoise process.
+// This will have expectation=dt and variance=(sigma^2*dt)
+// If dW = rgammawn(sigma,dt), then 
+// mu dW/dt is a candidate for a random rate process within an
+// Euler-multinomial context, i.e., 
+// E[mu*dW] = mu*dt and Var[mu*dW] = mu*sigma^2*dt
+SEXP R_GammaWN (SEXP n, SEXP sigma, SEXP deltat) {
+  int nprotect = 0;
+  int k, nval, nsig, ndt;
+  double *x, *sig, *dt;
+  SEXP ans;
+  PROTECT(n = AS_INTEGER(n)); nprotect++;
+  nval = INTEGER(n)[0];
+  PROTECT(sigma = AS_NUMERIC(sigma)); nprotect++;
+  nsig = LENGTH(sigma);
+  sig = REAL(sigma);
+  PROTECT(deltat = AS_NUMERIC(deltat)); nprotect++;
+  ndt = LENGTH(deltat);
+  dt = REAL(deltat);
+  PROTECT(ans = NEW_NUMERIC(nval)); nprotect++;
+  x = REAL(ans);
+  for (k = 0; k < nval; k++) 
+    x[k] = rgammawn(sig[k%nsig],dt[k%ndt]);
+  UNPROTECT(nprotect);
+  return ans;
+}
+

@@ -2,18 +2,13 @@
 
 ## functions to extract or call the components of a "pomp" object
 setGeneric("data.array",function(object,...)standardGeneric("data.array"))
-
 setGeneric("obs",function(object,...)standardGeneric("obs"))
-
 setGeneric("time<-",function(object,...,value)standardGeneric("time<-"))  
-
 setGeneric("coef<-",function(object,...,value)standardGeneric("coef<-"))
-
 setGeneric("states",function(object,...)standardGeneric("states"))
-
 setGeneric("timezero",function(object,...)standardGeneric("timezero"))
-
 setGeneric("timezero<-",function(object,...,value)standardGeneric("timezero<-"))
+setGeneric("partrans",function(object,params,dir=c("forward","inverse"),...)standardGeneric("partrans"))
 
 ## 'coerce' method: allows for coercion of a "pomp" object to a data-frame
 setAs(
@@ -38,6 +33,20 @@ setAs(
       )
 
 as.data.frame.pomp <- function (x, row.names, optional, ...) as(x,"data.frame")
+
+## parameter transformations
+pomp.transform <- function (object, params, dir = c("forward","inverse"), ...) {
+  if (!object@has.trans) return(params)
+  dir <- match.arg(dir)
+  tfunc <- switch(
+                  dir,
+                  forward=get.pomp.fun(object@par.trans),
+                  inverse=get.pomp.fun(object@par.untrans)
+                  )
+  .Call(do_partrans,object,params,tfunc)
+}
+
+setMethod("partrans","pomp",pomp.transform)
 
 ## a simple method to extract the data array
 setMethod(
@@ -167,59 +176,32 @@ setMethod(
           }
           )
 
-pomp.transform <- function (object, params, dir = c("forward","inverse")) {
-  dir <- match.arg(dir)
-  r <- length(dim(params))
-  nm <- if (r>0) rownames(params) else names(params)
-  tfunc <- switch(
-                  dir,
-                  forward=function (x) do.call(object@par.trans,c(list(x),object@userdata)),
-                  inverse=function (x) do.call(object@par.untrans,c(list(x),object@userdata))
-                  )
-  if (r > 1) {
-    retval <- apply(params,seq.int(from=2,to=r),tfunc)
-    no.names <- is.null(rownames(retval))
-  } else {
-    retval <- tfunc(params)
-    no.names <- is.null(names(retval))
-  }
-  if (no.names)
-    switch(
-           dir,
-           forward=stop(
-             "invalid ",sQuote("pomp")," object: ",
-             sQuote("parameter.transform")," must return a named numeric vector"
-             ),
-           inverse=stop(
-             "invalid ",sQuote("pomp")," object: ",
-             sQuote("parameter.inv.transform")," must return a named numeric vector"
-             )
-           )
-  retval
-}
-
 ## extract the coefficients
 setMethod(
           "coef",
           "pomp",
           function (object, pars, transform = FALSE, ...) {
-            if (transform) 
-              params <- pomp.transform(object,params=object@params,dir="inverse")
-            else
-              params <- object@params
-            if (missing(pars))
-              pars <- names(params)
-            else {
-              excl <- setdiff(pars,names(params))
-              if (length(excl)>0) {
-                stop(
-                     "in ",sQuote("coef"),": name(s) ",
-                     paste(sQuote(excl),collapse=","),
-                     " correspond to no parameter(s)"
-                     )
+            if (length(object@params)>0) {
+              if (transform) 
+                params <- partrans(object,params=object@params,dir="inverse")
+              else
+                params <- object@params
+              if (missing(pars))
+                pars <- names(params)
+              else {
+                excl <- setdiff(pars,names(params))
+                if (length(excl)>0) {
+                  stop(
+                       "in ",sQuote("coef"),": name(s) ",
+                       paste(sQuote(excl),collapse=","),
+                       " correspond to no parameter(s)"
+                       )
+                }
               }
+              params[pars]
+            } else {
+              numeric(0)
             }
-            params[pars]
           }
           )
 
@@ -229,14 +211,16 @@ setMethod(
           "pomp",
           function (object, pars, transform = FALSE, ..., value) {
             if (missing(pars)) {          ## replace the whole params slot with 'value'
-              if (transform) 
-                value <- pomp.transform(object,params=value,dir="forward")
-              pars <- names(value)
-              if (is.null(pars)) {
-                if (transform)
-                  stop(sQuote("parameter.transform(value)")," must be a named vector")
-                else
-                  stop(sQuote("value")," must be a named vector")
+              if (length(value)>0) {
+                if (transform) 
+                  value <- partrans(object,params=value,dir="forward")
+                pars <- names(value)
+                if (is.null(pars)) {
+                  if (transform)
+                    stop(sQuote("parameter.transform(value)")," must be a named vector")
+                  else
+                    stop(sQuote("value")," must be a named vector")
+                }
               }
               object@params <- value
             } else { ## replace or append only the parameters named in 'pars'
@@ -246,14 +230,12 @@ setMethod(
                         " names of ",sQuote("value")," are being discarded",
                         call.=FALSE
                         )
-##              if (length(pars)!=length(value))
-##                stop(sQuote("pars")," and ",sQuote("value")," must be of equal length")
               if (length(object@params)==0) { ## no pre-existing 'params' slot
                 val <- numeric(length(pars))
                 names(val) <- pars
                 val[] <- value
                 if (transform)
-                  value <- pomp.transform(object,params=val,dir="forward")
+                  value <- partrans(object,params=val,dir="forward")
                 object@params <- value
               } else { ## pre-existing params slot
                 params <- coef(object,transform=transform)
@@ -273,7 +255,7 @@ setMethod(
                 }
                 params[pars] <- val
                 if (transform)
-                  params <- pomp.transform(object,params=params,dir="forward")
+                  params <- partrans(object,params=params,dir="forward")
                 object@params <- params
               }
             }

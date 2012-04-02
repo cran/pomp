@@ -1,6 +1,6 @@
 
-R version 2.13.1 (2011-07-08)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.14.2 (2012-02-29)
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
 
@@ -27,7 +27,7 @@ Loading required package: deSolve
 > 
 > set.seed(3434388L)
 > 
-> pmat <- do.call(cbind,rep(list(coef(po)),3))
+> pmat <- parmat(coef(po),3)
 > sims <- simulate(po,states=T,obs=T,params=pmat)
 > 
 > dp <- dprocess(po,x=sims$states,times=time(po),params=pmat,log=T)
@@ -37,4 +37,18 @@ Loading required package: deSolve
 [1] -47.20607 -37.35755 -46.26917
 > apply(dm,1,sum)
 [1] -850.6711 -616.1925 -993.1957
+> 
+> dp1 <- dprocess(po,x=sims$states,times=time(po),params=coef(po),log=T)
+> dm1 <- dmeasure(po,x=sims$states,y=obs(po),times=time(po),params=coef(po),log=T)
+> stopifnot(identical(dp,dp1))
+> stopifnot(identical(dm,dm1))
+> 
+> x <- simulate(po,states=T,params=coef(po))
+> dp2 <- dprocess(po,x=x,times=time(po),params=coef(po),log=T)
+> dp3 <- dprocess(po,x=x,times=time(po),params=pmat,log=T)
+> stopifnot(identical(rbind(dp2,dp2,dp2),dp3))
+> 
+> dm2 <- dmeasure(po,x=x,y=obs(po),times=time(po),params=coef(po),log=T)
+> dm3 <- dmeasure(po,x=x,y=obs(po),times=time(po),params=pmat,log=T)
+> stopifnot(identical(rbind(dm2,dm2,dm2),dm3))
 > 

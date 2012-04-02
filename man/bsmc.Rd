@@ -2,6 +2,10 @@
 \alias{bsmc}
 \alias{bsmc-pomp}
 \alias{bsmc,pomp-method}
+\alias{$,bsmcd.pomp-method}
+\alias{$-bsmcd.pomp}
+\alias{plot,bsmcd.pomp-method}
+\alias{plot-bsmcd.pomp}
 \title{Liu and West Bayesian Particle Filter}
 \description{
   Generates draws from the posterior distribution for the parameters using the Liu and West algorithm.
@@ -10,7 +14,8 @@
 \usage{
 \S4method{bsmc}{pomp}(object, params, Np, est, smooth = 0.1,
      ntries = 1, tol = 1e-17, lower = -Inf, upper = Inf, seed = NULL,
-     verbose = getOption("verbose"), max.fail = 0, \dots)
+     verbose = getOption("verbose"), max.fail = 0,
+     transform = FALSE, \dots)
 }
 \arguments{
 \item{object}{
@@ -63,12 +68,18 @@
     The maximum number of filtering failures allowed.
     If the number of filtering failures exceeds this number, execution will terminate with an error.
   }
+  \item{transform}{
+    logical;
+    if \code{TRUE}, the algorithm operates on the transformed scale.
+  }
   \item{\dots}{
     currently ignored.
   }
 }
 \value{
-  A list with the following elements:
+  An object of class \dQuote{bsmcd.pomp}.
+  The \dQuote{params} slot of this object will hold the parameter posterior means.
+  The slots of this class include:
   \item{post}{
     A matrix containing draws from the approximate posterior distribution.
   }
@@ -77,9 +88,6 @@
   }
   \item{eff.sample.size}{
     A vector containing the effective number of particles at each time point.
-  }
-  \item{cond.loglik}{
-    A vector containing the conditional log likelihoods at each time point.
   }
   \item{smooth}{
     The smoothing parameter used (see above).
@@ -92,8 +100,11 @@
   \item{nfail}{
     The number of filtering failures encountered.
   }
-  \item{loglik}{
-    The estimated log-likelihood.
+  \item{cond.log.evidence}{
+    A vector containing the conditional log evidence scores at each time point.
+  }
+  \item{log.evidence}{
+    The estimated log evidence.
   }
   \item{weights}{
     The resampling weights for each particle.

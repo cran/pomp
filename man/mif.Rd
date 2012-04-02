@@ -10,7 +10,6 @@
 \alias{continue}
 \alias{continue,mif-method}
 \alias{continue-mif}
-%%\alias{mif.profile.design}
 \title{The MIF algorithm}
 \description{
   The MIF algorithm for estimating the parameters of a partially-observed Markov process.
@@ -19,22 +18,24 @@
 mif(object, \dots)
 \S4method{mif}{pomp}(object, Nmif = 1, start, pars, ivps = character(0),
     particles, rw.sd, Np, ic.lag, var.factor, cooling.factor,
-    weighted = TRUE, tol = 1e-17, max.fail = 0,
-    verbose = getOption("verbose"), \dots)
+    weighted, method = c("mif","unweighted","fp"),
+    tol = 1e-17, max.fail = 0,
+    verbose = getOption("verbose"), transform = FALSE, \dots)
 \S4method{mif}{pfilterd.pomp}(object, Nmif = 1, start, pars, ivps = character(0),
     particles, rw.sd, Np, ic.lag, var.factor, cooling.factor,
-    weighted = TRUE, tol, max.fail = 0,
-    verbose = getOption("verbose"), \dots)
+    weighted, method = c("mif","unweighted","fp"),
+    tol, max.fail = 0,
+    verbose = getOption("verbose"), transform = FALSE, \dots)
 \S4method{mif}{mif}(object, Nmif, start, pars, ivps,
     particles, rw.sd, Np, ic.lag, var.factor, cooling.factor,
-    weighted = TRUE, tol, max.fail = 0,
-    verbose = getOption("verbose"), \dots)
+    weighted, method = c("mif","unweighted","fp"),
+    tol, max.fail = 0,
+    verbose = getOption("verbose"), transform, \dots)
 \S4method{continue}{mif}(object, Nmif = 1, start, pars, ivps,
     particles, rw.sd, Np, ic.lag, var.factor, cooling.factor,
-    weighted = TRUE, tol, max.fail = 0,
-    verbose = getOption("verbose"), \dots)
-%%mif.profile.design(object, profile, lower, upper, nprof, ivps, rw.sd,
-%%                   Np, ic.lag, var.factor, cooling.factor, \dots)
+    weighted, method = c("mif","unweighted","fp"),
+    tol, max.fail = 0, verbose = getOption("verbose"),
+    transform, \dots)
 }
 \arguments{
   \item{object}{
@@ -98,10 +99,15 @@ mif(object, \dots)
     a positive number not greater than 1;
     the exponential cooling factor, \code{alpha}.
   }
-  \item{weighted}{
-    logical; if TRUE, the MIF update (a weighted average) is used.
-    If FALSE, the MIF update is not used;
-    instead, an unweighed average of the filtering means is used for the update.
+  \item{method, weighted}{
+    \code{method} sets the update rule used in the algorithm.
+    \code{method="mif"} uses the iterated filtering update rule (Ionides 2006, 2011);
+    \code{method="unweighted"} updates the parameter to the unweighted average of the filtering means of the parameters at each time;
+    \code{method="fp"} updates the parameter to the filtering mean at the end of the time series.
+    \code{weighted} is logical.
+    This argument is deprecated and will be removed in a future release.
+    \code{weighted=TRUE} is equivalent to \code{method="mif"};
+    \code{weighted=FALSE} is equivalent to \code{method="unweighted"}.
   }
   \item{tol}{
     numeric scalar; particles with log likelihood below \code{tol} are considered to be \dQuote{lost}.
@@ -114,14 +120,10 @@ mif(object, \dots)
   \item{verbose}{
     logical; if TRUE, print progress reports.
   }
-%   \item{lower, upper, nprof}{
-%     used in specifying the profile calculation.
-%     See \code{\link{profile.design}} for details.
-%   }
-%   \item{profile}{
-%     named list of numeric vectors.
-%     The profile calculation will fix parameters at all possible combinations of the parameters in \code{profile}.
-%   }
+  \item{transform}{
+    logical;
+    if \code{TRUE}, optimization is performed on the transformed scale.
+  }
   \item{\dots}{
     additional arguments.
     Currently, these are ignored.
@@ -145,13 +147,6 @@ mif(object, \dots)
   Note the implication that, when \code{mif} is used in this way on a time series any longer than \code{ic.lag}, unnecessary work is done.
   If the time series in \code{object} is longer than \code{ic.lag}, consider replacing \code{object} with \code{window(object,end=ic.lag)}. 
 }
-% \section{Likelihood profiles using MIF}{
-%   The function \code{mif.profile.design} sets up a MIF likelihood-profile calculation.
-%   It returns a list of lists, each one of which contains a \code{mif} object.
-%   Running \code{mif} or \code{continue} on each of these will maximize the likelihood over the desired parameters, while holding others fixed.
-%   Each \code{mif} calculation is independent of the others: the computation is therefore readily parallelized.
-%   The list returned by \code{mif.profile.design} will have one element for every row in \code{do.call(expand.grid,profile)}.
-% }
 \section{Details}{
   If \code{particles} is not specified, the default behavior is to draw the particles from a multivariate normal distribution.
   \strong{It is the user's responsibility to ensure that, if the optional \code{particles} argument is given, that the \code{particles} function satisfies the following conditions:}
@@ -174,6 +169,10 @@ mif(object, \dots)
   E. L. Ionides, C. Bret\\'o, & A. A. King,
   Inference for nonlinear dynamical systems,
   Proc. Natl. Acad. Sci. U.S.A., 103:18438--18443, 2006.
+
+  E. L. Ionides, A. Bhadra, Y. Atchad{\\'e}, & A. A. King,
+  Iterated filtering,
+  Annals of Statistics, 39:1776--1802, 2011.
 
   A. A. King, E. L. Ionides, M. Pascual, and M. J. Bouma,
   Inapparent infections and cholera dynamics,

@@ -44,7 +44,7 @@
 
 \date{\today, \pkg{pomp}~version~\Sexpr{packageDescription("pomp",fields="Version")}}
 
-\SweaveOpts{echo=T,results=verbatim,print=F,eps=F,pdf=T,keep.source=T}
+\SweaveOpts{echo=T,results=verbatim,print=F,eps=F,pdf=T,keep.source=T,resolution=100}
 
 \begin{document}
 
@@ -388,31 +388,19 @@ pomp(
      statenames=c("S","I","R","cases","W"),
      ## the order of the parameters assumed in the native routines:
      paramnames=c(
-       "gamma","mu","iota","beta1","beta.sd",
+       "gamma","mu","iota","logbeta1","beta.sd",
        "pop","rho","nbasis","degree","period"
        ), 
      ## designate 'cases' as an accumulator variable
      ## i.e., set it to zero after each observation
      zeronames=c("cases"),      
      comp.names=c("S","I","R"),
-     to.log.transform=c(
-       "gamma","mu","iota",
-       "beta1","beta2","beta3","beta.sd",
-       "rho",
-       "S.0","I.0","R.0"
-       ),
-     parameter.transform=function (params, to.log.transform, ...) {
-       params[to.log.transform] <- log(params[to.log.transform])
-       params
-     },
-     parameter.inv.transform=function (params, to.log.transform, ...) {
-       params[to.log.transform] <- exp(params[to.log.transform])
-       params
-     },
+     parameter.transform="_sir_par_trans",
+     parameter.inv.transform="_sir_par_untrans",
      initializer=function(params, t0, comp.names, ...) {
        ic.names <- paste(comp.names,".0",sep="")
        snames <- c("S","I","R","cases","W")
-       fracs <- exp(params[ic.names])
+       fracs <- params[ic.names]
        x0 <- numeric(length(snames))
        names(x0) <- snames
        x0[comp.names] <- round(params['pop']*fracs/sum(fracs))
@@ -449,14 +437,14 @@ Let's specify some parameters, simulate, and compute a deterministic trajectory:
 <<sir-sim>>=
 params <- c(
             gamma=26,mu=0.02,iota=0.01,
-            beta1=1200,beta2=1800,beta3=600,
+            logbeta1=log(1200),logbeta2=log(1800),logbeta3=log(600),
             beta.sd=1e-3,                      
             pop=2.1e6,
             rho=0.6,
             S.0=26/1200,I.0=0.001,R.0=1-0.001-26/1200
             )                                                     
 
-sir <- simulate(sir,params=c(log(params),nbasis=3,degree=3,period=1),seed=3493885L)
+sir <- simulate(sir,params=c(params,nbasis=3,degree=3,period=1),seed=3493885L)
 sims <- simulate(sir,nsim=10,obs=T)
 traj <- trajectory(sir,hmax=1/52)
 @ 
@@ -518,7 +506,7 @@ It takes initial conditions (which need not correspond to the zero-time \code{t0
 The initial states and parameters must be matrices, and they are checked for commensurability.
 The method returns a rank-3 array containing simulated state trajectories, sampled at the times specified.
 <<>>=
-x <- rprocess(ou2,xstart=x0,times=time(ou2,t0=T),params=as.matrix(true.p))
+x <- rprocess(ou2,xstart=x0,times=time(ou2,t0=T),params=true.p)
 dim(x)
 x[,,1:5]
 @ 
@@ -530,7 +518,7 @@ Note also that \verb+x[,,1]+ is identical to \verb+xstart+.
 The \code{rmeasure} method gives access to the measurement model simulator:
 <<>>=
 x <- x[,,-1,drop=F]
-y <- rmeasure(ou2,x=x,times=time(ou2),params=as.matrix(true.p))
+y <- rmeasure(ou2,x=x,times=time(ou2),params=true.p)
 dim(y)
 y[,,1:5]
 @ 
@@ -539,12 +527,12 @@ y[,,1:5]
 
 The \code{dmeasure} and \code{dprocess} methods give access to the measurement and process model densities, respectively.
 <<>>=
-fp <- dprocess(ou2,x=x,times=time(ou2),params=as.matrix(true.p))
+fp <- dprocess(ou2,x=x,times=time(ou2),params=true.p)
 dim(fp)
 fp[,36:40]
 @ 
 <<>>=
-fm <- dmeasure(ou2,y=y[,1,],x=x,times=time(ou2),params=as.matrix(true.p))
+fm <- dmeasure(ou2,y=y[,1,],x=x,times=time(ou2),params=true.p)
 dim(fm)
 fm[,36:40]
 @ 
@@ -554,7 +542,7 @@ All of these are to be preferred to direct access to the slots of the \code{pomp
 
 There are a number of example \code{pomp} objects included with the package.
 These can be found by running
-<<all-data-loaable,eval=F>>=
+<<all-data-loadable,eval=F>>=
 data(package="pomp")
 @ 
 The \R\ scripts that generated these are included in the \code{data-R} directory of the installed package.

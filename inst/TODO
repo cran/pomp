@@ -1,30 +1,40 @@
-* unit tests for 'sannbox'
+* put BSMC example into the intro vignette
 
-* Create objective functions for 'probe.match', 'traj.match', and
-   'spect.match' so that  users can roll their own optimization
-   routines.  Use 'nloptr' as the target optimizer package?
+* effects of replacing 'sample.int' with systematic resampling inside 'bsmc'
+
+* sorting vs no-sorting systematic resampling algorithm?
+
+* native C routine for vectorfield evaluation inside lsoda
+
+* parameter transformations: put 'transform' option into each estimation routine
+  (spect.match)
+
+* unit tests for above
+
+* unit tests for 'sannbox'
 
 * Improve 'pmcmc' to take advantage of all particles.
 
 * Partial rejection control for 'pfilter'?
 
-* Better documentation/rationalization for 'zeronames'.
+* Adaptive particle numbers in pfilter.
 
 * It might be possible to make the writing of basic model functions
-   using R expressions rather than functions.
+   using R expressions rather than functions....
 
-* Write 'plot' method for 'pfilterd.pomp' objects.  This would display
-  effective sample size, conditional log likelihood, filter means,
-  prediction variances, prediction means?
+* Write 'plot' and 'print' methods for 'pfilterd.pomp' objects.  
+  This would display effective sample size, conditional log likelihood, filter means, prediction variances, prediction means?
 
 * Add plugin for adaptive tau leaping algorithm.
 
 * Parallel 'pfilter' algorithm.
 
-* Add LPA model example.
+* Add LPA model examples.
+
+* Add BBS example.
+
+* SDE examples.
 
 * Extended Kalman filter.
 
 * Plugin for compartmental models.
-
-* Adaptive particle numbers in pfilter.
