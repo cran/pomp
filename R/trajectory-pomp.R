@@ -12,8 +12,8 @@ trajectory.internal <- function (object, params, times, t0, as.data.frame = FALS
 
   as.data.frame <- as.logical(as.data.frame)
 
-if (length(times)==0)
-    stop("if ",sQuote("times")," is empty, there is no work to do",call.=FALSE)
+  if (length(times)==0)
+    stop(sQuote("times")," is empty, there is no work to do",call.=FALSE)
   
   if (any(diff(times)<0))
     stop(sQuote("times")," must be a nondecreasing sequence of times",call.=FALSE)
@@ -23,7 +23,7 @@ if (length(times)==0)
   else
     t0 <- as.numeric(t0)
   
-    if (t0>times[1])
+  if (t0>times[1])
     stop("the zero-time ",sQuote("t0")," must occur no later than the first observation",call.=FALSE)
   ntimes <- length(times)
   
@@ -33,22 +33,11 @@ if (length(times)==0)
       stop("trajectory error: ",sQuote("params")," must be supplied",call.=FALSE)
     }
   }
-  nrep <- NCOL(params)
-  if (is.null(dim(params))) {
-    params <- matrix(
-                     params,
-                     nrow=length(params),
-                     ncol=nrep,
-                     dimnames=list(
-                       names(params),
-                       NULL
-                       )
-                     )
-  }
+  params <- as.matrix(params)
+  nrep <- ncol(params)
   paramnames <- rownames(params)
   if (is.null(paramnames))
     stop("trajectory error: ",sQuote("params")," must have rownames",call.=FALSE)
-  params <- as.matrix(params)
 
   x0 <- init.state(object,params=params,t0=t0)
   nvar <- nrow(x0)
@@ -56,10 +45,13 @@ if (length(times)==0)
   dim(x0) <- c(nvar,nrep,1)
   dimnames(x0) <- list(statenames,NULL,NULL)
   
+  znames <- object@zeronames
+  if (length(znames)>0) x0[znames,,] <- 0
+
   type <- object@skeleton.type          # map or vectorfield?
   
   if (is.na(type))
-    stop("trajectory error: no skeleton specified",call.=FALSE)
+    stop("trajectory error: 'skeleton.type' unspecified",call.=FALSE)
 
   if (type=="map") {
 
@@ -68,37 +60,17 @@ if (length(times)==0)
   } else if (type=="vectorfield") {
 
     skel <- get.pomp.fun(object@skeleton)
-
-    ## vectorfield function (RHS of ODE) in 'deSolve' format
-    vf.eval <- function (t, y, ...) {
-      list(
-           .Call(
-                 do_skeleton,
-                 object,
-                 x=array(
-                   data=y,
-                   dim=c(nvar,nrep,1),
-                   dimnames=list(statenames,NULL,NULL)
-                   ),
-                 t=t,
-                 params=params,
-                 skel=skel
-                 ),
-           NULL
-           )
-    }
-
-    znames <- object@zeronames
-
-    if (length(znames)>0)
-      x0[znames,,] <- 0
+    .Call(pomp_desolve_init,object,params,skel,statenames,nvar,nrep);
 
     X <- try(
              ode(
                  y=x0,
                  times=c(t0,times),
-                 func=vf.eval,
                  method="lsoda",
+                 func="pomp_vf_eval",
+                 dllname="pomp",
+                 initfunc=NULL,
+                 parms=NULL,
                  ...
                  ),
              silent=FALSE
@@ -110,15 +82,15 @@ if (length(times)==0)
 
     x <- array(data=t(X[-1,-1]),dim=c(nvar,nrep,ntimes),dimnames=list(statenames,NULL,NULL))
     
-    if (length(znames)>0)
-      x[znames,,-1] <- apply(x[znames,,,drop=FALSE],c(1,2),diff)
-    
   } else {
     
     stop("deterministic skeleton not specified")
 
   }
 
+  if (length(znames)>0)
+    x[znames,,-1] <- apply(x[znames,,,drop=FALSE],c(1,2),diff)
+    
   if (as.data.frame) {
     x <- lapply(
                 seq_len(ncol(x)),
