@@ -15,20 +15,22 @@
 # define MATCH_CHAR_TO_ROWNAMES(X,N,A) (match_char_to_names(GET_ROWNAMES(GET_DIMNAMES(X)),(N),(A)))
 
 // lookup-table structure, as used internally
-struct lookup_table {
+typedef struct lookup_table {
   int length, width;
   int index;
   double *x;
   double *y;
-};
+} lookup_table;
 
 // routine to compute number of discrete-time steps to take.
 // used by plugins in 'euler.c' and map iterator in 'trajectory.c'
 int num_map_steps (double t1, double t2, double dt);
+int num_euler_steps (double t1, double t2, double *dt);
 
 // simple linear interpolation of the lookup table (with derivative if desired)
 // setting dydt = 0 in the call to 'table_lookup' will bypass computation of the derivative
 void table_lookup (struct lookup_table *tab, double x, double *y, double *dydt);
+struct lookup_table make_covariate_table (SEXP object, int *ncovars);
 
 // bspline.c
 SEXP bspline_basis(SEXP x, SEXP degree, SEXP knots);
@@ -38,8 +40,9 @@ SEXP bspline_basis_function(SEXP x, SEXP i, SEXP degree, SEXP knots);
 SEXP sobol_sequence(SEXP dim);
 
 // pomp_fun.c
-SEXP pomp_fun_handler (SEXP pfun, int *use_native);
+SEXP pomp_fun_handler (SEXP pfun, int *mode);
 SEXP get_pomp_fun (SEXP pfun);
+SEXP unpack_pomp_fun (SEXP pfunlist, int *mode);
 
 // lookup_table.c
 SEXP lookup_in_table (SEXP ttable, SEXP xtable, SEXP t);
@@ -58,7 +61,21 @@ SEXP do_rmeasure (SEXP object, SEXP x, SEXP times, SEXP params, SEXP fun);
 
 // skeleton.c
 SEXP do_skeleton (SEXP object, SEXP x, SEXP t, SEXP params, SEXP fun);
+void eval_skeleton_native (double *f, double *time, double *x, double *p,
+			   int nvars, int npars, int ncovars, int ntimes, 
+			   int nrepx, int nrepp, int nreps, 
+			   int *sidx, int *pidx, int *cidx,
+			   lookup_table *covar_table,
+			   pomp_skeleton *fun, SEXP args);
+void eval_skeleton_R (double *f, double *time, double *x, double *p,
+		      SEXP fcall, SEXP rho, SEXP Snames,
+		      double *tp, double *xp, double *pp, double *cp,
+		      int nvars, int npars, int ntimes,
+		      int nrepx, int nrepp, int nreps, lookup_table *covar_table);
 
+//userdata.c
+void set_pomp_userdata (SEXP object);
+void unset_pomp_userdata (void);
 
 static R_INLINE SEXP makearray (int rank, int *dim) {
   int nprotect = 0;
@@ -109,6 +126,18 @@ static R_INLINE SEXP match_char_to_names (SEXP x, int n, char **names) {
     idx[k] -= 1;
   }
   UNPROTECT(nprotect);
+  return index;
+}
+
+static R_INLINE SEXP name_index (SEXP names, SEXP object, const char *slot) {
+  SEXP slotnames, index;
+  PROTECT(slotnames = GET_SLOT(object,install(slot)));
+  if (LENGTH(slotnames) > 0) {
+    PROTECT(index = matchnames(names,slotnames));
+  } else {
+    PROTECT(index = NEW_INTEGER(0));
+  }
+  UNPROTECT(2);
   return index;
 }
 
@@ -217,6 +246,29 @@ static R_INLINE double expit (double x) {
 
 static R_INLINE double logit (double x) {
   return log(x/(1-x));
+}
+
+static R_INLINE SEXP getListElement (SEXP list, const char *str)
+{
+  SEXP elmt = R_NilValue;
+  SEXP names = getAttrib(list,R_NamesSymbol);
+  for (R_len_t i = 0; i < length(list); i++)
+    if(strcmp(CHAR(STRING_ELT(names,i)),str) == 0) {
+      elmt = VECTOR_ELT(list,i);
+      break;
+    }
+  return elmt;
+}
+
+static R_INLINE SEXP getPairListElement (SEXP list, const char *name)
+{
+  const char *tag;
+  while (list != R_NilValue) {
+    tag = CHAR(PRINTNAME(TAG(list)));
+    if (strcmp(tag,name)==0) break;
+    list = CDR(list);
+  }
+  return CAR(list);
 }
 
 #ifdef __cplusplus

@@ -4,129 +4,29 @@
 #include <Rmath.h>
 #include <Rdefines.h>
 #include <Rinternals.h>
+#include <R_ext/Rdynload.h>
 
 #include "pomp_internal.h"
-
-static void dens_meas (pomp_measure_model_density *f,
-		       double *lik, double *y, 
-		       double *x, double *times, double *params, 
-		       int *give_log, int *ndim,
-		       int *obsindex, int *stateindex, int *parindex, int *covindex,
-		       double *time_table, double *covar_table)
-{
-  double t, *lp, *xp, *pp, *yp;
-  int nvar = ndim[0];
-  int npar = ndim[1];
-  int nrepp = ndim[2];
-  int nrepx = ndim[3];
-  int ntimes = ndim[4];
-  int covlen = ndim[5];
-  int covdim = ndim[6];
-  int nobs = ndim[7];
-  double covar_fn[covdim];
-  int nrep;
-  int k, p;
-  
-  // set up the covariate table
-  struct lookup_table covariate_table = {covlen, covdim, 0, time_table, covar_table};
-
-  nrep = (nrepp > nrepx) ? nrepp : nrepx;
-  
-  for (k = 0; k < ntimes; k++) { // loop over times
-
-    R_CheckUserInterrupt();	// check for user interrupt
-
-    t = times[k];
-    yp = &y[nobs*k];
-
-    // interpolate the covar functions for the covariates
-    if (covdim > 0) 
-      table_lookup(&covariate_table,t,covar_fn,0);
-    
-    for (p = 0; p < nrep; p++) { // loop over replicates
-      
-      lp = &lik[p+nrep*k];
-      xp = &x[nvar*((p%nrepx)+nrepx*k)];
-      pp = &params[npar*(p%nrepp)];
-
-      (*f)(lp,yp,xp,pp,*give_log,obsindex,stateindex,parindex,covindex,covdim,covar_fn,t);
-      
-    }
-  }
-}
-
-// these global objects will pass the needed information to the user-defined function
-// each of these is allocated once, globally, and refilled many times
-static SEXP _pomp_dmeas_Yvec;	// observable vector
-static SEXP _pomp_dmeas_Xvec;	// state variable vector
-static SEXP _pomp_dmeas_Pvec;	// parameter vector
-static SEXP _pomp_dmeas_Cvec;	// covariate vector
-static SEXP _pomp_dmeas_time;	// time
-static int  _pomp_dmeas_nvar;	// number of state variables
-static int  _pomp_dmeas_npar;	// number of parameters
-static int  _pomp_dmeas_nobs;	// number of observables
-static SEXP _pomp_dmeas_envir;	// function's environment
-static SEXP _pomp_dmeas_fcall;	// function call
-
-#define YVEC    (_pomp_dmeas_Yvec)
-#define XVEC    (_pomp_dmeas_Xvec)
-#define PVEC    (_pomp_dmeas_Pvec)
-#define CVEC    (_pomp_dmeas_Cvec)
-#define TIME    (_pomp_dmeas_time)
-#define NVAR    (_pomp_dmeas_nvar)
-#define NPAR    (_pomp_dmeas_npar)
-#define NOBS    (_pomp_dmeas_nobs)
-#define RHO     (_pomp_dmeas_envir)
-#define FCALL   (_pomp_dmeas_fcall)
-
-// this is the measurement pdf evaluated when the user supplies an R function
-// (and not a native routine)
-// Note that obsindex, stateindex, parindex, covindex are ignored.
-static void default_meas_dens (double *lik, double *y, double *x, double *p, int give_log,
-			       int *obsindex, int *stateindex, int *parindex, int *covindex,
-			       int covdim, double *covar, double t)
-{
-  int nprotect = 0;
-  int k;
-  double *xp;
-  SEXP ans;
-  xp = REAL(YVEC);
-  for (k = 0; k < NOBS; k++) xp[k] = y[k];
-  xp = REAL(XVEC);
-  for (k = 0; k < NVAR; k++) xp[k] = x[k];
-  xp = REAL(PVEC);
-  for (k = 0; k < NPAR; k++) xp[k] = p[k];
-  xp = REAL(CVEC);
-  for (k = 0; k < covdim; k++) xp[k] = covar[k];
-  xp = REAL(TIME);
-  xp[0] = t;
-  PROTECT(ans = AS_NUMERIC(eval(FCALL,RHO))); nprotect++; // evaluate the call
-  if (LENGTH(ans) != 1)
-    error("dmeasure error: user 'dmeasure' must return a scalar");
-  xp = REAL(ans);
-  *lik = *xp;
-  UNPROTECT(nprotect);
-}
 
 SEXP do_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP params, SEXP log, SEXP fun)
 {
   int nprotect = 0;
-  int *dim, nvars, npars, nrepsp, nrepsx, nreps, ntimes, covlen, covdim, nobs;
-  int ndim[7];
-  SEXP F, fn;
-  SEXP tcovar, covar;
-  SEXP statenames, paramnames, covarnames, obsnames;
-  SEXP sindex, pindex, cindex, oindex;
-  int *sidx, *pidx, *cidx, *oidx;
-  SEXP Xnames, Ynames, Pnames, Cnames;
-  int use_native;
-  int nstates, nparams, ncovars, nobsers;
+  int mode = -1;
+  int give_log;
+  int ntimes, nvars, npars, ncovars, nreps, nrepsx, nrepsp, nobs;
+  SEXP Snames, Pnames, Cnames, Onames;
+  SEXP tvec, xvec, yvec, pvec, cvec;
+  SEXP fn, fcall, rho, ans;
+  SEXP F;
+  int *sidx = 0, *pidx = 0, *cidx = 0, *oidx = 0;
+  int *dim;
+  struct lookup_table covariate_table;
   pomp_measure_model_density *ff = NULL;
 
   PROTECT(times = AS_NUMERIC(times)); nprotect++;
-  ntimes = LENGTH(times);
+  ntimes = length(times);
   if (ntimes < 1)
-    error("dmeasure error: no work to do");
+    error("dmeasure error: length('times') = 0, no work to do");
 
   PROTECT(y = as_matrix(y)); nprotect++;
   dim = INTEGER(GET_DIM(y));
@@ -151,114 +51,184 @@ SEXP do_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP params, SEXP log
   if ((nreps % nrepsp != 0) || (nreps % nrepsx != 0))
     error("dmeasure error: larger number of replicates is not a multiple of smaller");
 
-  PROTECT(tcovar =  GET_SLOT(object,install("tcovar"))); nprotect++;
-  PROTECT(covar =  GET_SLOT(object,install("covar"))); nprotect++;
-  PROTECT(obsnames =  GET_SLOT(object,install("obsnames"))); nprotect++;
-  PROTECT(statenames =  GET_SLOT(object,install("statenames"))); nprotect++;
-  PROTECT(paramnames =  GET_SLOT(object,install("paramnames"))); nprotect++;
-  PROTECT(covarnames =  GET_SLOT(object,install("covarnames"))); nprotect++;
-  nobsers = LENGTH(obsnames);
-  nstates = LENGTH(statenames);
-  nparams = LENGTH(paramnames);
-  ncovars = LENGTH(covarnames);
-
-  dim = INTEGER(GET_DIM(covar)); covlen = dim[0]; covdim = dim[1];
-  PROTECT(Ynames = GET_ROWNAMES(GET_DIMNAMES(y))); nprotect++;
-  PROTECT(Xnames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
+  PROTECT(Onames = GET_ROWNAMES(GET_DIMNAMES(y))); nprotect++;
+  PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
-  PROTECT(Cnames = GET_COLNAMES(GET_DIMNAMES(covar))); nprotect++;
+  PROTECT(Cnames = GET_COLNAMES(GET_DIMNAMES(GET_SLOT(object,install("covar"))))); nprotect++;
+    
+  give_log = *(INTEGER(log));
 
-  PROTECT(fn = VECTOR_ELT(fun,0)); nprotect++;
-  use_native = INTEGER(VECTOR_ELT(fun,1))[0];
+  // set up the covariate table
+  covariate_table = make_covariate_table(object,&ncovars);
 
-  switch (use_native) {
-  case 0:			// use R function
-    ff = (pomp_measure_model_density *) default_meas_dens;
-    PROTECT(RHO = (CLOENV(fn))); nprotect++;
-    NVAR = nvars;			// for internal use
-    NPAR = npars;			// for internal use
-    NOBS = nobs;			// for internal use
-    PROTECT(TIME = NEW_NUMERIC(1)); nprotect++;	// for internal use
-    PROTECT(YVEC = NEW_NUMERIC(nobs)); nprotect++; // for internal use
-    PROTECT(XVEC = NEW_NUMERIC(nvars)); nprotect++; // for internal use
-    PROTECT(PVEC = NEW_NUMERIC(npars)); nprotect++; // for internal use
-    PROTECT(CVEC = NEW_NUMERIC(covdim)); nprotect++; // for internal use
-    SET_NAMES(YVEC,Ynames); // make sure the names attribute is copied
-    SET_NAMES(XVEC,Xnames); // make sure the names attribute is copied
-    SET_NAMES(PVEC,Pnames); // make sure the names attribute is copied
-    SET_NAMES(CVEC,Cnames); // make sure the names attribute is copied
+  // vector for interpolated covariates
+  PROTECT(cvec = NEW_NUMERIC(ncovars)); nprotect++;
+  SET_NAMES(cvec,Cnames);
+
+  // extract the user-defined function
+  PROTECT(fn = unpack_pomp_fun(fun,&mode)); nprotect++;
+
+  // extract 'userdata' as pairlist
+  PROTECT(fcall = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;
+
+  // first do setup
+  switch (mode) {
+
+  case 0:			// R function
+
+    PROTECT(tvec = NEW_NUMERIC(1)); nprotect++;
+    PROTECT(xvec = NEW_NUMERIC(nvars)); nprotect++;
+    PROTECT(yvec = NEW_NUMERIC(nobs)); nprotect++;
+    PROTECT(pvec = NEW_NUMERIC(npars)); nprotect++;
+    SET_NAMES(xvec,Snames);
+    SET_NAMES(yvec,Onames);
+    SET_NAMES(pvec,Pnames);
+
     // set up the function call
-    PROTECT(FCALL = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;
-    PROTECT(FCALL = LCONS(CVEC,FCALL)); nprotect++;
-    SET_TAG(FCALL,install("covars"));
-    PROTECT(FCALL = LCONS(AS_LOGICAL(log),FCALL)); nprotect++;
-    SET_TAG(FCALL,install("log"));
-    PROTECT(FCALL = LCONS(PVEC,FCALL)); nprotect++;
-    SET_TAG(FCALL,install("params"));
-    PROTECT(FCALL = LCONS(TIME,FCALL)); nprotect++;
-    SET_TAG(FCALL,install("t"));
-    PROTECT(FCALL = LCONS(XVEC,FCALL)); nprotect++;
-    SET_TAG(FCALL,install("x"));
-    PROTECT(FCALL = LCONS(YVEC,FCALL)); nprotect++;
-    SET_TAG(FCALL,install("y"));
-    PROTECT(FCALL = LCONS(fn,FCALL)); nprotect++;
+    PROTECT(fcall = LCONS(cvec,fcall)); nprotect++;
+    SET_TAG(fcall,install("covars"));
+    PROTECT(fcall = LCONS(AS_LOGICAL(log),fcall)); nprotect++;
+    SET_TAG(fcall,install("log"));
+    PROTECT(fcall = LCONS(pvec,fcall)); nprotect++;
+    SET_TAG(fcall,install("params"));
+    PROTECT(fcall = LCONS(tvec,fcall)); nprotect++;
+    SET_TAG(fcall,install("t"));
+    PROTECT(fcall = LCONS(xvec,fcall)); nprotect++;
+    SET_TAG(fcall,install("x"));
+    PROTECT(fcall = LCONS(yvec,fcall)); nprotect++;
+    SET_TAG(fcall,install("y"));
+    PROTECT(fcall = LCONS(fn,fcall)); nprotect++;
+
+    // get the function's environment
+    PROTECT(rho = (CLOENV(fn))); nprotect++;
+
     break;
-  case 1:			// use native routine
+
+  case 1:			// native code
+
+    // construct state, parameter, covariate, observable indices
+    oidx = INTEGER(PROTECT(name_index(Onames,object,"obsnames"))); nprotect++;
+    sidx = INTEGER(PROTECT(name_index(Snames,object,"statenames"))); nprotect++;
+    pidx = INTEGER(PROTECT(name_index(Pnames,object,"paramnames"))); nprotect++;
+    cidx = INTEGER(PROTECT(name_index(Cnames,object,"covarnames"))); nprotect++;
+
+    // address of native routine
     ff = (pomp_measure_model_density *) R_ExternalPtrAddr(fn);
+
     break;
+
   default:
-    error("unrecognized 'use' slot in 'dmeasure'");
+
+    error("unrecognized 'mode' slot in 'dmeasure'");
     break;
+
   }
 
-  ndim[0] = nreps; ndim[1] = ntimes;
-  PROTECT(F = makearray(2,ndim)); nprotect++; 
-
-  if (nobsers > 0) {
-    PROTECT(oindex = matchnames(Ynames,obsnames)); nprotect++;
-    oidx = INTEGER(oindex);
-  } else {
-    oidx = 0;
+  // create array to store results
+  {
+    int dim[2] = {nreps, ntimes};
+    PROTECT(F = makearray(2,dim)); nprotect++; 
   }
 
-  if (nstates > 0) {
-    PROTECT(sindex = matchnames(Xnames,statenames)); nprotect++;
-    sidx = INTEGER(sindex);
-  } else {
-    sidx = 0;
+  // now do computations
+  switch (mode) {
+
+  case 0:			// R function
+
+    {
+      int first = 1;
+      double *ys = REAL(y);
+      double *xs = REAL(x);
+      double *ps = REAL(params);
+      double *cp = REAL(cvec);
+      double *tp = REAL(tvec);
+      double *xp = REAL(xvec);
+      double *yp = REAL(yvec);
+      double *pp = REAL(pvec);
+      double *ft = REAL(F);
+      double *time = REAL(times);
+      int j, k;
+
+      for (k = 0; k < ntimes; k++, time++, ys += nobs) { // loop over times
+
+	R_CheckUserInterrupt();	// check for user interrupt
+
+	*tp = *time;				   // copy the time
+	table_lookup(&covariate_table,*time,cp,0); // interpolate the covariates
+
+	memcpy(yp,ys,nobs*sizeof(double));
+
+	for (j = 0; j < nreps; j++, ft++) { // loop over replicates
+
+	  // copy the states and parameters into place
+	  memcpy(xp,&xs[nvars*((j%nrepsx)+nrepsx*k)],nvars*sizeof(double));
+	  memcpy(pp,&ps[npars*(j%nrepsp)],npars*sizeof(double));
+	
+	  if (first) {
+	    // evaluate the call
+	    PROTECT(ans = eval(fcall,rho)); nprotect++;
+	    if (LENGTH(ans) != 1)
+	      error("user 'dmeasure' return a vector of length %d when it should return a scalar",LENGTH(ans));
+
+	    *ft = *(REAL(AS_NUMERIC(ans)));
+
+	    first = 0;
+
+	  } else {
+
+	    *ft = *(REAL(AS_NUMERIC(eval(fcall,rho))));
+
+	  }
+
+	}
+      }
+    }
+
+    break;
+
+  case 1:			// native code
+
+    set_pomp_userdata(fcall);
+
+    {
+      double *yp = REAL(y);
+      double *xs = REAL(x);
+      double *ps = REAL(params);
+      double *cp = REAL(cvec);
+      double *ft = REAL(F);
+      double *time = REAL(times);
+      double *xp, *pp;
+      int j, k;
+
+      for (k = 0; k < ntimes; k++, time++, yp += nobs) { // loop over times
+	
+	R_CheckUserInterrupt();	// check for user interrupt
+
+	// interpolate the covar functions for the covariates
+	table_lookup(&covariate_table,*time,cp,0);
+
+	for (j = 0; j < nreps; j++, ft++) { // loop over replicates
+	
+	  xp = &xs[nvars*((j%nrepsx)+nrepsx*k)];
+	  pp = &ps[npars*(j%nrepsp)];
+	
+	  (*ff)(ft,yp,xp,pp,give_log,oidx,sidx,pidx,cidx,ncovars,cp,*time);
+      
+	}
+      }
+    }
+
+    unset_pomp_userdata();
+
+    break;
+
+  default:
+
+    error("unrecognized 'mode' slot in 'dmeasure'");
+    break;
+
   }
 
-  if (nparams > 0) {
-    PROTECT(pindex = matchnames(Pnames,paramnames)); nprotect++;
-    pidx = INTEGER(pindex);
-  } else {
-    pidx = 0;
-  }
-  
-  if (ncovars > 0) {
-    PROTECT(cindex = matchnames(Cnames,covarnames)); nprotect++;
-    cidx = INTEGER(cindex);
-  } else {
-    cidx = 0;
-  }
-  
-  ndim[0] = nvars; ndim[1] = npars; ndim[2] = nrepsp; ndim[3] = nrepsx; ndim[4] = ntimes; 
-  ndim[5] = covlen; ndim[6] = covdim; ndim[7] = nobs;
-
-  dens_meas(ff,REAL(F),REAL(y),REAL(x),REAL(times),REAL(params),INTEGER(log),ndim,
-	    oidx,sidx,pidx,cidx,REAL(tcovar),REAL(covar));
-  
   UNPROTECT(nprotect);
   return F;
 }
-
-#undef YVEC
-#undef XVEC
-#undef PVEC
-#undef CVEC
-#undef TIME
-#undef NVAR
-#undef NPAR
-#undef NOBS
-#undef RHO
-#undef FCALL

@@ -1,4 +1,40 @@
 NEWS
+0.42-1
+     o	An EXPERIMENTAL facility for constructing pomp objects out of native C routines is now included (pompBuilder).
+     	This facility is being actively developed and future changes may not be backward compatible.
+
+     o	A new facility allowing access to the 'userdata' slot of a pomp object from compiled 'rprocess', 'rmeasure', 'dprocess', 'dmeasure', 'skeleton', and 'partrans' codes is now available.
+     	Calls to the new C routines 'get_pomp_userdata', 'get_pomp_userdata_int', and 'get_pomp_userdata_double' allow retrieval of these elements.
+
+     o	Some of the data()-loadable examples have been reworked to make use of the above facility.
+     	The parameterization of these examples has changed.
+	These changes are not backward compatible: codes that depend on the data()-loadable examples may be broken.
+
+0.41-8
+     o	A demonstration of 'pompBuilder' has been put into the 'advanced topics' vignette.
+
+0.41-7
+     o	A bug in the 'blowflies' example has been fixed.
+     	Thanks to Greg Minshall for discovering it.
+
+0.41-6
+     o	The 'gompertz' example parameter transformations have been changed.
+     	No longer are the names of the parameter vector changed in the transformation.
+	This change is not backward-compatible, but only codes using this example are affected.
+
+     o	The 'euler.sir' and 'gillespie.sir' examples have been changed.
+     	The transmission rate beta(t) is now the arithmetic sum of the seasonality basis functions.
+	Before, it was the geometric sum.
+	R0 is now given by the arithmetic average of the beta parameters divided by (gamma+mu).
+	This change is not backward-compatible, but only codes using these examples are affected.
+
+0.41-5
+     o	An experimental facility for constructing pomp objects with native C routines is now included.
+
+0.41-4
+     o	The 'blowflies', 'euler.sir', 'gillespie.sir', 'bbs', and 'ricker' data()-loadable examples have been changed to make the parameterization simpler and more natural.
+	This change is not backward-compatible, but only codes using this example are affected.
+
 0.41-3
      o	In 'trajectory', all vectorfield and map evaluation is now done in C for speed.
      	For continuous-time dynamical systems, this gives an approximately 4-fold speedup.
@@ -6,7 +42,7 @@ NEWS
      o	Demos have been created to show some examples.
 
 0.41-2
-     o	Fix bug in 'bbs' example.
+     o	A segfault bug in 'bbs' example has been fixed.
 
      o  The posterior medians (not means) are now stored in the 'params' slot of the 'bsmcd.pomp' object.
 
@@ -14,8 +50,10 @@ NEWS
      o	New arguments in 'mif', 'nlf', 'bsmc', 'pmcmc', 'probe-match', and 'traj-match' allow the estimation to be done on a transformed parameter space.
      	When 'transform=TRUE' in these commands ('transform.params=TRUE' for 'nlf'), estimation is performed on the transformed parameter space.
 	This is described and demonstrated in the 'intro_to_pomp' vignette.
-	The data()-loadable examples have been re-implemented to make use of this facility.
+
+     o	The data()-loadable examples have been re-implemented to make use of the above-mentioned facility.
 	Note that this new functionality makes it unnecessary to "un-transform" model parameters within the user-specified 'rprocess', 'dprocess', 'rmeasure', 'dmeasure', 'skeleton', and 'initializer' codes.
+	This change is not backward-compatible, but only codes using these data()-loadable example are affected.
 
      o	The Bayesian sequential Monte Carlo command 'bsmc' now returns not a list but an object of class 'bsmcd.pomp'.
      	An experimental 'plot' method for objects of this class now exists.

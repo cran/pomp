@@ -1,5 +1,5 @@
 
-R version 2.15.0 (2012-03-30)
+R version 2.14.2 (2012-02-29)
 Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-unknown-linux-gnu (64-bit)
@@ -21,24 +21,50 @@ Loading required package: mvtnorm
 Loading required package: subplex
 Loading required package: deSolve
 > 
-> data(ricker)
-> y1 <- obs(simulate(ricker,seed=1066L))
-> r2 <- pomp(ricker,measurement.model=y~pois(lambda=N*phi))
-> coef(r2) <- coef(ricker)
-> y2 <- obs(simulate(r2,seed=1066L))
-> max(abs(y1-y2))
-[1] 0
-> r3 <- pomp(ricker,dmeasure="_ricker_poisson_dmeasure",PACKAGE="pomp")
-> coef(r3) <- coef(r2)
-> y3 <- obs(simulate(r3,seed=1066L))
-> max(abs(y1-y3))
-[1] 0
-> r4 <- pomp(r2,rmeasure="_ricker_poisson_rmeasure",PACKAGE="pomp")
-> coef(r4) <- coef(r2)
-> y4 <- obs(simulate(r4,seed=1066L))
-> max(abs(y1-y4))
-[1] 0
+> data(blowflies)
 > 
-> proc.time()
-   user  system elapsed 
-  0.432   0.036   0.491 
+> init.state(blowflies1)
+     [,1]
+N1  397.0
+N2  450.5
+N3  504.0
+N4  590.0
+N5  676.0
+N6  738.5
+N7  801.0
+N8  829.5
+N9  858.0
+N10 884.5
+N11 911.0
+N12 926.5
+N13 942.0
+N14 945.0
+N15 948.0
+R     0.0
+S     0.0
+e     0.0
+eps   0.0
+> x1 <- simulate(blowflies1)
+> f1 <- pfilter(blowflies1,Np=1000,seed=599688L)
+> logLik(f1)
+[1] -1466.694
+> 
+> init.state(blowflies2)
+    [,1]
+N1   397
+N2   504
+N3   676
+N4   801
+N5   858
+N6   911
+N7   942
+N8   948
+R      0
+S      0
+e      0
+eps    0
+> x2 <- simulate(blowflies2)
+> f2 <- pfilter(blowflies2,Np=1000,seed=599688L)
+> logLik(f2)
+[1] -1471.781
+> 
