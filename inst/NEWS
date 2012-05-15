@@ -1,4 +1,12 @@
 NEWS
+0.42-4
+     o	When 'trajectory' calls 'ode', there is a need to preserve information across calls to the vectorfield-evaluating function.
+     	The code has been modified to do this in a cleaner way.
+
+0.42-2
+     o	Several minor bugs have been fixed.
+     	See the ChangeLog for details.
+
 0.42-1
      o	An EXPERIMENTAL facility for constructing pomp objects out of native C routines is now included (pompBuilder).
      	This facility is being actively developed and future changes may not be backward compatible.
