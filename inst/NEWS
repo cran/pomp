@@ -1,4 +1,46 @@
 NEWS
+0.45-8
+     o	bug fix in 'gompertz' example.
+
+0.45-7
+     o	bug fix in 'pmcmc': Metropolis-Hastings ratio was incorrect except for flat priors!
+	
+0.45-6
+     o	a fix so that 'pompBuilder' will find 'pomp.h' header file on Windows machines.  Thanks to Dave Hayman for finding the problem.
+
+     o	new 'logmeanexp' function.
+
+     o	some reorganization of the source package structure.
+
+0.45-4
+     o	changes in the way 'reulermultinom', 'deulermultinom', 'dot_product' are exported to other packages.  Rather than just being exported as linkables, these are now also defined as static inline functions in the 'pomp.h' header.
+
+0.45-3
+     o	fix bug with 'continue' and method 'mif2'
+
+0.45-2
+     o	new method to coerce 'pfilterd.pomp' objects to data-frames.
+
+0.45-1
+     o	'profileDesign' can now handle variables of mixed type.
+
+0.44-1
+     o	New 'mif2' option for 'mif'.
+
+     o	The default behavior for 'mif' and 'pfilter' with respect to filtering failures has been changed.
+     	Before, the default behavior has been to stop with an error on the first filtering failure ('max.fail=0').
+	Now, the default is 'max.fail=Inf', i.e., an error is never triggered.
+
+     o	The implementation of MIF cooling schedules has been changed to make it more general.
+     	The cooling schedule is now specified by a 'type' and a 'fraction'.
+	Currently, supported 'cooling.type's include 'geometric' (the old behavior) and 'hyperbolic', i.e., a 1/(1+n) schedule.
+	The 'cooling.fraction' argument specifies the cooling at 50 iterations.
+	That is, if s is the intensity of the random-walk perturbation to parameters at the first iteration ('rw.sd'), then the intensity at iteration 50 is s*cooling.fraction.
+
+     o	Remove all data()-loadable pomp objects.
+	To load the prebuilt example pomp objects from previous versions, use the new 'pompExample' function.
+	E.g., instead of 'data(euler.sir)', do 'pompExample("euler.sir")'.
+
 0.43-4
      o	Clean up tests.
 

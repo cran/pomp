@@ -96,7 +96,7 @@ undefine <- list(
                  )
 
 header <- list(
-               file="/* pomp model file: {%name%} */\n\n#include <pomp.h>\n#include <R_ext/Rdynload.h>\n\n",
+               file="/* pomp model file: {%name%} */\n\n#include <{%pompheader%}>\n#include <R_ext/Rdynload.h>\n\n",
                rmeasure="\nvoid {%name%}_rmeasure (double *__y, double *__x, double *__p, int *__obsindex, int *__stateindex, int *__parindex, int *__covindex, int __ncovars, double *__covars, double t)\n{\n",
                dmeasure= "\nvoid {%name%}_dmeasure (double *__lik, double *__y, double *__x, double *__p, int give_log, int *__obsindex, int *__stateindex, int *__parindex, int *__covindex, int __ncovars, double *__covars, double t)\n{\n",
                step.fn="\nvoid {%name%}_stepfn (double *__x, const double *__p, const int *__stateindex, const int *__parindex, const int *__covindex, int __covdim, const double *__covars, double t, double dt)\n{\n",
@@ -107,7 +107,6 @@ header <- list(
 
 decl <- list(
              periodic_bspline_basis_eval="\tvoid (*periodic_bspline_basis_eval)(double,double,int,int,double*);\nperiodic_bspline_basis_eval = (void (*)(double,double,int,int,double*)) R_GetCCallable(\"pomp\",\"periodic_bspline_basis_eval\");\n",
-             reulermultinom="\tvoid (*reulermultinom)(int,double,double*,double,double*);\nreulermultinom = (void (*)(int,double,double*,double,double*)) R_GetCCallable(\"pomp\",\"reulermultinom\");\n",
              get_pomp_userdata="\tconst SEXP (*get_pomp_userdata)(const char *);\npomp_get_userdata = (const SEXP (*)(const char*)) R_GetCCallable(\"pomp\",\"get_pomp_userdata\");\n",
              get_pomp_userdata_int="\tconst int * (*get_pomp_userdata_int)(const char *);\npomp_get_userdata_int = (const int *(*)(const char*)) R_GetCCallable(\"pomp\",\"get_pomp_userdata_int\");\n",
              get_pomp_userdata_double="\tconst double * (*get_pomp_userdata_double)(const char *);\npomp_get_userdata_double = (const double *(*)(const char*)) R_GetCCallable(\"pomp\",\"get_pomp_userdata_double\");\n"
@@ -149,10 +148,15 @@ pompCBuilder <- function (name, statenames, paramnames, covarnames, obsnames, rm
 
   modelfile <- paste0(name,".c")
   solib <- paste0(name,.Platform$dynlib.ext)
-
+  if (.Platform$OS.type=="unix") {
+    pompheader <- "pomp.h"
+  } else {
+    pompheader <- system.file("include/pomp.h",package="pomp")
+  }
+  
   out <- file(description=modelfile,open="w")
   
-  cat(file=out,render(header$file,name=name))
+  cat(file=out,render(header$file,name=name,pompheader=pompheader))
 
   for (f in utility.fns) {
     cat(file=out,f)

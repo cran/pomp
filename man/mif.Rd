@@ -17,25 +17,17 @@
 \usage{
 mif(object, \dots)
 \S4method{mif}{pomp}(object, Nmif = 1, start, pars, ivps = character(0),
-    particles, rw.sd, Np, ic.lag, var.factor, cooling.factor,
-    weighted, method = c("mif","unweighted","fp"),
-    tol = 1e-17, max.fail = 0,
+    particles, rw.sd, Np, ic.lag, var.factor,
+    cooling.type, cooling.fraction, cooling.factor,
+    method = c("mif","unweighted","fp","mif2"),
+    tol = 1e-17, max.fail = Inf,
     verbose = getOption("verbose"), transform = FALSE, \dots)
-\S4method{mif}{pfilterd.pomp}(object, Nmif = 1, start, pars, ivps = character(0),
-    particles, rw.sd, Np, ic.lag, var.factor, cooling.factor,
-    weighted, method = c("mif","unweighted","fp"),
-    tol, max.fail = 0,
-    verbose = getOption("verbose"), transform = FALSE, \dots)
+\S4method{mif}{pfilterd.pomp}(object, Nmif = 1, Np, tol, \dots)
 \S4method{mif}{mif}(object, Nmif, start, pars, ivps,
-    particles, rw.sd, Np, ic.lag, var.factor, cooling.factor,
-    weighted, method = c("mif","unweighted","fp"),
-    tol, max.fail = 0,
-    verbose = getOption("verbose"), transform, \dots)
-\S4method{continue}{mif}(object, Nmif = 1, start, pars, ivps,
-    particles, rw.sd, Np, ic.lag, var.factor, cooling.factor,
-    weighted, method = c("mif","unweighted","fp"),
-    tol, max.fail = 0, verbose = getOption("verbose"),
-    transform, \dots)
+    particles, rw.sd, Np, ic.lag, var.factor,
+    cooling.type, cooling.fraction,
+    method, tol, transform, \dots)
+\S4method{continue}{mif}(object, Nmif = 1, \dots)
 }
 \arguments{
   \item{object}{
@@ -89,33 +81,34 @@ mif(object, \dots)
     The \code{mif} update for initial-value parameters consists of replacing them by their filtering mean at time \code{times[ic.lag]}, where \code{times=time(object)}.
     It makes no sense to set \code{ic.lag>length(times)};
     if it is so set, \code{ic.lag} is set to \code{length(times)} with a warning.
+    For \code{method='mif2'}, the default is \code{ic.lag=length(times)}.
   }
   \item{var.factor}{
     a positive number;
     the scaling coefficient relating the width of the starting particle distribution to \code{rw.sd}.
     In particular, the width of the distribution of particles at the start of the first MIF iteration will be \code{random.walk.sd*var.factor}.
   }
-  \item{cooling.factor}{
-    a positive number not greater than 1;
-    the exponential cooling factor, \code{alpha}.
+  \item{cooling.type, cooling.fraction, cooling.factor}{
+    specifications for the cooling schedule, i.e., the manner in which the intensity of the parameter perturbations is reduced with successive filtering iterations.
+    \code{cooling.type} specifies the nature of the cooling schedule.
+    When \code{cooling.type="geometric"}, on the n-th MIF iteration, the relative perturbation intensity is \code{cooling.fraction^(n/50)}.
+    When \code{cooling.type="hyperbolic"}, on the n-th MIF iteration, the relative perturbation intensity is \code{(s+1)(s+n)}, where \code{(s+1)/(s+50)=cooling.fraction}.
+    \code{cooling.fraction} is the relative magnitude of the parameter perturbations after 50 MIF iterations.
+    \code{cooling.factor} is now deprecated:
+    to achieve the old behavior, use \code{cooling.type="geometric"} and \code{cooling.fraction=(cooling.factor)^50}.
   }
-  \item{method, weighted}{
+  \item{method}{
     \code{method} sets the update rule used in the algorithm.
     \code{method="mif"} uses the iterated filtering update rule (Ionides 2006, 2011);
     \code{method="unweighted"} updates the parameter to the unweighted average of the filtering means of the parameters at each time;
     \code{method="fp"} updates the parameter to the filtering mean at the end of the time series.
-    \code{weighted} is logical.
-    This argument is deprecated and will be removed in a future release.
-    \code{weighted=TRUE} is equivalent to \code{method="mif"};
-    \code{weighted=FALSE} is equivalent to \code{method="unweighted"}.
+    \code{method="mif2"} [EXPLAIN]
   }
   \item{tol}{
-    numeric scalar; particles with log likelihood below \code{tol} are considered to be \dQuote{lost}.
-    A filtering failure occurs when, at some time point, all particles are lost.
+    See the description under \code{\link{pfilter}}.
   }
   \item{max.fail}{
-    integer; maximum number of filtering failures permitted.
-    If the number of failures exceeds this number, execution will terminate with an error.
+    See the description under \code{\link{pfilter}}.
   }
   \item{verbose}{
     logical; if TRUE, print progress reports.
@@ -125,8 +118,7 @@ mif(object, \dots)
     if \code{TRUE}, optimization is performed on the transformed scale.
   }
   \item{\dots}{
-    additional arguments.
-    Currently, these are ignored.
+    additional arguments that override the defaults.
   }
 }
 \section{Re-running MIF Iterations}{

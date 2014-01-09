@@ -1,6 +1,5 @@
 useDynLib(			
           pomp,
-          get_pomp_fun,
           bspline_basis,
           periodic_bspline_basis,
           bspline_basis_function,
@@ -10,6 +9,7 @@ useDynLib(
           lookup_in_table,
           SSA_simulator,
           R_Euler_Multinom,D_Euler_Multinom,R_GammaWN,
+          mif_update,
           pfilter_computations,
           simulation_computations,
           iterate_map,traj_transp_and_copy,
@@ -29,6 +29,7 @@ useDynLib(
           do_init_state
           )
 
+import(methods)
 importFrom(graphics,plot)		
 importFrom(stats,simulate,time,coef,logLik,window)
 importFrom(mvtnorm,dmvnorm,rmvnorm)
@@ -62,6 +63,7 @@ exportMethods(
 
 export(
        as.data.frame.pomp,
+       as.data.frame.pfilterd.pomp,
        reulermultinom,
        deulermultinom,
        rgammawn,
@@ -79,6 +81,7 @@ export(
        compare.mif,
        nlf,
        parmat,
+       logmeanexp,
        probe.mean,
        probe.median,
        probe.var,
@@ -92,5 +95,6 @@ export(
        sannbox,
        spect.match,
        traj.match.objfun,
-       pompBuilder
+       pompBuilder,
+       pompExample
        )
