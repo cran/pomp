@@ -18,6 +18,10 @@
 #define CLIN       (p[parindex[11]])
 #define NBASIS     (p[parindex[12]])
 #define NRSTAGE    (p[parindex[13]])
+#define S0         (p[parindex[14]])
+#define I0         (p[parindex[15]])
+#define RS0        (p[parindex[16]])
+#define RL0        (p[parindex[17]])
 
 #define SUSCEP     (x[stateindex[0]])
 #define INFECT     (x[stateindex[1]])
@@ -34,8 +38,41 @@
 
 #define DATADEATHS   (y[obsindex[0]])
 
+void _cholmodel_untrans (double *pt, double *p, int *parindex) 
+{
+  int k, nrstage = (int) NRSTAGE;
+  pt[parindex[0]] = log(TAU);
+  pt[parindex[1]] = log(GAMMA);
+  pt[parindex[2]] = log(EPS);
+  pt[parindex[3]] = log(DELTA);
+  pt[parindex[4]] = log(DELTA_I);
+  pt[parindex[6]] = log(SD_BETA);
+  pt[parindex[9]] = log(ALPHA);
+  pt[parindex[10]] = log(RHO);
+  pt[parindex[11]] = logit(CLIN);
+
+  to_log_barycentric(&pt[parindex[14]],&S0,3+nrstage);
+}
+ 
+void _cholmodel_trans (double *pt, double *p, int *parindex) 
+{
+  int k, nrstage = (int) NRSTAGE;
+  pt[parindex[0]] = exp(TAU);
+  pt[parindex[1]] = exp(GAMMA);
+  pt[parindex[2]] = exp(EPS);
+  pt[parindex[3]] = exp(DELTA);
+  pt[parindex[4]] = exp(DELTA_I);
+  pt[parindex[6]] = exp(SD_BETA);
+  pt[parindex[9]] = exp(ALPHA);
+  pt[parindex[10]] = exp(RHO);
+  pt[parindex[11]] = expit(CLIN);
+
+  from_log_barycentric(&pt[parindex[14]],&S0,3+nrstage);
+}
+
 void _cholmodel_norm_rmeasure (double *y, double *x, double *p, 
-			       int *obsindex, int *stateindex, int *parindex, int *covindex,
+			       int *obsindex, int *stateindex, 
+			       int *parindex, int *covindex,
 			       int ncovars, double *covars, double t)
 {
   double v, tol = 1.0e-18;
@@ -47,8 +84,10 @@ void _cholmodel_norm_rmeasure (double *y, double *x, double *p,
   }
 }
 
-void _cholmodel_norm_dmeasure (double *lik, double *y, double *x, double *p, int give_log,
-			       int *obsindex, int *stateindex, int *parindex, int *covindex,
+void _cholmodel_norm_dmeasure (double *lik, double *y, double *x, 
+			       double *p, int give_log,
+			       int *obsindex, int *stateindex, 
+			       int *parindex, int *covindex,
 			       int ncovars, double *covars, double t)
 {
   double v, tol = 1.0e-18;
@@ -69,7 +108,8 @@ void _cholmodel_norm_dmeasure (double *lik, double *y, double *x, double *p, int
 // truncation is not used
 // instead, particles with negative states are killed
 void _cholmodel_one (double *x, const double *p, 
-		     const int *stateindex, const int *parindex, const int *covindex,
+		     const int *stateindex, const int *parindex, 
+		     const int *covindex,
 		     int covdim, const double *covar, 
 		     double t, double dt)
 {			   // implementation of the SIRS cholera model
@@ -89,33 +129,15 @@ void _cholmodel_one (double *x, const double *p,
   double beta;
   double omega;
   double dw;
-  const double *pt;
+  double *pt;
   int j;
 
-  if (!(R_FINITE(SUSCEP))) return;
-  if (!(R_FINITE(INFECT))) return;
-  if (!(R_FINITE(RSHORT))) return;
-  for (pt = &RLONG, j = 0; j < nrstage; j++) {
-    if (!(R_FINITE(pt[j]))) return;
-  }
+  if (COUNT != 0.0) return;
 
   eps = EPS*NRSTAGE;
 
-  if (!(R_FINITE(GAMMA))) return;
-  if (!(R_FINITE(eps))) return;
-  if (!(R_FINITE(RHO))) return;
-  if (!(R_FINITE(DELTA))) return;
-  if (!(R_FINITE(DELTA_I))) return;
-  if (!(R_FINITE(CLIN))) return;
-  if (!(R_FINITE(SD_BETA))) return;
-  if (!(R_FINITE(ALPHA))) return;
-  if (!(R_FINITE(BETATREND))) return;
-
   beta = exp(dot_product(nbasis,&SEASBASIS,&LOGBETA)+BETATREND*TREND);
   omega = exp(dot_product(nbasis,&SEASBASIS,&LOGOMEGA));
-
-  if (!(R_FINITE(beta))) return;
-  if (!(R_FINITE(omega))) return;
 
   dw = rnorm(0,sqrt(dt));	// white noise
 
@@ -128,37 +150,50 @@ void _cholmodel_one (double *x, const double *p,
   rsdeaths = DELTA*RSHORT;	// natural Rs deaths
   wanings = RHO*RSHORT;		// loss of immunity
 
-  for (pt = &RLONG, j = 0; j < nrstage; j++) {
-    rldeaths[j] = DELTA*pt[j];	// natural R deaths
-    passages[j+1] = eps*pt[j];	// passage to the next immunity class
+  for (pt = &RLONG, j = 0; j < nrstage; j++, pt++) {
+    rldeaths[j] = *pt*DELTA;	// natural R deaths
+    passages[j+1] = *pt*eps;	// passage to the next immunity class
   }
 
   infections = (omega+(beta+SD_BETA*dw/dt)*effI)*SUSCEP; // infection
   sdeaths = DELTA*SUSCEP;	// natural S deaths
-  if (infections > 0.0) {
-    if ((infections+sdeaths)*dt > SUSCEP) { // too many leaving S class
-      COUNT += 1.0e10;
-      return;
-    }
-  } else {
-    if ((-CLIN*infections+disease+ideaths+passages[0])*dt > INFECT) { // too many leaving I class
-      COUNT += 1.0e5;
-      return;
-    }
-    if ((-(1-CLIN)*infections+rsdeaths+wanings)*dt > RSHORT) { // too many leaving Rs class
-      COUNT += 1;
-      return;
-    }
-  }
 
   SUSCEP += (births - infections - sdeaths + passages[nrstage] + wanings)*dt;
   INFECT += (CLIN*infections - disease - ideaths - passages[0])*dt;
   RSHORT += ((1-CLIN)*infections - rsdeaths - wanings)*dt;
-  for (j = 0; j < nrstage; j++) 
-    (&RLONG)[j] += (passages[j] - passages[j+1] - rldeaths[j])*dt;
+  for (pt = &RLONG, j = 0; j < nrstage; j++, pt++) 
+    *pt += (passages[j] - passages[j+1] - rldeaths[j])*dt;
   DEATHS += disease*dt;		// cumulative deaths due to disease
   NOISE += dw;
 
+  // check for violations of positivity constraints
+  // nonzero COUNT variable signals violation
+  if (SUSCEP < 0.0) {
+    SUSCEP = 0.0; INFECT = 0.0; RSHORT = 0.0; 
+    COUNT += 1; 
+  }
+  if (INFECT < 0.0) {
+    INFECT = 0.0; SUSCEP = 0.0; 
+    COUNT += 1e3; 
+  }
+  if (RSHORT < 0.0) { 
+    RSHORT = 0.0; SUSCEP = 0.0; 
+    COUNT += 1e6; 
+  }
+  if (DEATHS < 0.0) { 
+    DEATHS = 0.0; 
+    COUNT += 1e9; 
+  }
+  for (pt = &RLONG, j = 0; j < nrstage-1; j++, pt++) {
+    if (*pt < 0.0) {
+      *pt = 0.0; *(pt+1) = 0.0;
+      COUNT += 1e12; 
+    }
+  }
+  if (*pt < 0.0) {
+    *pt = 0.0; SUSCEP = 0.0;
+    COUNT += 1e12;
+  }
 }
 
 #undef GAMMA    

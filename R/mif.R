@@ -386,8 +386,6 @@ mif.internal <- function (object, Nmif,
       )
 }
 
-setGeneric('mif',function(object,...)standardGeneric("mif"))
-
 setMethod(
           "mif",
           signature=signature(object="pomp"),
@@ -404,18 +402,19 @@ setMethod(
                     transform = FALSE,
                     ...) {
             
-            transform <- as.logical(transform)
             method <- match.arg(method)
             
             if (missing(start)) start <- coef(object)
             if (missing(rw.sd))
               stop("mif error: ",sQuote("rw.sd")," must be specified",call.=FALSE)
-            if (missing(ic.lag) && length(ivps)>0) {
-              if (method=="mif2")
-                ic.lag <- length(time(object)) # default mif2 behavior
-              else
-                stop("mif error: ",sQuote("ic.lag")," must be specified if ",sQuote("ivps"),
+            if (missing(ic.lag)) {
+              if (length(ivps)>0 && (method != "mif2")) {
+                stop("mif error: ",sQuote("ic.lag"),
+                     " must be specified if ",sQuote("ivps"),
                      " are",call.=FALSE)
+              } else {
+                ic.lag <- length(time(object))
+              }
             }
             if (missing(pars)) {
               rw.names <- names(rw.sd)[rw.sd>0]
@@ -492,7 +491,7 @@ setMethod(
           signature=signature(object="mif"),
           function (object, Nmif,
                     start,
-                    pars, ivps,
+                    ivps,
                     particles, rw.sd,
                     Np, ic.lag, var.factor,
                     cooling.type, cooling.fraction,
@@ -503,7 +502,6 @@ setMethod(
             
             if (missing(Nmif)) Nmif <- object@Nmif
             if (missing(start)) start <- coef(object)
-            if (missing(pars)) pars <- object@pars
             if (missing(ivps)) ivps <- object@ivps
             if (missing(particles)) particles <- object@particles
             if (missing(rw.sd)) rw.sd <- object@random.walk.sd
@@ -513,7 +511,6 @@ setMethod(
             if (missing(cooling.fraction)) cooling.fraction <- object@cooling.fraction
             if (missing(method)) method <- object@method
             if (missing(transform)) transform <- object@transform
-            transform <- as.logical(transform)
 
             if (missing(Np)) Np <- object@Np
             if (missing(tol)) tol <- object@tol
@@ -522,7 +519,6 @@ setMethod(
                 object=as(object,"pomp"),
                 Nmif=Nmif,
                 start=start,
-                pars=pars,
                 ivps=ivps,
                 particles=particles,
                 rw.sd=rw.sd,

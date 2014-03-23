@@ -25,6 +25,8 @@ useDynLib(
           do_dprocess,
           do_rmeasure,
           do_dmeasure,
+          do_rprior,
+          do_dprior,
           do_skeleton,
           do_init_state
           )
@@ -35,6 +37,7 @@ importFrom(stats,simulate,time,coef,logLik,window)
 importFrom(mvtnorm,dmvnorm,rmvnorm)
 importFrom(subplex,subplex)
 importFrom(deSolve,ode)
+importFrom(nloptr,nloptr)
 
 exportClasses(
               pomp,
@@ -43,22 +46,26 @@ exportClasses(
               pmcmc,
               traj.matched.pomp,
               probed.pomp,probe.matched.pomp,
-              spect.pomp,spect.matched.pomp
+              spect.pomp,spect.matched.pomp,
+              abc
               )
 
 exportMethods(
               pomp,
               plot,show,print,coerce,summary,logLik,window,"$",
               dprocess,rprocess,rmeasure,dmeasure,init.state,skeleton,
-              data.array,obs,partrans,coef,"coef<-",time,"time<-",timezero,"timezero<-",
+              dprior,rprior,
+              data.array,obs,partrans,coef,"coef<-",
+              time,"time<-",timezero,"timezero<-",
               simulate,pfilter,
               eff.sample.size,cond.logLik,
               particles,mif,continue,states,trajectory,
               pred.mean,pred.var,filter.mean,conv.rec,
-              bsmc,
-              pmcmc,dprior,
-              spect,probe,
-              probe.match,traj.match
+              bsmc,pmcmc,abc,
+              traj.match.objfun,
+              probe.match.objfun,
+              spect,probe,probe.match,
+              traj.match
               )
 
 export(
@@ -94,7 +101,6 @@ export(
        probe.marginal,
        sannbox,
        spect.match,
-       traj.match.objfun,
        pompBuilder,
        pompExample
        )

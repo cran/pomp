@@ -29,8 +29,6 @@ setClass(
            )
          )
 
-setGeneric("bsmc",function(object,...)standardGeneric("bsmc"))
-
 bsmc.internal <- function (object, params, Np, est,
                            smooth = 0.1,
                            ntries = 1,
@@ -68,6 +66,9 @@ bsmc.internal <- function (object, params, Np, est,
   if (missing(Np)) Np <- NCOL(params)
   else if (is.matrix(params)&&(Np!=ncol(params)))
     warning(sQuote("Np")," is ignored when ",sQuote("params")," is a matrix")
+
+  if ((!is.matrix(params)) && (Np > 1))
+    params <- rprior(object,params=parmat(params,Np))
   
   if (transform)
     params <- partrans(object,params,dir="inverse",

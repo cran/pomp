@@ -1,6 +1,3 @@
-## as of version 0.37-1 'pomp' is a generic function
-setGeneric("pomp",function(data,...)standardGeneric("pomp"))
-
 ## this is the initial-condition setting function that is used by default
 ## it simply finds all parameters in the vector 'params' that have a name ending in '.0'
 ## and returns a vector with their values with names stripped of '.0'
@@ -25,6 +22,8 @@ setClass(
            dprocess = 'function',
            dmeasure = 'pomp.fun',
            rmeasure = 'pomp.fun',
+           dprior = 'pomp.fun',
+           rprior = 'pomp.fun',
            skeleton.type = 'character',
            skeleton = 'pomp.fun',
            skelmap.delta.t = 'numeric',
@@ -52,6 +51,8 @@ setClass(
            dprocess=function(x,times,params,log=FALSE,...)stop(sQuote("dprocess")," not specified"),
            dmeasure=pomp.fun(),
            rmeasure=pomp.fun(),
+           dprior=pomp.fun(),
+           rprior=pomp.fun(),
            skeleton.type="map",
            skeleton=pomp.fun(),
            skelmap.delta.t=as.numeric(NA),
