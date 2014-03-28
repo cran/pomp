@@ -1,8 +1,8 @@
-27e979a8b45f53cb6c1e28d218b693d0 *DESCRIPTION
+a135782d91af95febbd7905a4bbf2680 *DESCRIPTION
 5d0e72752f7b0bb98d260ef956c21f88 *NAMESPACE
 b34c6c62b208bbfc0b644d0aca460cee *R/aaa.R
 3fa768402e11a73afcb243d9a101077c *R/abc-methods.R
-8b297ec760618df5da85b3c795ece002 *R/abc.R
+62f77adf5fab149f95015dd4e2c1e67a *R/abc.R
 84a26c9552920e388f398b2cb0e9e700 *R/authors.R
 ec1aa6209c9f64fdd69385f6f14dd749 *R/basic-probes.R
 13abb75b18d2e59b788648504745ae4e *R/bsmc.R
@@ -71,7 +71,7 @@ ae883e3c49ec6386c290ec2314b2781b *inst/O_CHANGES
 8da2afb00c9c996b167055069927d2bb *inst/doc/advanced_topics_in_pomp.pdf
 8df7105aca75f76e90da1b87ccb9e99f *inst/doc/index.html
 ce71bf41454235276c8bd3158d2d0824 *inst/doc/intro_to_pomp.pdf
-746eacef10e5e0eaad5ca777e1102e1b *inst/doc/manual.pdf
+39278732636d1d581f0cde89881cc782 *inst/doc/manual.pdf
 f65ca4a7e78164e51e61074e34fc1d50 *inst/examples/bbs.R
 3155bc4ceff9bce8e5cc3c93e87210c7 *inst/examples/blowflies.R
 73fcffa235752a8633d91d1aa63f3d54 *inst/examples/dacca.R
@@ -139,7 +139,7 @@ e8be9c64aa7b520c63a874b557b657d3 *man/trajectory-pomp.Rd
 44374e12ccddbc8b95f5e20202a0687d *src/Makevars
 64808906ce817b1b8a5f14a72aa6cdba *src/R_init_pomp.c
 05ce5eb597db370f284b759b2ece9565 *src/SSA.f90
-5205c03786edc2e2769ac7632095b56c *src/SSA_wrapper.c
+81ee1d698b5da8274855e887cc2db704 *src/SSA_wrapper.c
 149ecdbc6f53ec3071307b5c623c1b1d *src/blowfly.c
 1e5335bbef7be03be1fd9ef790e7d1c7 *src/bspline.c
 56b7aa3be981199eac5da3d6c736e285 *src/cholmodel.c
@@ -147,7 +147,7 @@ a827d5ab3d39db4b224c34c8960a6b1c *src/dmeasure.c
 ff22657d2b11e022876a4796fbc1cb8b *src/dprior.c
 b2efc42a7b07851a4e3ff2143fae74bd *src/dprocess.c
 bd100683f5548149fac0a2245cc5ff00 *src/dsobol.c
-058cd3c38722af0f1dd1dac637b82d26 *src/euler.c
+377d98fd1055741a642f8cd3d3e44c16 *src/euler.c
 41aa6771b067145d5695453a36043e95 *src/eulermultinom.c
 75d4e5b83bc144f1709a207d12dac482 *src/gompertz.c
 06ae7719bc29a67312a7cc4fa4fb489c *src/initstate.c
@@ -166,14 +166,14 @@ ac17ef0132384888155aca86e4051fdc *src/pomp_internal.h
 712280f08d74144816b3b120d8eeb5cb *src/probe_marginal.c
 2f3fa99c841f11417e87dbf1e7ba223f *src/probe_nlar.c
 a6b43a7525e326e1a5117e4cdd8c0e23 *src/ricker.c
-c649540e703121a6b2cbb0c407bb3293 *src/rmeasure.c
+bcaa2bd68c78a8cf665887215c94b970 *src/rmeasure.c
 78856d34db38ec5ae9b21dbf185ec72e *src/rprior.c
 755057be486f514bdffafea213a534f1 *src/rprocess.c
-b3f1b9c1e14e394acbd9230154902313 *src/simulate.c
+b61a1dac7bfb1978f2afd27ad9ed8497 *src/simulate.c
 27b62799fddc5618d2aed29ad3983c6f *src/sir.c
 18558d041adc8f7fd0d15e7f61b36e06 *src/skeleton.c
 557ce952eed189a3610f2bb746b08a45 *src/sobol.f
 64d6159c656724f3657e556d828e74e3 *src/synth_lik.c
-7e55a3a5b8ef99b55224c61b854dc67c *src/trajectory.c
+7edac67390501d2c37bef9b3528b5985 *src/trajectory.c
 13f807fe6273d10b151e462470268a3c *src/tsir.c
 75f44d716edf4294e916e543834a57b8 *src/userdata.c
