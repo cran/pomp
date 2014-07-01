@@ -2,9 +2,8 @@
 setClass(
          'abc',
          contains='pomp',
-         representation=representation(
+         slots=c(
            pars = 'character',
-           transform = 'logical',
            Nabc = 'integer',
            probes='list',
            scale = 'numeric',
@@ -18,14 +17,13 @@ abc.internal <- function (object, Nabc,
                           start, pars,
                           rw.sd, probes,
                           epsilon, scale,
-                          verbose, transform,
+                          verbose,
                           .ndone = 0L,
                           .getnativesymbolinfo = TRUE,
                           ...) {
 
   object <- as(object,'pomp')
   gnsi <- as.logical(.getnativesymbolinfo)
-  transform <- as.logical(transform)
   Nabc <- as.integer(Nabc)
   epsilon <- as.numeric(epsilon)
   epssq <- epsilon*epsilon
@@ -97,9 +95,12 @@ abc.internal <- function (object, Nabc,
   }
 
   theta <- start
-  log.prior <- dprior(object,params=theta,log=TRUE,
-                      .getnativesymbolinfo=gnsi)
-  ## we suppose that theta is a "match", which does the right thing for continue() and
+  log.prior <- dprior(object,params=theta,log=TRUE,.getnativesymbolinfo=gnsi)
+  if (!is.finite(log.prior))
+    stop("inadmissible value of ",sQuote("dprior"),
+         " at parameters ",sQuote("start"))
+  ## we suppose that theta is a "match",
+  ## which does the right thing for continue() and
   ## should have negligible effect unless doing many short calls to continue()
 
   conv.rec <- matrix(
@@ -134,47 +135,39 @@ abc.internal <- function (object, Nabc,
   for (n in seq_len(Nabc)) { # main loop
 
     theta.prop <- theta
+    theta.prop[pars] <- rnorm(n=length(pars),mean=theta[pars],sd=rw.sd)
+    log.prior.prop <- dprior(object,params=theta.prop,log=TRUE)
 
-    if (transform)
-      theta.prop <- partrans(object,params=theta.prop,dir='inverse',
-                             .getnativesymbolinfo=gnsi)
+    if (is.finite(log.prior.prop) &&
+        runif(1) < exp(log.prior.prop-log.prior)) {
 
-    theta.prop[pars] <- rnorm(n=length(pars),mean=theta.prop[pars],sd=rw.sd)
+      ## compute the probes for the proposed new parameter values
 
-    if (transform)
-      theta.prop <- partrans(object,params=theta.prop,dir='forward',
-                             .getnativesymbolinfo=gnsi)
+      simval <- try(
+                    .Call(
+                          apply_probe_sim,
+                          object=object,
+                          nsim=1,
+                          params=theta.prop,
+                          seed=NULL,
+                          probes=probes,
+                          datval=datval
+                          ),
+                    silent=FALSE
+                    )
 
-    gnsi <- FALSE
+      if (inherits(simval,'try-error'))
+        stop("abc error: error in ",sQuote("apply_probe_sim"),call.=FALSE)
 
-    ## compute the probes for the proposed new parameter values
-
-    simval <- try(
-                  .Call(
-                        apply_probe_sim,
-                        object=object,
-                        nsim=1,
-                        params=theta.prop,
-                        seed=NULL,
-                        probes=probes,
-                        datval=datval
-                        ),
-                  silent=FALSE
-                  )
-
-    if (inherits(simval,'try-error'))
-      stop("abc error: error in ",sQuote("apply_probe_sim"),call.=FALSE)
-
-    ## ABC update rule
-    distance <- sum(((datval-simval)/scale)^2)
-    if( (is.finite(distance)) && (distance<epssq) ){ 
-      log.prior.prop <- dprior(object,params=theta.prop,log=TRUE)
-      if (runif(1) < exp(log.prior.prop-log.prior)) {
+      ## ABC update rule
+      distance <- sum(((datval-simval)/scale)^2)
+      if( (is.finite(distance)) && (distance<epssq) ){ 
         theta <- theta.prop
         log.prior <- log.prior.prop
       }
-    }
 
+    }
+    
     ## store a record of this iteration
     conv.rec[n+1,names(theta)] <- theta
     if (verbose && (n%%5==0))
@@ -187,7 +180,6 @@ abc.internal <- function (object, Nabc,
       object,
       params=theta,
       pars=pars,
-      transform=transform,
       Nabc=Nabc,
       probes=probes,
       scale=scale,
@@ -205,7 +197,6 @@ setMethod(
                     start, pars, rw.sd,
                     probes, scale, epsilon,
                     verbose = getOption("verbose"),
-                    transform = FALSE,
                     ...) {
             
             if (missing(start))
@@ -239,8 +230,7 @@ setMethod(
                          scale=scale,
                          epsilon=epsilon,
                          rw.sd=rw.sd,
-                         verbose=verbose,
-                         transform=transform
+                         verbose=verbose
                          )
           }
           )
@@ -250,7 +240,6 @@ setMethod(
           signature=signature(object="probed.pomp"),
           function (object, probes,
                     verbose = getOption("verbose"),
-                    transform = FALSE,
                     ...) {
 
             if (missing(probes)) probes <- object@probes
@@ -258,7 +247,6 @@ setMethod(
             f(
               object=object,
               probes=probes,
-              transform=transform,
               ...
               )
           }
@@ -271,7 +259,6 @@ setMethod(
                     start, pars, rw.sd,
                     probes, scale, epsilon,
                     verbose = getOption("verbose"),
-                    transform,
                     ...) {
 
             if (missing(Nabc)) Nabc <- object@Nabc
@@ -281,7 +268,6 @@ setMethod(
             if (missing(probes)) probes <- object@probes
             if (missing(scale)) scale <- object@scale
             if (missing(epsilon)) epsilon <- object@epsilon
-            if (missing(transform)) transform <- object@transform
 
             f <- selectMethod("abc","pomp")
 
@@ -295,7 +281,6 @@ setMethod(
               scale=scale,
               epsilon=epsilon,
               verbose=verbose,
-              transform=transform,
               ...
               )
           }

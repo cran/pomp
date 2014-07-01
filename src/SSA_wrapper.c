@@ -89,16 +89,14 @@ static double default_ssa_rate_fn (int j, double t, const double *x, const doubl
 
 SEXP SSA_simulator (SEXP func, SEXP mflag, SEXP xstart, SEXP times, SEXP params, 
 		    SEXP e, SEXP vmatrix, SEXP dmatrix, SEXP tcovar, SEXP covar,
-		    SEXP statenames, SEXP paramnames, SEXP covarnames, SEXP zeronames,
-		    SEXP args, SEXP gnsi)
+		    SEXP zeronames, SEXP args, SEXP gnsi)
 {
   int nprotect = 0;
   int *dim, xdim[3];
   int nvar, nevent, npar, nrep, ntimes;
   int covlen, covdim;
-  int nstates = LENGTH(statenames);
-  int nparams = LENGTH(paramnames);
-  int ncovars = LENGTH(covarnames);
+  SEXP statenames, paramnames, covarnames;
+  int nstates, nparams, ncovars;
   int nzeros = LENGTH(zeronames);
   int use_native = 0;
   SEXP X, pindex, sindex, cindex, zindex;
@@ -114,6 +112,14 @@ SEXP SSA_simulator (SEXP func, SEXP mflag, SEXP xstart, SEXP times, SEXP params,
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(xstart))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
   PROTECT(Cnames = GET_COLNAMES(GET_DIMNAMES(covar))); nprotect++;
+
+  PROTECT(statenames = GET_SLOT(func,install("statenames"))); nprotect++;
+  PROTECT(paramnames = GET_SLOT(func,install("paramnames"))); nprotect++;
+  PROTECT(covarnames = GET_SLOT(func,install("covarnames"))); nprotect++;
+
+  nstates = LENGTH(statenames);
+  nparams = LENGTH(paramnames);
+  ncovars = LENGTH(covarnames);
 
   PROTECT(fn = pomp_fun_handler(func,gnsi,&use_native)); nprotect++;
 
@@ -151,26 +157,26 @@ SEXP SSA_simulator (SEXP func, SEXP mflag, SEXP xstart, SEXP times, SEXP params,
   PROTECT(X = makearray(3,xdim)); nprotect++;
   setrownames(X,Snames,3);
 
- if (nstates>0) {
-    PROTECT(sindex = MATCHROWNAMES(xstart,statenames)); nprotect++;
+  if (nstates>0) {
+    PROTECT(sindex = MATCHROWNAMES(xstart,statenames,"state variables")); nprotect++;
     sidx = INTEGER(sindex);
   } else {
     sidx = 0;
   }
   if (nparams>0) {
-    PROTECT(pindex = MATCHROWNAMES(params,paramnames)); nprotect++;
+    PROTECT(pindex = MATCHROWNAMES(params,paramnames,"parameters")); nprotect++;
     pidx = INTEGER(pindex);
   } else {
     pidx = 0;
   }
   if (ncovars>0) {
-    PROTECT(cindex = MATCHCOLNAMES(covar,covarnames)); nprotect++;
+    PROTECT(cindex = MATCHCOLNAMES(covar,covarnames,"covariates")); nprotect++;
     cidx = INTEGER(cindex);
   } else {
     cidx = 0;
   }
   if (nzeros>0) {
-    PROTECT(zindex = MATCHROWNAMES(xstart,zeronames)); nprotect++;
+    PROTECT(zindex = MATCHROWNAMES(xstart,zeronames,"state variables")); nprotect++;
     zidx = INTEGER(zindex);
   } else {
     zidx = 0;

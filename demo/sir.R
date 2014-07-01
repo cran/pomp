@@ -7,22 +7,23 @@ rmeas <- '
   cases = rnbinom_mu(theta,rho*incid);
 '
 
-dmeas <- '
-  lik = dnbinom_mu(cases,theta,rho*incid,give_log);
+## three basis functions
+globals <- '
+  static int nbasis = 3;
 '
 
 ## SIR process model with extra-demographic stochasticity
 ## and seasonal transmission
-step.fn <- '
-  int nrate = 6;
-  double rate[nrate];		// transition rates
-  double trans[nrate];		// transition numbers
+step.fun <- '
+  double rate[6];		// transition rates
+  double trans[6];		// transition numbers
   double beta;			// transmission rate
   double dW;			// white noise increment
   int k;
 
   // seasonality in transmission
-  beta = beta1*seas1+beta2*seas2+beta3*seas3;
+  for (k = 0, beta = 0.0; k < nbasis; k++)
+     beta += (&beta1)[k]*(&seas1)[k];
 
   // compute the environmental stochasticity
   dW = rgammawn(beta_sd,dt);
@@ -50,14 +51,14 @@ step.fn <- '
 '
 
 skel <- '
-  int nrate = 6;
-  double rate[nrate];		// transition rates
-  double term[nrate];		// transition numbers
+  double rate[6];		// transition rates
+  double term[6];		// transition numbers
   double beta;			// transmission rate
   double dW;			// white noise increment
   int k;
   
-  beta = beta1*seas1+beta2*seas2+beta3*seas3;
+  for (k = 0, beta = 0.0; k < nbasis; k++)
+     beta += (&beta1)[k]*(&seas1)[k];
 
   // compute the transition rates
   rate[0] = mu*popsize;		// birth into susceptible class
@@ -88,12 +89,12 @@ skel <- '
 ## the success of this depends on S0, I0, R0 being in
 ## adjacent memory locations, in that order
 partrans <- "
+  int k;
   Tgamma = exp(gamma);
   Tmu = exp(mu);
   Tiota = exp(iota);
-  Tbeta1 = exp(beta1);
-  Tbeta2 = exp(beta2);
-  Tbeta3 = exp(beta3);
+  for (k = 0; k < nbasis; k++)
+    (&Tbeta1)[k] = exp((&beta1)[k]);
   Tbeta_sd = exp(beta_sd);
   Trho = expit(rho);
   Ttheta = exp(theta);
@@ -101,12 +102,12 @@ partrans <- "
 "
 
 paruntrans <- "
+  int k;
   Tgamma = log(gamma);
   Tmu = log(mu);
   Tiota = log(iota);
-  Tbeta1 = log(beta1);
-  Tbeta2 = log(beta2);
-  Tbeta3 = log(beta3);
+  for (k = 0; k < nbasis; k++)
+    (&Tbeta1)[k] = log((&beta1)[k]);
   Tbeta_sd = log(beta_sd);
   Trho = logit(rho);
   Ttheta = log(theta);
@@ -128,41 +129,42 @@ cbind(
                     )
       ) -> covar
 
-pompBuilder(
-            name="SIR",
-            data=subset(
-              LondonYorke,
-              subset=town=="New York"&disease=="measles"&year>=1928&year<=1933,
-              select=c(time,cases)
-            ),
-            times="time",
-            t0=1928,
-            dmeasure=dmeas,
-            rmeasure=rmeas,
-            step.fn=step.fn,
-            step.fn.delta.t=1/52/20,
-            skeleton.type="vectorfield",
-            skeleton=skel,
-            covar=covar,
-            tcovar="time",
-            parameter.transform=partrans,
-            parameter.inv.transform=paruntrans,
-            statenames=c("S","I","R","incid","W"),
-            paramnames=c(
-              "gamma","mu","iota","beta1","beta2","beta3","beta.sd",
-              "popsize","rho","theta","S.0","I.0","R.0"
-              ), 
-            zeronames=c("incid","W"),
-            comp.names=c("S","I","R"),
-            ic.names=c("S.0","I.0","R.0"),
-            initializer=function(params, t0, comp.names, ic.names, ...) {
-              x0 <- numeric(5)
-              names(x0) <- c("S","I","R","incid","W")
-              fracs <- params[ic.names]
-              x0[comp.names] <- round(params['popsize']*fracs/sum(fracs))
-              x0
-            }
-            ) -> po
+pomp(
+     data=subset(
+       LondonYorke,
+       subset=town=="New York"&disease=="measles"&year>=1928&year<=1933,
+       select=c(time,cases)
+       ),
+     times="time",
+     t0=1928,
+     globals=globals,
+     rmeasure=Csnippet(rmeas),
+     rprocess=euler.sim(
+       step.fun=Csnippet(step.fun),
+       delta.t=1/52/20
+       ),
+     skeleton.type="vectorfield",
+     skeleton=Csnippet(skel),
+     covar=covar,
+     tcovar="time",
+     parameter.transform=Csnippet(partrans),
+     parameter.inv.transform=Csnippet(paruntrans),
+     statenames=c("S","I","R","incid","W"),
+     paramnames=c(
+       "gamma","mu","iota","beta1","beta.sd",
+       "popsize","rho","theta","S.0","I.0","R.0"
+       ), 
+     zeronames=c("incid","W"),
+     comp.names=c("S","I","R"),
+     ic.names=c("S.0","I.0","R.0"),
+     initializer=function(params, t0, comp.names, ic.names, ...) {
+       x0 <- numeric(5)
+       names(x0) <- c("S","I","R","incid","W")
+       fracs <- params[ic.names]
+       x0[comp.names] <- round(params['popsize']*fracs/sum(fracs))
+       x0
+     }
+     ) -> po
 
 coef(po) <- c(
               gamma=26,mu=0.02,iota=0.01,
@@ -188,3 +190,24 @@ toc <- Sys.time()
 print(toc-tic)
 
 plot(incid~time,data=x,col=as.factor(x$sim),pch=16)
+
+## compute the likelihood.
+## first add a dmeasure
+po <- pomp(
+           po,
+           dmeasure=Csnippet('
+  lik = dnbinom_mu(cases,theta,rho*incid,give_log);
+'
+             ),
+           statenames=c("S","I","R","incid","W"),
+           paramnames=c(
+             "gamma","mu","iota","beta1","beta.sd",
+             "popsize","rho","theta","S.0","I.0","R.0"
+             )
+           )
+
+## then run a particle filter
+tic <- Sys.time()
+logLik(pfilter(po,Np=1000))
+toc <- Sys.time()
+print(toc-tic)

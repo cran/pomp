@@ -10,12 +10,12 @@
 \alias{continue}
 \alias{continue,mif-method}
 \alias{continue-mif}
-\title{The MIF algorithm}
+\alias{mif-class}
+\title{Iterated filtering}
 \description{
-  The MIF algorithm for estimating the parameters of a partially-observed Markov process.
+  Iterated filtering algorithms for estimating the parameters of a partially-observed Markov process.
 }
 \usage{
-mif(object, \dots)
 \S4method{mif}{pomp}(object, Nmif = 1, start, pars, ivps = character(0),
     particles, rw.sd, Np, ic.lag, var.factor,
     cooling.type, cooling.fraction, cooling.factor,
@@ -34,7 +34,7 @@ mif(object, \dots)
     An object of class \code{pomp}.
   }
   \item{Nmif}{
-    The number of MIF iterations to perform.
+    The number of filtering iterations to perform.
   }
   \item{start}{
     named numerical vector;
@@ -81,7 +81,7 @@ mif(object, \dots)
     The \code{mif} update for initial-value parameters consists of replacing them by their filtering mean at time \code{times[ic.lag]}, where \code{times=time(object)}.
     It makes no sense to set \code{ic.lag>length(times)};
     if it is so set, \code{ic.lag} is set to \code{length(times)} with a warning.
-    For \code{method='mif2'}, the default is \code{ic.lag=length(times)}.
+    For \code{method="mif2"}, the default is \code{ic.lag=length(times)}.
   }
   \item{var.factor}{
     a positive number;
@@ -92,7 +92,7 @@ mif(object, \dots)
     specifications for the cooling schedule, i.e., the manner in which the intensity of the parameter perturbations is reduced with successive filtering iterations.
     \code{cooling.type} specifies the nature of the cooling schedule.
     When \code{cooling.type="geometric"}, on the n-th MIF iteration, the relative perturbation intensity is \code{cooling.fraction^(n/50)}.
-    When \code{cooling.type="hyperbolic"}, on the n-th MIF iteration, the relative perturbation intensity is \code{(s+1)(s+n)}, where \code{(s+1)/(s+50)=cooling.fraction}.
+    When \code{cooling.type="hyperbolic"}, on the n-th MIF iteration, the relative perturbation intensity is \code{(s+1)/(s+n)}, where \code{(s+1)/(s+50)=cooling.fraction}.
     \code{cooling.fraction} is the relative magnitude of the parameter perturbations after 50 MIF iterations.
     \code{cooling.factor} is now deprecated:
     to achieve the old behavior, use \code{cooling.type="geometric"} and \code{cooling.fraction=(cooling.factor)^50}.
@@ -102,7 +102,7 @@ mif(object, \dots)
     \code{method="mif"} uses the iterated filtering update rule (Ionides 2006, 2011);
     \code{method="unweighted"} updates the parameter to the unweighted average of the filtering means of the parameters at each time;
     \code{method="fp"} updates the parameter to the filtering mean at the end of the time series.
-    \code{method="mif2"} [EXPLAIN]
+%    \code{method="mif2"} 
   }
   \item{tol}{
     See the description under \code{\link{pfilter}}.
@@ -148,7 +148,7 @@ mif(object, \dots)
   \code{Np} may be assumed to be a positive integer;
   \code{center} and \code{sd} will be named vectors of the same length.
   Additional arguments may be specified;
-  these will be filled with the elements of the \code{userdata} slot of the underlying \code{pomp} object (see \code{\link{pomp-class}}).
+  these will be filled with the elements of the \code{userdata} slot of the underlying \code{pomp} object (see \code{\link{pomp}}).
 
   \code{particles} returns a \code{length(center)} x \code{Np} matrix with rownames matching the names of \code{center} and \code{sd}.
   Each column represents a distinct particle.
@@ -172,7 +172,7 @@ mif(object, \dots)
 }
 \author{Aaron A. King \email{kingaa at umich dot edu}}
 \seealso{
-  \code{\link{mif-methods}}, \code{\link{pomp}}, \code{\link{pomp-class}}, \code{\link{pfilter}}.
+  \code{\link{mif-methods}}, \code{\link{pomp}}, \code{\link{pfilter}}.
   See the \dQuote{intro_to_pomp} vignette for examples.
 }
 \keyword{ts}

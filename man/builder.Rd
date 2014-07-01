@@ -2,15 +2,17 @@
 \alias{pompBuilder}
 \title{Write, compile, link, and build a pomp object using native codes}
 \description{
-  \code{pompBuilder} is an EXPERIMENTAL facility for producing compiled \code{pomp} objects.
+  \code{pompBuilder} is a facility for producing compiled \code{pomp} objects.
 }
 \usage{
 pompBuilder(data, times, t0, name, statenames, paramnames, 
             tcovar, covar,
             rmeasure, dmeasure, step.fn, step.fn.delta.t,
-            skeleton, skeleton.type, skelmap.delta.t = 1,
+            skeleton, skeleton.type = c("map","vectorfield"),
+            skelmap.delta.t = 1,
             parameter.transform, parameter.inv.transform,
-            \dots, link = TRUE, save = FALSE)
+            rprior, dprior,
+            globals, \dots, link = TRUE, save = FALSE)
 }
 \arguments{
   \item{data, times, t0}{
@@ -38,13 +40,20 @@ pompBuilder(data, times, t0, name, statenames, paramnames,
   }
   \item{skeleton, skeleton.type, skelmap.delta.t}{
     \code{skeleton} is a C code that implements the deterministic skeleton.
-    As in \code{pomp}, \code{skeleton.type} indicates whether the skeleton is a map (discrete-time) or vectorfield (continuous-time).
+    As in \code{\link{pomp}}, \code{skeleton.type} indicates whether the skeleton is a map (discrete-time) or vectorfield (continuous-time).
     If the former, \code{skelmap.delta.t} is the time-step of the map.
   }
   \item{parameter.transform, parameter.inv.transform}{
     optional C codes that implement parameter transformations.
     \code{parameter.transform} maps parameters from the estimation scale to the natural scale;
     \code{parameter.inv.transformation} maps them from the natural scale to the estimation scale.
+  }
+  \item{rprior, dprior}{
+    C codes implementing the prior distribution
+  }
+  \item{globals}{
+    optional.
+    C codes here will be included verbatim in the generated code and compiled into the shared-object library.
   }
   \item{\dots}{
     additional arguments are passed to \code{\link{pomp}}
@@ -73,7 +82,7 @@ pompBuilder(data, times, t0, name, statenames, paramnames,
   Note, however, that all worker nodes must dynamically load (using \code{\link{dyn.load}}) the dynamic shared object file before anything can be done with the \code{pomp} object.
 }
 \details{
-  \code{pompBuilder} assumes that files can be written to the current working directory and that dynamic shared objects can be compiled and linked, i.e., that \code{R CMD SHLIB} will work.
+  \code{pompBuilder} with \code{save=TRUE} assumes that files can be written to the current working directory and that dynamic shared objects can be compiled and linked, i.e., that \code{R CMD SHLIB} will work.
   This will not typically be the case in out-of-the-box Windows installations.
 }
 \seealso{
