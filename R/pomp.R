@@ -8,15 +8,24 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
                               params, covar, tcovar,
                               obsnames, statenames, paramnames, covarnames,
                               zeronames, PACKAGE,
-                              parameter.transform, parameter.inv.transform,
-                              globals,
-                              userdata) {
+                              fromEstimationScale, toEstimationScale,
+                              parameter.transform = NULL, parameter.inv.transform = NULL,
+                              globals, userdata, ...,
+                              .solibfile, .filename, .filedir,
+                              verbose = getOption("verbose",FALSE)) {
 
   ## preliminary error checking
   if (missing(data)) stop(sQuote("data")," is a required argument")
   if (missing(times)) stop(sQuote("times")," is a required argument")
   if (missing(t0)) stop(sQuote("t0")," is a required argument")
   if (missing(params)) params <- numeric(0)
+  if (missing(.solibfile)) .solibfile <- list()
+  if (missing(.filename)) .filename <- NULL
+  if (missing(.filedir)) .filedir <- NULL
+  
+  if (missing(userdata)) userdata <- list()
+  added.userdata <- list(...)
+  userdata[names(added.userdata)] <- added.userdata
 
   ## name of shared object library
   if (missing(PACKAGE)) PACKAGE <- NULL
@@ -31,9 +40,39 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
   if (missing(dmeasure)) dmeasure <- NULL
   if (missing(rprior)) rprior <- NULL
   if (missing(dprior)) dprior <- NULL
-  if (missing(parameter.transform)) parameter.transform <- NULL
-  if (missing(parameter.inv.transform)) parameter.inv.transform <- NULL
+  if (missing(fromEstimationScale)) fromEstimationScale <- NULL
+  if (missing(toEstimationScale)) toEstimationScale <- NULL
   
+  ## deal with deprecated arguments
+  if (!is.null(parameter.transform)) {
+    warning("the ",sQuote("parameter.transform")," argument of ",
+            sQuote("pomp")," is deprecated, ",
+            "and will be removed in a future release.\n",
+            "Use ",sQuote("fromEstimationScale")," instead.",call.=FALSE)
+    if (!is.null(fromEstimationScale) && !is(fromEstimationScale,"pomp.fun")) {
+      warning("both ",sQuote("fromEstimationScale")," and ",
+              sQuote("parameter.transform")," have been specified in a call to ",
+              sQuote("pomp"),".\n",
+              "The latter will be ignored.",call.=FALSE)
+    } else {
+      fromEstimationScale <- parameter.transform
+    }
+  }
+  if (!is.null(parameter.inv.transform)) {
+    warning("the ",sQuote("parameter.inv.transform")," argument of ",
+            sQuote("pomp")," is deprecated, ",
+            "and will be removed in a future release.\n",
+            "Use ",sQuote("toEstimationScale")," instead.",call.=FALSE)
+    if (!is.null(toEstimationScale) && !is(toEstimationScale,"pomp.fun")) {
+      warning("both ",sQuote("toEstimationScale")," and ",
+              sQuote("parameter.inv.transform")," have been specified in a call to ",
+              sQuote("pomp"),".\n",
+              "The latter will be ignored.",call.=FALSE)
+    } else {
+      toEstimationScale <- parameter.inv.transform
+    }
+  }
+
   ## defaults for names of states, parameters, and accumulator variables
   if (missing(statenames)) statenames <- character(0)
   if (missing(paramnames)) paramnames <- character(0)
@@ -52,7 +91,7 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
   storage.mode(data) <- 'double'
   if (missing(obsnames) || length(obsnames)==0) obsnames <- rownames(data)
   obsnames <- as.character(obsnames)
-    
+  
   ## check times
   if (!is.numeric(times) || !all(diff(times)>0))
     stop("pomp error: ",sQuote("times")," must be an increasing numeric vector")
@@ -124,10 +163,10 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
     snips <- c(snips,rprior=rprior@text)
   if (is(dprior,"Csnippet"))
     snips <- c(snips,dprior=dprior@text)
-  if (is(parameter.transform,"Csnippet"))
-    snips <- c(snips,parameter.transform=parameter.transform@text)
-  if (is(parameter.inv.transform,"Csnippet"))
-    snips <- c(snips,parameter.inv.transform=parameter.inv.transform@text)
+  if (is(fromEstimationScale,"Csnippet"))
+    snips <- c(snips,fromEstimationScale=fromEstimationScale@text)
+  if (is(toEstimationScale,"Csnippet"))
+    snips <- c(snips,toEstimationScale=toEstimationScale@text)
   if (length(snips)>0) {
     libname <- try(
                    do.call(
@@ -139,18 +178,24 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
                                   paramnames=paramnames,
                                   covarnames=covarnames,
                                   globals=globals,
-                                  link=TRUE,
-                                  save=FALSE
+                                  name=.filename,
+                                  dir=.filedir,
+                                  verbose=verbose
                                   ),
                              snips
                              )
                            ),
                    silent=FALSE
                    )
-    if (inherits(PACKAGE,"try-error"))
-      stop("error in building shared-object library from Csnippets")
+    if (inherits(libname,"try-error")) {
+      stop("in ",sQuote("pomp"),": error in building shared-object library from Csnippets:\n",
+           libname,call.=FALSE)
+    } else {
+      .solibfile <- c(.solibfile,list(libname))
+      libname <- libname[1]
+    }
   } else {
-    libname <- ""
+    libname <- ''
   }
   
   ## handle rprocess
@@ -274,65 +319,71 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
   }
   
   ## handle parameter transformations
-  mpt <- is.null(parameter.transform)
-  mpit <- is.null(parameter.inv.transform)
+  mpt <- is.null(fromEstimationScale)
+  mpit <- is.null(toEstimationScale)
   if (xor(mpt,mpit)) {
-    stop("if one of ",sQuote("parameter.transform"),", ",
-         sQuote("parameter.inv.transform"),
+    stop("if one of ",sQuote("fromEstimationScale"),", ",
+         sQuote("toEstimationScale"),
          " is supplied, then so must the other")
   }
   has.trans <- !mpt
   if (has.trans) {
-    par.trans <- pomp.fun(
-                          f=parameter.transform,
-                          PACKAGE=PACKAGE,
-                          proto=quote(par.trans(params,...)),
-                          slotname="parameter.transform",
-                          libname=libname,
-                          statenames=statenames,
-                          paramnames=paramnames,
-                          obsnames=obsnames,
-                          covarnames=covarnames
-                          )
-    par.untrans <- pomp.fun(
-                            f=parameter.inv.transform,
-                            PACKAGE=PACKAGE,
-                            proto=quote(par.untrans(params,...)),
-                            slotname="parameter.inv.transform",
-                            libname=libname,
-                            statenames=statenames,
-                            paramnames=paramnames,
-                            obsnames=obsnames,
-                            covarnames=covarnames
-                            )
+    from.trans <- pomp.fun(
+                           f=fromEstimationScale,
+                           PACKAGE=PACKAGE,
+                           proto=quote(from.trans(params,...)),
+                           slotname="fromEstimationScale",
+                           libname=libname,
+                           statenames=statenames,
+                           paramnames=paramnames,
+                           obsnames=obsnames,
+                           covarnames=covarnames
+                           )
+    to.trans <- pomp.fun(
+                         f=toEstimationScale,
+                         PACKAGE=PACKAGE,
+                         proto=quote(to.trans(params,...)),
+                         slotname="toEstimationScale",
+                         libname=libname,
+                         statenames=statenames,
+                         paramnames=paramnames,
+                         obsnames=obsnames,
+                         covarnames=covarnames
+                         )
   } else {
-    par.trans <- pomp.fun()
-    par.untrans <- pomp.fun()
+    from.trans <- pomp.fun()
+    to.trans <- pomp.fun()
   }
-  if (has.trans && par.trans@mode<0 && par.untrans@mode<0) has.trans <- FALSE
+  if (has.trans &&
+      from.trans@mode==pompfunmode$undef &&
+      to.trans@mode==pompfunmode$undef
+      ) has.trans <- FALSE
 
   if (nrow(covar)>0) {
     if (
-        (skeleton@mode==1L)
+        (skeleton@mode==pompfunmode$Rfun)
         &&!("covars"%in%names(formals(skeleton@R.fun)))
         )
       warning("a covariate table has been given, yet the ",
               sQuote("skeleton")," function does not have ",
-              sQuote("covars")," as a formal argument",call.=FALSE)
+              sQuote("covars")," as a formal argument: see ",
+              sQuote("?pomp"),call.=FALSE)
     if (
-        (rmeasure@mode==1L)
+        (rmeasure@mode==pompfunmode$Rfun)
         &&!("covars"%in%names(formals(rmeasure@R.fun)))
         )
       warning("a covariate table has been given, yet the ",
               sQuote("rmeasure")," function does not have ",
-              sQuote("covars")," as a formal argument",call.=FALSE)
+              sQuote("covars")," as a formal argument: see ",
+              sQuote("?pomp"),call.=FALSE)
     if (
-        (dmeasure@mode==1L)
+        (dmeasure@mode==pompfunmode$Rfun)
         &&!("covars"%in%names(formals(dmeasure@R.fun)))
         )
       warning("a covariate table has been given, yet the ",
               sQuote("dmeasure")," function does not have ",
-              sQuote("covars")," as a formal argument",call.=FALSE)
+              sQuote("covars")," as a formal argument: see ",
+              sQuote("?pomp"),call.=FALSE)
   }
 
   if ((length(tcovar)>0)&&((min(tcovar)>t0)||(max(tcovar)<max(times)))) 
@@ -361,8 +412,9 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
       tcovar = tcovar,
       zeronames = zeronames,
       has.trans = has.trans,
-      par.trans = par.trans,
-      par.untrans = par.untrans,
+      from.trans = from.trans,
+      to.trans = to.trans,
+      solibfile = .solibfile,
       userdata = userdata
       )
 }
@@ -456,7 +508,7 @@ setMethod(
             initializer, rprior, dprior,
             params, covar, tcovar,
             obsnames, statenames, paramnames, covarnames, zeronames,
-            PACKAGE, parameter.transform, parameter.inv.transform,
+            PACKAGE, fromEstimationScale, toEstimationScale,
             globals) {
             
             data <- t(sapply(data,as.numeric))
@@ -483,8 +535,8 @@ setMethod(
                              rmeasure=rmeasure,
                              dmeasure=dmeasure,
                              measurement.model=measurement.model,
-                             dprior = dprior,
-                             rprior = rprior,
+                             dprior=dprior,
+                             rprior=rprior,
                              skeleton=skeleton,
                              skeleton.type=skeleton.type,
                              skelmap.delta.t=skelmap.delta.t,
@@ -498,10 +550,10 @@ setMethod(
                              covarnames=covarnames,
                              zeronames=zeronames,
                              PACKAGE=PACKAGE,
-                             parameter.transform=parameter.transform,
-                             parameter.inv.transform=parameter.inv.transform,
+                             fromEstimationScale=fromEstimationScale,
+                             toEstimationScale=toEstimationScale,
                              globals=globals,
-                             userdata=list(...)
+                             ...
                              )
           }
           )
@@ -515,7 +567,7 @@ setMethod(
             skelmap.delta.t = 1,
             initializer, rprior, dprior, params, covar, tcovar,
             obsnames, statenames, paramnames, covarnames, zeronames,
-            PACKAGE, parameter.transform, parameter.inv.transform,
+            PACKAGE, fromEstimationScale, toEstimationScale,
             globals) {
             
             pomp.constructor(
@@ -527,8 +579,8 @@ setMethod(
                              rmeasure=rmeasure,
                              dmeasure=dmeasure,
                              measurement.model=measurement.model,
-                             dprior = dprior,
-                             rprior = rprior,
+                             dprior=dprior,
+                             rprior=rprior,
                              skeleton=skeleton,
                              skeleton.type=skeleton.type,
                              skelmap.delta.t=skelmap.delta.t,
@@ -542,10 +594,10 @@ setMethod(
                              covarnames=covarnames,
                              zeronames=zeronames,
                              PACKAGE=PACKAGE,
-                             parameter.transform=parameter.transform,
-                             parameter.inv.transform=parameter.inv.transform,
+                             fromEstimationScale=fromEstimationScale,
+                             toEstimationScale=toEstimationScale,
                              globals=globals,
-                             userdata=list(...)
+                             ...
                              )
           }
           )
@@ -560,7 +612,7 @@ setMethod(
                     skelmap.delta.t = 1,
                     initializer, rprior, dprior, params, covar, tcovar,
                     obsnames, statenames, paramnames, covarnames, zeronames,
-                    PACKAGE, parameter.transform, parameter.inv.transform,
+                    PACKAGE, fromEstimationScale, toEstimationScale,
                     globals) {
 
             pomp.constructor(
@@ -572,8 +624,8 @@ setMethod(
                              rmeasure=rmeasure,
                              dmeasure=dmeasure,
                              measurement.model=measurement.model,
-                             dprior = dprior,
-                             rprior = rprior,
+                             dprior=dprior,
+                             rprior=rprior,
                              skeleton=skeleton,
                              skeleton.type=skeleton.type,
                              skelmap.delta.t=skelmap.delta.t,
@@ -587,10 +639,10 @@ setMethod(
                              covarnames=covarnames,
                              zeronames=zeronames,
                              PACKAGE=PACKAGE,
-                             parameter.transform=parameter.transform,
-                             parameter.inv.transform=parameter.inv.transform,
+                             fromEstimationScale=fromEstimationScale,
+                             toEstimationScale=toEstimationScale,
                              globals=globals,
-                             userdata=list(...)
+                             ...
                              )
           }
           )
@@ -603,7 +655,7 @@ setMethod(
             skeleton, skeleton.type, skelmap.delta.t,
             initializer, rprior, dprior, params, covar, tcovar,
             obsnames, statenames, paramnames, covarnames, zeronames,
-            PACKAGE, parameter.transform, parameter.inv.transform,
+            PACKAGE, fromEstimationScale, toEstimationScale,
             globals) {
             
             if (missing(times)) times <- data@times
@@ -639,29 +691,25 @@ setMethod(
             if (missing(skeleton.type)) skeleton.type <- data@skeleton.type
             if (missing(skeleton)) skeleton <- data@skeleton
             if (missing(skelmap.delta.t)) skelmap.delta.t <- data@skelmap.delta.t
-            if (missing(parameter.transform)) {
-              if (missing(parameter.inv.transform)) {
-                par.trans <- data@par.trans
-                par.untrans <- data@par.untrans
+            if (missing(fromEstimationScale)) {
+              if (missing(toEstimationScale)) {
+                from.trans <- data@from.trans
+                to.trans <- data@to.trans
               } else {
-                stop("pomp error: if ",sQuote("parameter.inv.transform"),
+                stop("pomp error: if ",sQuote("toEstimationScale"),
                      " is supplied, then " ,
-                     sQuote("parameter.transform")," must also be supplied")
+                     sQuote("fromEstimationScale")," must also be supplied")
               }
             } else {
-              if (missing(parameter.inv.transform)) {
-                stop("pomp error: if ",sQuote("parameter.transform"),
+              if (missing(toEstimationScale)) {
+                stop("pomp error: if ",sQuote("fromEstimationScale"),
                      " is supplied, then " ,
-                     sQuote("parameter.inv.transform")," must also be supplied")
+                     sQuote("toEstimationScale")," must also be supplied")
               } else {
-                par.trans <- parameter.transform
-                par.untrans <- parameter.inv.transform
+                from.trans <- fromEstimationScale
+                to.trans <- toEstimationScale
               }
             }
-
-            userdata <- data@userdata
-            added.userdata <- list(...)
-            userdata[names(added.userdata)] <- added.userdata
 
             if (missing(obsnames)) obsnames <- character(0)
             if (missing(statenames)) statenames <- character(0)
@@ -677,8 +725,8 @@ setMethod(
                              dprocess=dprocess,
                              rmeasure=rmeasure,
                              dmeasure=dmeasure,
-                             dprior = dprior,
-                             rprior = rprior,
+                             dprior=dprior,
+                             rprior=rprior,
                              skeleton=skeleton,
                              skeleton.type=skeleton.type,
                              skelmap.delta.t=skelmap.delta.t,
@@ -691,11 +739,13 @@ setMethod(
                              covarnames=covarnames,
                              zeronames=zeronames,
                              PACKAGE=PACKAGE,
-                             parameter.transform=par.trans,
-                             parameter.inv.transform=par.untrans,
+                             fromEstimationScale=from.trans,
+                             toEstimationScale=to.trans,
                              params=params,
                              globals=globals,
-                             userdata=userdata
+                             .solibfile=data@solibfile,
+                             userdata=data@userdata,
+                             ...
                              )
           }
           )

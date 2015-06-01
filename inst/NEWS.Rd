@@ -1,5 +1,123 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 0.65-1}{
+  \itemize{
+    \item The unfortunately named \code{pomp} arguments \code{parameter.transform} and \code{parameter.inv.transform} have been deprecated in favor of the more mnemonic \code{toEstimationScale} and \code{fromEstimationScale}.
+    Using the old arguments will result in the same behavior as previously, but a warning will be generated.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.64-1}{
+  \itemize{
+    \item The \code{mif} option \code{cooling.fraction} has been replaced by the more descriptive \code{cooling.fraction.50}.
+    Recall that this parameter specifies the fraction of random-walk remaining after 50 \code{mif} iterations.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.63-6}{
+  \itemize{
+    \item Fixed bug arising when using \code{pomp} with \code{Csnippets} under windows.
+    Thanks to Hamish McCallum for reporting it.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.63-3}{
+  \itemize{
+    \item Improvements to documentation.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.63-1}{
+  \itemize{
+    \item The optimization packages \pkg{nloptr} and \pkg{subplex} are no longer dependencies of \pkg{pomp} that will be loaded at the time \pkg{pomp} is.
+    Instead, they are imported as needed.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.62-2}{
+  \itemize{
+    \item Bug fix in \code{partrans} when transformations are implemented using \code{Csnippet}s.
+    \item Remove the \code{verhulst} example.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.62-1}{
+  \itemize{
+    \item \code{mif} now has the default value \code{var.factor=1}.
+    Since \code{var.factor} has long been a required parameter, this change is backward compatible.
+    Since \code{var.factor} has long been a required parameter, this change is backward compatible.
+    \item The long-deprecated \code{cooling.factor} option to \code{mif} has now been removed.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.61-3}{
+  \itemize{
+    \item \code{mif}'s \code{pars} argument, which is redundant, is now deprecated.
+    In a future release, this argument will be removed.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.61-1}{
+  \itemize{
+    \item When using \code{Csnippet}s or \code{pompBuilder}, it is no longer necessary to manually load and unload the dynamically loadable library.
+    This is now handled automatically.
+    Accordingly, the \code{link} argument of \code{pompBuilder} has been removed.
+    The \code{pompLoad} and \code{pompUnload} functions introduced in 0.58-1 remain available, though they should rarely be needed.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.60-1}{
+  \itemize{
+    \item \code{pmcmc} and \code{abc} can now use arbitrary symmetric proposal distributions via the \code{proposal} argument.
+    For the moment, these are constrained to be symmetric.
+    Two new functions, \code{mvn.diag.rw} and \code{mvn.rw} generate suitable proposal functions.
+    The first generates a multivariate normal random-walk proposal with diagonal variance-covariance matrix; this duplicates the old behavior of both \code{abc} and \code{pmcmc}.
+    The second, \code{mvn.rw}, corresponds to a multivariate normal random-walk proposal with arbitrary variance-covariance matrix.
+    \item In \code{pmcmc} and \code{abc}, the arguments \code{pars} and \code{rw.sd} are now unneeded and have been deprecated.
+    Use of \code{rw.sd} will generate a warning and result in behavior equivalent to choosing \code{proposal=mvn.diag.rw(rw.sd)}.
+    Use of \code{pars} will be ignored, with a warning.
+    \item In \code{nlf}, the \code{transform.params} argument is now deprecated;
+    use instead the \code{transform} argument, as in the other inference methods.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.59-1}{
+  \itemize{
+    \item A bug in \code{spect.match} has been fixed.
+    Thanks to Karsten Hempel for finding it and contributing the fix.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.58-1}{
+  \itemize{
+    \item Compiler messages are now suppressed by default when \code{Csnippet}s are used in construction of a \code{pomp} object.
+    These can be enabled by setting \code{options(verbose=TRUE)}.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.58-1}{
+  \itemize{
+    \item A \code{pomp} object created with \code{Csnippet}s or \code{pompBuilder} will now remember its associated shared-object file, which can be unloaded and reloaded using the new \code{pompUnload} and \code{pompLoad} methods.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.57-1}{
+  \itemize{
+    \item \code{simulate} has a new argument, \code{include.data}, that when used in conjuncion with \code{as.data.frame=TRUE} will include the actual data in the resulting data frame along with the simulations.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.56-1}{
+  \itemize{
+    \item Revamped the \code{pompExample} function.
+    A search path for example directories is now stored in global option "pomp.examples".
+  }
+}
+\section{Changes in \pkg{pomp} version 0.55-1}{
+  \itemize{
+    \item New \code{values} method extracts simulated probe values on \code{probed.pomp} object.
+    \item Better documentation in the \file{pomp.h} header file.
+    \item Vignettes now feature \code{bsmc2} instead of \code{bsmc}.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.54-1}{
+  \itemize{
+    \item A modified version of the Liu and West (2001) algorithm is included as \code{bsmc2}.
+    \item By default, when \code{B} is of class \code{bsmcd.pomp}, \code{plot(B)} ignores fixed parameters.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.53-6}{
+  \itemize{
+    \item A bug having to do with paths to the temporary C files, encountered when using \code{Csnippet}s under windows, has been fixed.
+    \item Package demos are now checked by \code{R CMD check} on all platforms.
+  }
+}
 \section{Changes in \pkg{pomp} version 0.53-1}{
   \itemize{
     \item \code{nlf} now returns an S4 object of class \code{nlfd.pomp} with a \code{logLik} method for extracting the log quasi likelihood and a \code{$} method for extracting arbitrary components.

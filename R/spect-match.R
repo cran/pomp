@@ -20,6 +20,8 @@ spect.mismatch <- function (par, est, object, params,
   if (missing(est)) est <- integer(0)
   if (missing(params)) params <- coef(object)
   
+  pompLoad(object)
+
   params[est] <- par
   
   ## vector of frequencies and estimated power spectum of data
@@ -37,13 +39,14 @@ spect.mismatch <- function (par, est, object, params,
                                detrend=detrend,
                                ker=ker
                                )
+  ## simvals is an nsim x nfreq x nobs array
   
   ## compute a measure of the discrepancies between simulations and data
   discrep <- array(dim=c(length(freq),length(vars)))
   sim.means <- colMeans(simvals)
   for (j in seq_along(freq)) {
     for (k in seq_along(vars)) {
-      discrep[j,k] <- ((datval[j,k]-sim.means[j,k])^2)/mean((simvals[j,,k]-sim.means[j,k])^2)
+      discrep[j,k] <- ((datval[j,k]-sim.means[j,k])^2)/mean((simvals[,j,k]-sim.means[j,k])^2)
     }
     discrep[j,] <- weights[j]*discrep[j,]
   }
@@ -54,6 +57,7 @@ spect.mismatch <- function (par, est, object, params,
     mismatch <- sum(discrep) 
   }
 
+  pompUnload(object)
   mismatch
 }
 
@@ -65,6 +69,8 @@ spect.match <- function(object, start, est = character(0),
                         method = c("subplex","Nelder-Mead","SANN"),
                         verbose = getOption("verbose"),
                         eval.only = FALSE, fail.value = NA, ...) {
+
+  pompLoad(object)
 
   obj.fn <- spect.mismatch
 
@@ -168,23 +174,23 @@ spect.match <- function(object, start, est = character(0),
     msg <- "no optimization performed"
   } else {
     if (method == 'subplex') {
-      opt <- subplex(
-                     par=guess,
-                     fn=obj.fn,
-                     est=par.index,
-                     object=object,
-                     params=params,
-                     vars=vars,
-                     ker=ker,
-                     nsim=nsim,
-                     seed=seed,
-                     transform=transform,
-                     detrend=detrend,
-                     weights=weights,
-                     data.spec=ds,
-                     fail.value=fail.value,
-                     control=list(...)
-                     )
+      opt <- subplex::subplex(
+                              par=guess,
+                              fn=obj.fn,
+                              est=par.index,
+                              object=object,
+                              params=params,
+                              vars=vars,
+                              ker=ker,
+                              nsim=nsim,
+                              seed=seed,
+                              transform=transform,
+                              detrend=detrend,
+                              weights=weights,
+                              data.spec=ds,
+                              fail.value=fail.value,
+                              control=list(...)
+                              )
     } else {
       opt <- optim(
                    par=guess,
@@ -211,6 +217,8 @@ spect.match <- function(object, start, est = character(0),
     evals <- opt$counts
     msg <- opt$message
   }
+
+  pompUnload(object)
 
   new(
       "spect.matched.pomp",

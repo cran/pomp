@@ -89,7 +89,7 @@ SEXP do_skeleton (SEXP object, SEXP x, SEXP t, SEXP params, SEXP gnsi)
 {
   int nprotect = 0;
   int nvars, npars, nrepp, nrepx, nreps, ntimes, ncovars;
-  int mode = -1;
+  pompfunmode mode = undef;
   int *dim;
   SEXP Snames, Cnames, Pnames;
   SEXP pompfun;
@@ -131,13 +131,15 @@ SEXP do_skeleton (SEXP object, SEXP x, SEXP t, SEXP params, SEXP gnsi)
   // set up the array to hold results
   {
     int dim[3] = {nvars, nreps, ntimes};
+    const char *dimnms[3] = {"variable","rep","time"};
     PROTECT(F = makearray(3,dim)); nprotect++; 
     setrownames(F,Snames,3);
+    fixdimnames(F,dimnms,3);
   }
 
   // first do setup
   switch (mode) {
-  case 0: 			// R skeleton
+  case Rfun: 			// R skeleton
     {
       int nprotect = 0;
       SEXP tvec, xvec, pvec, cvec, fcall, rho;
@@ -171,7 +173,7 @@ SEXP do_skeleton (SEXP object, SEXP x, SEXP t, SEXP params, SEXP gnsi)
       UNPROTECT(nprotect);
     }
     break;
-  case 1:			// native skeleton
+  case native:			// native skeleton
     {
       int nprotect = 0;
       int *sidx, *pidx, *cidx;

@@ -25,15 +25,20 @@ setAs(
 as.data.frame.pomp <- function (x, row.names, optional, ...) as(x,"data.frame")
 
 ## parameter transformations
-partrans.internal <- function (object, params, dir = c("forward","inverse"),
+partrans.internal <- function (object, params,
+                               dir = c("fromEstimationScale","toEstimationScale",
+                                 "forward","inverse"),
                                .getnativesymbolinfo = TRUE, ...) {
   if (!object@has.trans) return(params)
-  dir <- switch(match.arg(dir),forward=1L,inverse=-1L)
-  .Call(do_partrans,object,params,dir,.getnativesymbolinfo)
+  pompLoad(object)
+  dir <- switch(match.arg(dir),fromEstimationScale=1L,toEstimationScale=-1L,forward=1L,inverse=-1L)
+  rv <- .Call(do_partrans,object,params,dir,.getnativesymbolinfo)
+  pompUnload(object)
+  rv
 }
 
 setMethod("partrans","pomp",
-          function (object, params, dir = c("forward","inverse"), ...) 
+          function (object, params, dir = c("fromEstimationScale","toEstimationScale", "forward","inverse"),...)
           partrans.internal(object=object,params=params,dir=dir,...)
           )
 
@@ -44,27 +49,34 @@ obs.internal <- function (object, vars, ...) {
     vars <- varnames
   else if (!all(vars%in%varnames))
     stop("some elements of ",sQuote("vars")," correspond to no observed variable")
-  object@data[vars,,drop=FALSE]
+  y <- object@data[vars,,drop=FALSE]
+  dimnames(y) <- list(variable=rownames(y),time=time(object))
+  y
 }
 
 ## a simple method to extract the data array
 setMethod("obs","pomp",obs.internal)
-setMethod("data.array","pomp",obs.internal)
+setMethod("data.array","pomp",function (object, ...) {
+  warning(sQuote("data.array")," is deprecated and will be removed ",
+          "in a future release.  Use ",sQuote("obs")," instead.")
+  obs.internal(object,...)
+})
+
 
 ## a simple method to extract the array of states
-setMethod(
-          "states",
-          "pomp",
-          function (object, vars, ...) {
-            if (length(object@states)==0) {
-              NULL
-            } else {
-              if (missing(vars))
-                vars <- seq(length=nrow(object@states))
-              object@states[vars,,drop=FALSE]
-            }
-          }
-          )
+states.internal <- function (object, vars, ...) {
+  if (length(object@states)==0) {
+    NULL
+  } else {
+    if (missing(vars))
+      vars <- seq(length=nrow(object@states))
+    x <- object@states[vars,,drop=FALSE]
+    dimnames(x) <- list(variable=rownames(x),time=time(object))
+    x
+  }
+}
+
+setMethod("states","pomp",states.internal)
 
 ## a simple method to extract the vector of times
 setMethod(
@@ -158,7 +170,7 @@ setMethod(
           function (object, pars, transform = FALSE, ...) {
             if (length(object@params)>0) {
               if (transform) 
-                params <- partrans(object,params=object@params,dir="inverse")
+                params <- partrans(object,params=object@params,dir="toEstimationScale")
               else
                 params <- object@params
               if (missing(pars))
@@ -188,7 +200,7 @@ setMethod(
             if (missing(pars)) {          ## replace the whole params slot with 'value'
               if (length(value)>0) {
                 if (transform) 
-                  value <- partrans(object,params=value,dir="forward")
+                  value <- partrans(object,params=value,dir="fromEstimationScale")
                 pars <- names(value)
                 if (is.null(pars)) {
                   if (transform)
@@ -210,7 +222,7 @@ setMethod(
                 names(val) <- pars
                 val[] <- value
                 if (transform)
-                  value <- partrans(object,params=val,dir="forward")
+                  value <- partrans(object,params=val,dir="fromEstimationScale")
                 object@params <- value
               } else { ## pre-existing params slot
                 params <- coef(object,transform=transform)
@@ -230,7 +242,7 @@ setMethod(
                 }
                 params[pars] <- val
                 if (transform)
-                  params <- partrans(object,params=params,dir="forward")
+                  params <- partrans(object,params=params,dir="fromEstimationScale")
                 object@params <- params
               }
             }
@@ -286,10 +298,10 @@ setMethod(
             }
             cat("initializer = \n")
             show(object@initializer)
-            cat("parameter transform function = \n")
-            show(object@par.trans)
-            cat("parameter inverse transform function = \n")
-            show(object@par.untrans)
+            cat("parameter transformation (to estimation scale) = \n")
+            show(object@to.trans)
+            cat("parameter transformation (from estimation scale) = \n")
+            show(object@from.trans)
             if (length(coef(object))>0) {
               cat("parameter(s):\n")
               print(coef(object))
@@ -303,4 +315,3 @@ setMethod(
             invisible(NULL)
           }
           )
-

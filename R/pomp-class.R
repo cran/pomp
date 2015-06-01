@@ -32,8 +32,9 @@ setClass(
            tcovar = 'numeric',
            zeronames = 'character',
            has.trans = 'logical',
-           par.trans = 'pomp.fun',
-           par.untrans = 'pomp.fun',
+           from.trans = 'pomp.fun',
+           to.trans = 'pomp.fun',
+           solibfile = 'list',
            userdata = 'list'
            ),
          prototype=prototype(
@@ -56,8 +57,9 @@ setClass(
            tcovar=numeric(0),
            zeronames=character(0),
            has.trans=FALSE,
-           par.trans=pomp.fun(),
-           par.untrans=pomp.fun(),
+           from.trans=pomp.fun(),
+           to.trans=pomp.fun(),
+           solibfile=list(),
            userdata=list()
            ),
          validity=function (object) {

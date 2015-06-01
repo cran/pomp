@@ -14,6 +14,8 @@ setClass(
 
 probe.internal <- function (object, probes, params, nsim = 1, seed = NULL, ...) {
 
+  pompLoad(object)
+
   if (!is.list(probes)) probes <- list(probes)
   if (!all(sapply(probes,is.function)))
     stop(sQuote("probes")," must be a function or a list of functions")
@@ -55,6 +57,8 @@ probe.internal <- function (object, probes, params, nsim = 1, seed = NULL, ...) 
   ll <- .Call(synth_loglik,simval,datval)
 
   coef(object) <- params
+
+  pompUnload(object)
 
   new(
       "probed.pomp",
@@ -206,5 +210,17 @@ setAs(
       }
       )
 
+as.data.frame.probed.pomp <- function (x, row.names, optional, ...) as(x,"data.frame")
+
 setMethod("logLik",signature(object="probed.pomp"),function(object,...)object@synth.loglik)
 setMethod("$",signature=signature(x="probed.pomp"),function(x, name)slot(x,name))
+
+values.probe.internal <- function (object, ...) {
+  x <- as.data.frame(rbind(object@datvals,object@simvals))
+  row.names(x) <- seq.int(from=0,to=nrow(x)-1)
+  x$.id <- factor(c("data",rep("sim",nrow(x)-1)))
+  x
+}
+
+setMethod("values",signature(object="probed.pomp"),
+          definition=values.probe.internal)

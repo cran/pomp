@@ -3,7 +3,9 @@
 simulate.internal <- function (object, nsim = 1, seed = NULL, params,
                                states = FALSE, obs = FALSE,
                                times, t0, as.data.frame = FALSE,
+                               include.data = FALSE,
                                .getnativesymbolinfo = TRUE, ...) {
+  pompLoad(object)
 
   if (missing(times))
     times <- time(object,t0=FALSE)
@@ -18,6 +20,7 @@ simulate.internal <- function (object, nsim = 1, seed = NULL, params,
   obs <- as.logical(obs)
   states <- as.logical(states)
   as.data.frame <- as.logical(as.data.frame)
+  include.data <- as.logical(include.data)
 
   if (missing(params))
     params <- coef(object)
@@ -77,7 +80,7 @@ simulate.internal <- function (object, nsim = 1, seed = NULL, params,
                       as.data.frame(t(retval$obs)),
                       as.data.frame(t(retval$states))
                       )
-      retval$sim <- factor(seq_len(nsim))
+      retval$sim <- as.character(seq_len(nsim))
       retval$time <- rep(times,each=nsim)
       retval <- retval[order(retval$sim,retval$time),]
     } else if (obs || states) {
@@ -88,7 +91,7 @@ simulate.internal <- function (object, nsim = 1, seed = NULL, params,
       dim(retval) <- c(dm[1L],prod(dm[-1L]))
       rownames(retval) <- nm
       retval <- as.data.frame(t(retval))
-      retval$sim <- factor(seq_len(nsim))
+      retval$sim <- as.character(seq_len(nsim))
       retval$time <- rep(times,each=nsim)
       retval <- retval[order(retval$sim,retval$time),]
     } else {
@@ -103,14 +106,24 @@ simulate.internal <- function (object, nsim = 1, seed = NULL, params,
                          }
                          )
         retval <- do.call(rbind,retval)
-        retval$sim <- factor(retval$sim)
+        retval$sim <- as.character(retval$sim)
       } else {
         retval <- as.data.frame(retval)
-        retval$sim <- factor(1)
+        retval$sim <- "1"
       }
     }
-    
+
+    if (include.data) {
+      od <- as.data.frame(object)
+      od$sim <- "data"
+      retval <- merge(od,retval,all=TRUE)
+    }
+
+    retval$sim <- factor(retval$sim)
+
   }
+
+  pompUnload(object)
 
   retval
 }
@@ -119,8 +132,9 @@ setMethod(
           "simulate",
           signature=signature(object="pomp"),
           definition=function (object, nsim = 1, seed = NULL, params,
-                               states = FALSE, obs = FALSE,
-                               times, t0, as.data.frame = FALSE, ...)
+            states = FALSE, obs = FALSE,
+            times, t0, as.data.frame = FALSE, include.data = FALSE,
+            ...)
           simulate.internal(
                             object=object,
                             nsim=nsim,
@@ -131,6 +145,7 @@ setMethod(
                             times=times,
                             t0=t0,
                             as.data.frame=as.data.frame,
+                            include.data=include.data,
                             ...
                             )
           )

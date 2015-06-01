@@ -45,6 +45,8 @@ setGeneric("cond.logLik",function(object,...)standardGeneric("cond.logLik"))
 setGeneric("eff.sample.size",function(object,...)standardGeneric("eff.sample.size"))
 ## convergence record
 setGeneric("conv.rec",function(object,...)standardGeneric("conv.rec"))
+## values of probes
+setGeneric("values",function(object,...)standardGeneric("values"))
 ## stochastic simulation
 setGeneric("simulate",function(object,nsim=1,seed=NULL,...)standardGeneric("simulate"))
 
@@ -59,6 +61,7 @@ setGeneric('abc',function(object,...)standardGeneric("abc"))
 
 ## Bayesian SMC (Liu & West)
 setGeneric("bsmc",function(object,...)standardGeneric("bsmc"))
+setGeneric("bsmc2",function(object,...)standardGeneric("bsmc2"))
 
 ## basic SMC (particle filter)
 setGeneric("pfilter",function(object,...)standardGeneric("pfilter"))
@@ -85,3 +88,7 @@ setGeneric("spect",function(object,...)standardGeneric("spect"))
 
 ## continue an iteration
 setGeneric("continue",function(object,...)standardGeneric("continue"))
+
+## dynamic loading and unloading
+setGeneric("pompLoad",function(object,...)standardGeneric("pompLoad"))
+setGeneric("pompUnload",function(object,...)standardGeneric("pompUnload"))

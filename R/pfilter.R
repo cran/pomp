@@ -44,6 +44,8 @@ pfilter.internal <- function (object, params, Np,
                               .transform,
                               .getnativesymbolinfo = TRUE) {
 
+  pompLoad(object)
+
   ptsi.inv <- ptsi.for <- gnsi.rproc <- gnsi.dmeas <- as.logical(.getnativesymbolinfo)
   mif2 <- as.logical(.mif2)
   transform <- as.logical(.transform)
@@ -118,14 +120,16 @@ pfilter.internal <- function (object, params, Np,
   ptsi.for <- FALSE
   
   ## set up storage for saving samples from filtering distributions
-  if (save.states)
-    xparticles <- vector(mode="list",length=ntimes)
-  else
+  if (save.states) {
+    xparticles <- setNames(vector(mode="list",length=ntimes),time(object))
+  } else {
     xparticles <- list()
-  if (save.params)
-    pparticles <- vector(mode="list",length=ntimes)
-  else
+  }
+  if (save.params) {
+    pparticles <- setNames(vector(mode="list",length=ntimes),time(object))
+  } else {
     pparticles <- list()
+  }
   
   random.walk <- !missing(.rw.sd)
   if (random.walk) {
@@ -155,7 +159,9 @@ pfilter.internal <- function (object, params, Np,
                      data=0,
                      nrow=nvars+npars,
                      ncol=ntimes,
-                     dimnames=list(c(statenames,rw.names),NULL)
+                     dimnames=list(
+                       variable=c(statenames,rw.names),
+                       time=time(object))
                      )
   else
     pred.m <- array(data=numeric(0),dim=c(0,0))
@@ -165,7 +171,9 @@ pfilter.internal <- function (object, params, Np,
                      data=0,
                      nrow=nvars+npars,
                      ncol=ntimes,
-                     dimnames=list(c(statenames,rw.names),NULL)
+                     dimnames=list(
+                       variable=c(statenames,rw.names),
+                       time=time(object))
                      )
   else
     pred.v <- array(data=numeric(0),dim=c(0,0))
@@ -176,14 +184,18 @@ pfilter.internal <- function (object, params, Np,
                        data=0,
                        nrow=nvars+length(paramnames),
                        ncol=ntimes,
-                       dimnames=list(c(statenames,paramnames),NULL)
+                       dimnames=list(
+                         variable=c(statenames,paramnames),
+                         time=time(object))
                        )
     else
       filt.m <- matrix(
                        data=0,
                        nrow=nvars,
                        ncol=ntimes,
-                       dimnames=list(statenames,NULL)
+                       dimnames=list(
+                         variable=statenames,
+                         time=time(object))
                        )
   else
     filt.m <- array(data=numeric(0),dim=c(0,0))
@@ -301,10 +313,12 @@ pfilter.internal <- function (object, params, Np,
     
     if (save.states) {
       xparticles[[nt]] <- x
+      dimnames(xparticles[[nt]]) <- setNames(dimnames(xparticles[[nt]]),c("variable","rep"))
     }
     
     if (save.params) {
       pparticles[[nt]] <- params
+      dimnames(pparticles[[nt]]) <- setNames(dimnames(pparticles[[nt]]),c("variable","rep"))
     }
     
     if (verbose && (nt%%5==0))
@@ -321,6 +335,8 @@ pfilter.internal <- function (object, params, Np,
     warning(sprintf(ngettext(nfail,msg1="%d filtering failure occurred in ",
                              msg2="%d filtering failures occurred in "),nfail),
             sQuote("pfilter"),call.=FALSE)
+
+  pompUnload(object)
 
   new(
       "pfilterd.pomp",

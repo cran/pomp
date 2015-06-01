@@ -1,15 +1,16 @@
-\name{simulate-pomp}
+\name{POMP simulation}
+\title{Simulations of a partially-observed Markov process}
 \docType{methods}
+\alias{POMP simulation}
 \alias{simulate,pomp-method}
 \alias{simulate-pomp}
-\title{Running simulations of a partially-observed Markov process}
 \description{
-  \code{simulate} can be used to generate simulated data sets and/or to simulate the state process.
+  \code{simulate} generates simulations of the state and measurement processes.
 }
 \usage{
 \S4method{simulate}{pomp}(object, nsim = 1, seed = NULL, params,
          states = FALSE, obs = FALSE, times, t0,
-         as.data.frame = FALSE, \dots)
+         as.data.frame = FALSE, include.data = FALSE, \dots)
 }
 \arguments{
   \item{object}{An object of class \code{pomp}.}
@@ -34,8 +35,11 @@
     \code{t0} specifies the start time (the time at which the initial conditions hold).
     The default for \code{times} is is \code{times=time(object,t0=FALSE)} and \code{t0=timezero(object)}, respectively.
   }
-  \item{as.data.frame}{
-    logical; if \code{TRUE}, return the result as a data-frame.
+  \item{as.data.frame, include.data}{
+    logical; if \code{as.data.frame=TRUE}, the results are returned as a data-frame.
+    A factor variable, \sQuote{sim}, distinguishes one simulation from another.
+    If, in addition, \code{include.data=TRUE}, the original data are included as an additional \sQuote{simulation}.
+    If \code{as.data.frame=FALSE}, \code{include.data} is ignored.
   }
   \item{\dots}{further arguments that are currently ignored.}
 }
@@ -64,6 +68,8 @@
 pompExample(ou2)
 x <- simulate(ou2,seed=3495485,nsim=10)
 x <- simulate(ou2,seed=3495485,nsim=10,states=TRUE,obs=TRUE)
+x <- simulate(ou2,seed=3495485,nsim=10,obs=TRUE,
+              as.data.frame=TRUE,include.data=TRUE)
 }
 \author{Aaron A. King \email{kingaa at umich dot edu}}
 \seealso{\link{pomp}}

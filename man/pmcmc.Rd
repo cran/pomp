@@ -1,4 +1,5 @@
-\name{pmcmc}
+\name{Particle Markov Chain Monte Carlo}
+\title{The particle Markov chain Metropolis-Hastings algorithm}
 \docType{methods}
 \alias{pmcmc}
 \alias{pmcmc,pmcmc-method}
@@ -10,16 +11,33 @@
 \alias{continue,pmcmc-method}
 \alias{continue-pmcmc}
 \alias{pmcmc-class}
-\title{The PMCMC algorithm}
+\alias{pmcmc-methods}
+\alias{logLik,pmcmc-method}
+\alias{logLik-pmcmc}
+\alias{conv.rec,pmcmc-method}
+\alias{conv.rec-pmcmc}
+\alias{conv.rec,pmcmcList-method}
+\alias{conv.rec-pmcmcList}
+\alias{plot-pmcmc}
+\alias{plot,pmcmc-method}
+\alias{plot-pmcmcList}
+\alias{plot,pmcmcList-method}
+\alias{pmcmcList-class}
+\alias{c-pmcmc}
+\alias{c,pmcmc-method}
+\alias{c-pmcmcList}
+\alias{c,pmcmcList-method}
+\alias{[-pmcmcList}
+\alias{[,pmcmcList-method}
 \description{
   The Particle MCMC algorithm for estimating the parameters of a partially-observed Markov process.
 }
 \usage{
-\S4method{pmcmc}{pomp}(object, Nmcmc = 1, start, pars, rw.sd, Np,
+\S4method{pmcmc}{pomp}(object, Nmcmc = 1, start, proposal, pars, rw.sd, Np,
     tol = 1e-17, max.fail = 0, verbose = getOption("verbose"), \dots)
 \S4method{pmcmc}{pfilterd.pomp}(object, Nmcmc = 1, Np, tol, \dots)
-\S4method{pmcmc}{pmcmc}(object, Nmcmc, start, pars, rw.sd, Np,
-    tol, max.fail = 0, verbose = getOption("verbose"), \dots)
+\S4method{pmcmc}{pmcmc}(object, Nmcmc, start, proposal, Np, tol,
+    max.fail = 0, verbose = getOption("verbose"), \dots)
 \S4method{continue}{pmcmc}(object, Nmcmc = 1, \dots)
 }
 \arguments{
@@ -33,18 +51,14 @@
     named numeric vector;
     the starting guess of the parameters.
   }
-  \item{pars}{
-    optional character vector naming the ordinary parameters to be estimated.
-    Every parameter named in \code{pars} must have a positive random-walk standard deviation specified in \code{rw.sd}.
-    Leaving \code{pars} unspecified is equivalent to setting it equal to the names of all parameters with a positive value of \code{rw.sd}.
+  \item{proposal}{
+    optional function that draws from the proposal distribution.
+    Currently, the proposal distribution must be symmetric for proper inference:
+    it is the user's responsibility to ensure that it is.
+    Several functions that construct appropriate proposal function are provided:
+    see \link{MCMC proposal functions} for more information.
   }
-  \item{rw.sd}{
-    numeric vector with names; used to parameterize a Gaussian random walk MCMC proposal. The random walk is only applied to parameters named in \code{pars}. The algorithm requires that the random walk be nontrivial, so each element in \code{rw.sd[pars]} must be positive.
-    The following must be satisfied:
-    \code{names(rw.sd)} must be a subset of \code{names(start)},
-    \code{rw.sd} must be non-negative (zeros are simply ignored),
-    the name of every positive element of \code{rw.sd} must be in \code{pars}.
-  }
+  \item{pars, rw.sd}{Deprecated.  Will be removed in a future release.}
   \item{Np}{
     a positive integer;
     the number of particles to use in each filtering operation.
@@ -84,6 +98,22 @@
   This gives an asymptotically correct Bayesian procedure for parameter estimation (Andrieu and Roberts, 2009).
   An extension to give a correct Bayesian posterior distribution of unobserved state variables (as in Andrieu et al, 2010) has not yet been implemented.
 }
+\section{Methods}{
+  \describe{
+    \item{conv.rec}{
+      \code{conv.rec(object, pars)} returns the columns of the convergence-record matrix corresponding to the names in \code{pars} as an object of class \code{\link[coda]{mcmc}} or \code{\link[coda]{mcmc.list}}.
+    }
+    \item{plot}{
+      Diagnostic plots.
+    }
+    \item{logLik}{
+      Returns the value in the \code{loglik} slot.
+    }
+    \item{c}{
+      Concatenates \code{pmcmc} objects into a \code{pmcmcList}.
+    }
+  }
+}
 \references{
   C. Andrieu, A. Doucet and R. Holenstein, 
   Particle Markov chain Monte Carlo methods, 
@@ -95,6 +125,7 @@
 }
 \author{Edward L. Ionides \email{ionides at umich dot edu}, Aaron A. King \email{kingaa at umich dot edu}}
 \seealso{
-  \code{\link{pmcmc-class}}, \code{\link{pmcmc-methods}}, \code{\link{pomp}}, \code{\link{pomp-class}}, \code{\link{pfilter}}.
+  \code{\link{pomp}}, \code{\link{pfilter}},
+  and the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.
 }
 \keyword{ts}

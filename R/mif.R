@@ -13,7 +13,7 @@ setClass(
            var.factor='numeric',
            ic.lag='integer',
            cooling.type='character',
-           cooling.fraction='numeric',
+           cooling.fraction.50='numeric',
            method='character',
            random.walk.sd = 'numeric',
            conv.rec = 'matrix'
@@ -57,7 +57,7 @@ cooling.function <- function (type, perobs, fraction, ntimes) {
          hyperbolic={
            if (fraction>=1)
              stop(
-                  "mif error: ",sQuote("cooling.fraction"),
+                  "mif error: ",sQuote("cooling.fraction.50"),
                   " must be < 1 when cooling.type = ",
                   sQuote("hyperbolic"),
                   call.=FALSE
@@ -81,36 +81,12 @@ cooling.function <- function (type, perobs, fraction, ntimes) {
          )
 }
 
-mif.cooling <- function (factor, n) {   # default geometric cooling schedule
-  alpha <- factor^(n-1)
-  list(alpha=alpha,gamma=alpha^2)
-}
-
-mif2.cooling <- function (frac, nt, m, n) {   # cooling schedule for mif2
-  ## frac is the fraction of cooling after 50 iterations
-  scal <- (50*n*frac-1)/(1-frac)
-  alpha <- (1+scal)/(scal+nt+n*(m-1))
-  list(alpha=alpha)
-}
-
-powerlaw.cooling <- function (init = 1, delta = 0.1, eps = (1-delta)/2, n) {
-  m <- init
-  if (n <= m) {                         # linear cooling regime
-    alpha <- (m-n+1)/m
-    gamma <- alpha
-  } else {                              # power-law cooling regime
-    alpha <- ((n/m)^(delta+eps))/n
-    gamma <- ((n/m)^(delta+1))/n/n
-  }
-  list(alpha=alpha,gamma=gamma)
-}
-
 mif.internal <- function (object, Nmif,
-                          start, pars, ivps,
+                          start, pars = NULL, ivps,
                           particles,
                           rw.sd,
                           Np, var.factor, ic.lag,
-                          cooling.type, cooling.fraction, cooling.factor,
+                          cooling.type, cooling.fraction.50,
                           method,
                           tol, max.fail,
                           verbose, transform, .ndone = 0L,
@@ -118,6 +94,8 @@ mif.internal <- function (object, Nmif,
                           .getnativesymbolinfo = TRUE,
                           ...) {
   
+  pompLoad(object)
+
   gnsi <- as.logical(.getnativesymbolinfo)
 
   transform <- as.logical(transform)
@@ -144,6 +122,11 @@ mif.internal <- function (object, Nmif,
   rw.names <- names(rw.sd[rw.sd>0])
   if (length(rw.names) == 0)
     stop("mif error: ",sQuote("rw.sd")," must have one positive entry for each parameter to be estimated",call.=FALSE)
+  
+  if (is.null(pars))
+    pars <- rw.names[!(rw.names%in%ivps)]
+  else
+    warning("mif warning: argument ",sQuote("pars")," is redundant and deprecated.  It will be removed in a future release.",call.=FALSE)
   
   if (
       !is.character(pars) ||
@@ -223,33 +206,16 @@ mif.internal <- function (object, Nmif,
             )
   }
   
-  ## the following deals with the deprecated option 'cooling.factor'
-  if (!missing(cooling.factor)) {
-    warning(sQuote("cooling.factor")," is deprecated.\n",
-            "See ",sQuote("?mif")," for instructions on specifying the cooling schedule.",
-            call.=FALSE)
-    cooling.factor <- as.numeric(cooling.factor)
-    if ((length(cooling.factor)!=1)||(cooling.factor<0)||(cooling.factor>1))
-      stop("mif error: ",sQuote("cooling.factor")," must be a number between 0 and 1",call.=FALSE)
-    if (missing(cooling.fraction)) {
-      cooling.fraction <- cooling.factor^50
-    } else {
-      warning("specification of ",sQuote("cooling.factor"),
-              " is overridden by that of ",sQuote("cooling.fraction"),
-              call.=FALSE)
-    }
-  }
-
-  if (missing(cooling.fraction))
-    stop("mif error: ",sQuote("cooling.fraction")," must be specified",call.=FALSE)
-  cooling.fraction <- as.numeric(cooling.fraction)
-  if ((length(cooling.fraction)!=1)||(cooling.fraction<0)||(cooling.fraction>1))
-    stop("mif error: ",sQuote("cooling.fraction")," must be a number between 0 and 1",call.=FALSE)
+  if (missing(cooling.fraction.50))
+    stop("mif error: ",sQuote("cooling.fraction.50")," must be specified",call.=FALSE)
+  cooling.fraction.50 <- as.numeric(cooling.fraction.50)
+  if ((length(cooling.fraction.50)!=1)||(cooling.fraction.50<0)||(cooling.fraction.50>1))
+    stop("mif error: ",sQuote("cooling.fraction.50")," must be a number between 0 and 1",call.=FALSE)
   
   cooling <- cooling.function(
                               type=cooling.type,
                               perobs=(method=="mif2"),
-                              fraction=cooling.fraction,
+                              fraction=cooling.fraction.50,
                               ntimes=ntimes
                               )
 
@@ -278,8 +244,8 @@ mif.internal <- function (object, Nmif,
                      nrow=Nmif+1,
                      ncol=length(theta)+2,
                      dimnames=list(
-                       seq(.ndone,.ndone+Nmif),
-                       c('loglik','nfail',names(theta))
+                       iteration=seq(.ndone,.ndone+Nmif),
+                       variable=c('loglik','nfail',names(theta))
                        )
                      )
   conv.rec[1L,] <- c(NA,NA,theta)
@@ -386,6 +352,8 @@ mif.internal <- function (object, Nmif,
   ## back transform the parameter estimate if necessary
   if (transform) theta <- partrans(pfp,theta,dir="forward")
   
+  pompUnload(object)
+
   new(
       "mif",
       pfp,
@@ -402,7 +370,7 @@ mif.internal <- function (object, Nmif,
       conv.rec=conv.rec,
       method=method,
       cooling.type=cooling.type,
-      cooling.fraction=cooling.fraction,
+      cooling.fraction.50=cooling.fraction.50,
       paramMatrix=if (method=="mif2") paramMatrix else array(data=numeric(0),dim=c(0,0))
       )
 }
@@ -412,11 +380,11 @@ setMethod(
           signature=signature(object="pomp"),
           function (object, Nmif = 1,
                     start,
-                    pars, ivps = character(0),
+                    ivps = character(0),
                     particles, rw.sd,
-                    Np, ic.lag, var.factor,
+                    Np, ic.lag, var.factor = 1,
                     cooling.type = c("geometric","hyperbolic"),
-                    cooling.fraction, cooling.factor,
+                    cooling.fraction.50,
                     method = c("mif","unweighted","fp","mif2"),
                     tol = 1e-17, max.fail = Inf,
                     verbose = getOption("verbose"),
@@ -437,14 +405,9 @@ setMethod(
                 ic.lag <- length(time(object))
               }
             }
-            if (missing(pars)) {
-              rw.names <- names(rw.sd)[rw.sd>0]
-              pars <- rw.names[!(rw.names%in%ivps)]
-            }
+
             if (missing(Np))
               stop("mif error: ",sQuote("Np")," must be specified",call.=FALSE)
-            if (missing(var.factor))
-              stop("mif error: ",sQuote("var.factor")," must be specified",call.=FALSE)
 
             cooling.type <- match.arg(cooling.type)
             
@@ -466,14 +429,12 @@ setMethod(
                          object=object,
                          Nmif=Nmif,
                          start=start,
-                         pars=pars,
                          ivps=ivps,
                          particles=particles,
                          rw.sd=rw.sd,
                          Np=Np,
                          cooling.type=cooling.type,
-                         cooling.factor=cooling.factor,
-                         cooling.fraction=cooling.fraction,
+                         cooling.fraction.50=cooling.fraction.50,
                          var.factor=var.factor,
                          ic.lag=ic.lag,
                          method=method,
@@ -515,7 +476,7 @@ setMethod(
                     ivps,
                     particles, rw.sd,
                     Np, ic.lag, var.factor,
-                    cooling.type, cooling.fraction,
+                    cooling.type, cooling.fraction.50,
                     method,
                     tol,
                     transform,
@@ -529,7 +490,7 @@ setMethod(
             if (missing(ic.lag)) ic.lag <- object@ic.lag
             if (missing(var.factor)) var.factor <- object@var.factor
             if (missing(cooling.type)) cooling.type <- object@cooling.type
-            if (missing(cooling.fraction)) cooling.fraction <- object@cooling.fraction
+            if (missing(cooling.fraction.50)) cooling.fraction.50 <- object@cooling.fraction.50
             if (missing(method)) method <- object@method
             if (missing(transform)) transform <- object@transform
 
@@ -545,7 +506,7 @@ setMethod(
                 rw.sd=rw.sd,
                 Np=Np,
                 cooling.type=cooling.type,
-                cooling.fraction=cooling.fraction,
+                cooling.fraction.50=cooling.fraction.50,
                 var.factor=var.factor,
                 ic.lag=ic.lag,
                 method=method,
@@ -577,53 +538,9 @@ setMethod(
                                   object@conv.rec,
                                   obj@conv.rec[-1L,colnames(object@conv.rec)]
                                   )
+            names(dimnames(obj@conv.rec)) <- c("iteration","variable")
             obj@Nmif <- as.integer(ndone+Nmif)
             
             obj
           }
           )
-
-mif.profileDesign <- function (object, profile, lower, upper, nprof, ivps, 
-                               rw.sd, Np, ic.lag, var.factor, cooling.factor,option, cooling.fraction, paramMatrix, ...)
-{
-  if (missing(profile)) profile <- list()
-  if (missing(lower)) lower <- numeric(0)
-  if (missing(upper)) upper <- lower
-  if (length(lower)!=length(upper))
-    stop(sQuote("lower")," and ",sQuote("upper")," must be of the same length")
-  pars <- names(lower)
-  if (missing(ivps)) ivps <- character(0)
-  Np <- as.integer(Np)
-  
-  pd <- do.call(profileDesign,c(profile,list(lower=lower,upper=upper,nprof=nprof)))
-  
-  object <- as(object,"pomp")
-  
-  pp <- coef(object)
-  idx <- !(names(pp)%in%names(pd))
-  if (any(idx)) pd <- cbind(pd,as.list(pp[idx]))
-  
-  ans <- vector(mode="list",length=nrow(pd))
-  for (k in seq_len(nrow(pd))) {
-    ans[[k]] <- list(
-                     mf=mif(
-                       object,
-                       Nmif=0,
-                       start=unlist(pd[k,]),
-                       pars=pars,
-                       ivps=ivps,
-                       rw.sd=rw.sd,
-                       Np=Np,
-                       ic.lag=ic.lag,
-                       var.factor=var.factor,
-                       cooling.factor=cooling.factor,
-                       option=option,
-                       cooling.fraction=cooling.fraction,
-                       paramMatrix=paramMatrix,
-                       ...
-                       )
-                     )
-  }
-  
-  ans
-}

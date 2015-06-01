@@ -1,8 +1,35 @@
-citHeader("To cite the pomp package in publications use:")
+year <- sub("-.*", "", meta$Date)
+note1 <- sprintf("R~package, version~%s", meta$Version)
+note2 <- sprintf("(R package, version %s)", meta$Version)
 
 citEntry(
+         header=paste("To cite the",sQuote("pomp"),
+         "package in publications, please use:"),
+         entry="Article",
+         title="Statistical Inference for Partially Observed {M}arkov Processes via the {R} Package {pomp}",
+         author=personList(
+ 	   as.person("Aaron A. King"),
+	   as.person("Dao Nguyen"),
+	   as.person("Edward L. Ionides")
+           ),
+	 year=2015,
+         journal="Journal of Statistical Software",
+         volume="in press",
+#	 number=XX,
+#	 url="http://www.jstatsoft.org/vXX/iXX",
+	 textVersion=paste0(
+           "Aaron A. King, Dao Nguyen, Edward L. Ionides",
+	   " (2015) ",
+           "Statistical Inference for Partially Observed Markov Processes via the R Package pomp. ",
+           "Journal of Statistical Software, in press. "
+#	   "http://www.jstatsoft.org/vXX/iXX"
+	  )	   
+   )		 
+
+citEntry(
+         header="Additionally, please cite the package itself:",
          entry="Manual",
-         title="pomp: Statistical inference for partially observed Markov processes (R package)",
+         title="{pomp}: {S}tatistical Inference for Partially Observed {M}arkov Processes",
          author=personList(
  	   as.person("Aaron A. King"),
 	   as.person("Edward L. Ionides"),
@@ -16,13 +43,15 @@ citEntry(
 	   as.person("Helen Wearing"),
 	   as.person("Simon N. Wood")
 	   ),	   
-	 year=2014,
-	 url="http://pomp.r-forge.r-rproject.org",
-	 textVersion=paste(
-			   "A. A. King, E. L. Ionides, C. M. Bret\\'o, S. P. Ellner, M. J. Ferrari, B. E. Kendall, M. Lavine, D. Nguyen, D. C. Reuman, H. Wearing, and S. N. Wood",
-			   "pomp: Statistical inference for partially observed Markov processes (R package)",
-			   "http://pomp.r-forge.r-project.org"
-			  )	   
-	 )		 
+	 year=year,
+	 note=note1,
+	 url=meta$URL,
+	 textVersion=paste0(
+           "A. A. King, E. L. Ionides, C. M. Breto, S. P. Ellner, M. J. Ferrari, B. E. Kendall, M. Lavine, D. Nguyen, D. C. Reuman, H. Wearing, and S. N. Wood"," (",year,") ",
+	   "pomp: Statistical Inference for Partially Observed Markov Processes ",
+	   note2,". ",meta$URL
+	  )	   
+   )		 
 
-citFooter("As pomp is continually evolving, you may want to cite its version number. Find it with 'help(package=pomp)'.")
+citFooter("To obtain these citations in BibTeX format, do ",
+          sQuote("toBibtex(citation(\"pomp\"))"))

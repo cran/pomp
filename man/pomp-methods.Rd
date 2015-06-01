@@ -1,5 +1,6 @@
-\name{pomp-methods}
+\name{pomp methods}
 \docType{methods}
+\alias{pomp methods}
 \alias{pomp-methods}
 \alias{plot,pomp-method}
 \alias{plot-pomp}
@@ -40,15 +41,14 @@
 \alias{coef<-}
 \alias{coef<-,pomp-method}
 \alias{coef<--pomp}
-\title{Methods of the "pomp" class}
-\description{Methods of the \code{pomp} class.}
+\title{Functions for manipulating, displaying, and extracting information from objects of the \code{pomp} class}
+\description{This page documents the various methods that allow one to extract information from, display, plot, and modify \code{pomp} objects.}
 \usage{
-\S3method{as.data.frame}{pomp}(x, row.names, optional, \dots)
 \S4method{coef}{pomp}(object, pars, transform = FALSE, \dots)
 \S4method{coef}{pomp}(object, pars, transform = FALSE, \dots) <- value
 \S4method{obs}{pomp}(object, vars, \dots)
-\S4method{data.array}{pomp}(object, vars, \dots)
-\S4method{partrans}{pomp}(object, params, dir = c("forward","inverse"), \dots)
+\S4method{partrans}{pomp}(object, params, dir = c("fromEstimationScale",
+      "toEstimationScale","forward","inverse"), \dots)
 \S4method{plot}{pomp}(x, y, variables, panel = lines,
       nc = NULL, yax.flip = FALSE,
       mar = c(0, 5.1, 0, if (yax.flip) 5.1 else 2.1),
@@ -62,7 +62,6 @@
 \S4method{timezero}{pomp}(object, \dots) <- value
 \S4method{window}{pomp}(x, start, end, \dots)
 \S4method{as}{pomp}(object, class)
-\S4method{coerce}{pomp,data.frame}(from, to = "data.frame", strict = TRUE)
 }
 \arguments{
   \item{object, x}{The \code{pomp} object.}
@@ -104,12 +103,6 @@
     character;
     name of the class to which \code{object} should be coerced.
   }
-  \item{from, to}{
-    the classes between which coercion should be performed.
-  }
-  \item{strict}{
-    ignored.
-  }
   \item{y}{ignored.}
   \item{variables}{
     optional character;
@@ -134,9 +127,6 @@
     logical;
     indicates if x- and y- axes should be drawn.
   }
-  \item{row.names, optional}{
-    ignored.
-  }
   \item{\dots}{
     Further arguments (either ignored or passed to underlying functions).
   }
@@ -146,8 +136,8 @@
     \item{coef}{
       \code{coef(object)} returns the contents of the \code{params} slot of \code{object}.
       \code{coef(object,pars)} returns only those parameters named in \code{pars}.
-      \code{coef(object,transform=TRUE)} returns \code{parameter.inv.transform(coef(object))}, where \code{parameter.inv.transform} is the user parameter inverse transformation function specified when \code{object} was created.
-      Likewise, \code{coef(object,pars,transform=TRUE)} returns \code{parameter.inv.transform(coef(object))[pars]}.
+      \preformatted{coef(object,transform=TRUE)} returns \preformatted{parameter.inv.transform(coef(object))}, where \code{parameter.inv.transform} is the user parameter inverse transformation function specified when \code{object} was created.
+      Likewise, \preformatted{coef(object,pars,transform=TRUE)} returns \preformatted{parameter.inv.transform(coef(object))[pars]}.
     }
     \item{coef<-}{
       Assigns values to the \code{params} slot of the \code{pomp} object.
@@ -162,10 +152,9 @@
       \code{coef(object,pars,transform=TRUE) <- value} first, discards any names the \code{value} may have, sets \code{names(value) <- pars}, and then replaces the elements of \code{object}'s \code{params} slot \code{parameter.transform(value)}.
       In this case, if some of the names in \code{pars} do not already name parameters in \code{coef(object,transform=TRUE)}, then they are concatenated.
     }
-    \item{obs, data.array}{
-      These functions are synonymous.
+    \item{obs}{
       \code{obs(object)} returns the array of observations.
-      \code{obs(object,vars)} gives just the observations of variables named \code{vars}.
+      \code{obs(object,vars)} gives just the observations of variables named in \code{vars}.
       \code{vars} may specify the variables by position or by name.
     }
     \item{states}{
@@ -197,52 +186,18 @@
       Additional arguments are passed to the low-level plotting routine.
     }
     \item{print}{Prints the \code{pomp} object in a nice way.}
-    \item{as, coerce}{
-      The \code{coerce} method should typically not be used directly.
-      It is defined by \code{setAs} as a method to be used by \code{as}.
-      A \code{pomp} object can be coerced to a data frame via \code{as(object,"data.frame")}.
+    \item{as}{
+      A \code{pomp} object can be coerced to a data frame via \preformatted{as(object,"data.frame").}
       The data frame contains the times, the data, and the state trajectories, if they exist.
-    }
-    \item{rprocess}{
-      simulates the process model.
-      See \code{\link{rprocess-pomp}}.
-    }
-    \item{dprocess}{
-      evaluates the process model density.
-      See \code{\link{dprocess-pomp}}.
-    }
-    \item{rmeasure}{
-      simulates the measurement model.
-      See \code{\link{rmeasure-pomp}}.
-    }
-    \item{dmeasure}{
-      evaluates the measurement-model density.
-      See \code{\link{dmeasure-pomp}}.
-    }
-    \item{skeleton}{
-      evaluates the deterministic skeleton (be it a vector field or a map).
-      See \code{\link{skeleton-pomp}}.
-    }
-    \item{init.state}{
-      returns a vector of initialial conditions.
-      See \code{\link{init.state-pomp}}.
-    }
-    \item{simulate}{
-      \code{simulate} can be used to simulate state and observation trajectories.
-      See documentation under \code{\link{simulate-pomp}}.
     }
   }
 }
 \author{Aaron A. King \email{kingaa at umich dot edu}}
 \seealso{
   \code{\link{pomp}},
-  \link{pomp-class},
-  \code{\link{rprocess}},
-  \code{\link{dprocess}},
-  \code{\link{rmeasure}},
-  \code{\link{dmeasure}},
-  \code{\link{init.state}},
-  \code{\link[=simulate-pomp]{simulate}}
+  \link{pomp low-level interface},
+  \link[=simulate-pomp]{simulate},
+  \code{\link{pfilter}}, \code{\link{probe}}.
 }
-\keyword{models}
+\keyword{programming}
 \keyword{ts}

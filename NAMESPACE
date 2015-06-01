@@ -7,6 +7,7 @@ useDynLib(
           euler_model_simulator,
           euler_model_density,
           lookup_in_table,
+          load_stack_incr,load_stack_decr,
           SSA_simulator,
           R_Euler_Multinom,D_Euler_Multinom,R_GammaWN,
           mif_update,
@@ -56,6 +57,7 @@ exportClasses(
 exportMethods(
               pomp,
               plot,show,print,coerce,summary,logLik,window,"$",
+              pompLoad,pompUnload,
               dprocess,rprocess,rmeasure,dmeasure,init.state,skeleton,
               dprior,rprior,
               data.array,obs,partrans,coef,"coef<-",
@@ -64,16 +66,19 @@ exportMethods(
               eff.sample.size,cond.logLik,
               particles,mif,continue,states,trajectory,
               pred.mean,pred.var,filter.mean,conv.rec,
-              bsmc,pmcmc,abc,nlf,
+              values,
+              bsmc2,bsmc,pmcmc,abc,nlf,
               traj.match.objfun,
               probe.match.objfun,
               spect,probe,probe.match,
               traj.match
               )
 
+S3method(as.data.frame,pomp)
+S3method(as.data.frame,pfilterd.pomp)
+S3method(as.data.frame,probed.pomp)
+
 export(
-       as.data.frame.pomp,
-       as.data.frame.pfilterd.pomp,
        Csnippet,
        reulermultinom,
        deulermultinom,
@@ -83,13 +88,13 @@ export(
        onestep.sim,
        onestep.dens,
        gillespie.sim,
+       mvn.diag.rw,mvn.rw,
        sobol,
        sobolDesign,
        sliceDesign,
        profileDesign,
        bspline.basis,
        periodic.bspline.basis,
-       compare.mif,
        parmat,
        logmeanexp,
        probe.mean,

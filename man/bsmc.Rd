@@ -1,17 +1,24 @@
-\name{bsmc}
+\name{Bayesian sequential Monte Carlo}
+\title{The Liu and West Bayesian particle filter}
+\alias{Bayesian sequential Monte Carlo}
 \alias{bsmc}
 \alias{bsmc-pomp}
 \alias{bsmc,pomp-method}
+\alias{bsmc2}
+\alias{bsmc2-pomp}
+\alias{bsmc2,pomp-method}
 \alias{$,bsmcd.pomp-method}
 \alias{$-bsmcd.pomp}
 \alias{plot,bsmcd.pomp-method}
 \alias{plot-bsmcd.pomp}
-\title{Liu and West Bayesian Particle Filter}
 \description{
-  Generates draws from the posterior distribution for the parameters using the Liu and West algorithm.
-  \code{bsmc} gives draws from the posterior.
+  Modified versions of the Liu and West (2001) algorithm.
 }
 \usage{
+\S4method{bsmc2}{pomp}(object, params, Np, est, smooth = 0.1,
+     tol = 1e-17, seed = NULL,
+     verbose = getOption("verbose"), max.fail = 0,
+     transform = FALSE, \dots)
 \S4method{bsmc}{pomp}(object, params, Np, est, smooth = 0.1,
      ntries = 1, tol = 1e-17, lower = -Inf, upper = Inf, seed = NULL,
      verbose = getOption("verbose"), max.fail = 0,
@@ -107,11 +114,15 @@
   There are two ways to specify the prior distribution of particles.
   If \code{params} is unspecified or is a named vector, \code{Np} draws are made from the prior distribution, as specified by \code{\link{rprior}}.
   Alternatively, \code{params} can be specified as an \code{npars} x \code{Np} matrix (with rownames).
+
+  \code{bsmc} uses version of the original algorithm that includes a plug-and-play auxiliary particle filter.
+  \code{bsmc2} discards this auxiliary particle filter and appears to give superior performance for the same amount of effort.
 }
 \author{
   Michael Lavine (lavine at math dot umass dot edu),
   Matthew Ferrari (mferrari at psu dot edu),
-  Aaron A. King
+  Aaron A. King (kingaa at umich dot edu),
+  Edward L. Ionides (ionides at umich dot edu)
 }
 \references{
   Liu, J. and M. West.
@@ -120,8 +131,7 @@
   Sequential Monte Carlo Methods in Practice, pages 197-224.
   Springer, New York, 2001.
 }
-\examples{
-## See the "Introducton to pomp" document for examples.
+\seealso{
+  \code{\link{pomp}}, \code{\link{pfilter}}
 }
-\seealso{\link{pomp-class}}
 \keyword{ts}
