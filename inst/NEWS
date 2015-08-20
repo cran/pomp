@@ -1,5 +1,144 @@
 _N_e_w_s _f_o_r _p_a_c_k_a_g_e '_p_o_m_p'
 
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._7_8-_1:
+
+        • There is a new, adaptive MCMC proposal function,
+          ‘mvn.rw.adaptive’ that can be used in ‘pmcmc’ and ‘abc’.
+
+        • The new ‘covmat’ method, applied to ‘abc’, ‘abcList’,
+          ‘pmcmc’, or ‘pmcmcList’ objects, returns an inflated
+          empirical covariance matrix suitable for use as input to the
+          proposal generator ‘mvn.rw’.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._7_7-_1:
+
+        • The deprecated ‘transform.params’ argument from ‘nlf’ has
+          been removed.
+
+        • The deprecated ‘pars’ and ‘rw.sd’ arguments from ‘abc’ and
+          ‘pmcmc’ have been removed.
+
+        • The deprecated ‘data.array’ method has been removed.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._7_6-_2:
+
+        • The default value of ‘max.fail’ for ‘pmcmc’ is now ‘Inf’.
+          That is, by default ‘pmcmc’ will not halt (but will issue a
+          warning) when filtering failure occurs (i.e., no particles
+          are consistent with the data, as defined by the likelihood
+          threshold ‘tol’).
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._7_6-_1:
+
+        • ‘logmeanexp’ has used a delta-method estimate of the variance
+          in log(mean(exp(x))) when ‘se = TRUE’.  This gave
+          misleadingly small values when the variance in exp(x) was
+          large.  The new ‘logmeanexp’ uses a jackknife estimate of the
+          variance.  This is still conservative, in that it is biased
+          upwards, but is more robust.
+
+        • ‘pomp’ now includes ‘magrittr’, ‘plyr’, ‘reshape2’,
+          ‘ggplot2’, and ‘knitr’ in its ‘Suggests’ field: these
+          packages are available for use in ‘pompExample’s and package
+          tests.
+
+        • There is now a ‘coef’ method for ‘mifList’ and ‘mif2List’
+          objects.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._7_5-_1:
+
+        • By default, when ‘Csnippet’s are used, the source code is now
+          stored internally to the ‘pomp’ object.  When a ‘pomp’ object
+          is used, a test is first performed to see if the needed
+          shared-object file exists.  If it does not, the source code
+          is written to a file in the session's temporary directory,
+          which is then compiled and loaded.  This feature allows
+          ‘pomp’ objects to be stored and reused across R sessions.
+          The name of the file is constructed using a hash of the
+          file's contents.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._7_4-_1:
+
+        • The functions ‘bake’ and ‘stew’ have arguments that allow the
+          control of the RNG.  These functions can now set the state
+          (and kind) of the RNG and restore it when they return.
+
+        • The new function ‘freeze’ allows control of the RNG
+          similarly.
+
+        • The ‘seed’ argument of ‘bsmc’ and ‘bsmc2’ has been removed.
+          Its use now generates a warning, stating that it has no
+          effect.
+
+        • The ‘seed’ argument to ‘pfilter’ is now deprecated and will
+          be removed soon.  Equivalent functionality is provided via
+          ‘freeze’, ‘bake’, or ‘stew’.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._7_3-_1:
+
+        • The new functions ‘bake’ and ‘stew’ faciliate storing
+          expensive calculations for later retrieval in a transparent
+          fashion.
+
+        • ‘pompBuilder’, which has not been actively maintained for
+          time due to the fact that its facilities are all provided by
+          ‘pomp’ via ‘Csnippet’s, is now no longer exported.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._7_2-_1:
+
+        • ‘pmcmc’ and ‘pfilter’ now have the capability of saving
+          filtered trajectories.  These can be extracted using the new
+          method ‘filter.traj’.  The principal use will be in
+          conjunction with ‘pmcmc’, where, upon convergence to the
+          posterior, samples from the filtered trajectories are draws
+          from the posterior P[x[1:T] | y[1:T]].  Thanks to Sebastian
+          Funk for initiating this development.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._7_1-_1:
+
+        • ‘partrans’ and ‘parmat’ have been jiggered to make them play
+          better with ‘reshape2::melt’.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._7_0-_1:
+
+        • Some of the underpinnings of ‘nlf’ have been streamlined for
+          speed.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._6_9-_2:
+
+        • Measles data from England and Wales, kindly provided by Ben
+          Bolker, are now included as ‘ewmeas’ and ‘ewcitmeas’.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._6_8-_2:
+
+        • When using ‘Csnippet’s, by default, the C codes and
+          shared-object files are stored in the R session's temporary
+          directory.  One can override this behavior by setting the
+          global ‘pomp.cache’ option.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._6_7-_1:
+
+        • A ‘pomp’ object's initializer can now be specified as a
+          Csnippet.
+
+        • The default initializer is now considerably faster.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._6_6-_4:
+
+        • A full-featured version of IF2, an improved iterated
+          filtering algorithm, is now available as ‘mif2’.  This allows
+          a more general structure for the random perturbations applied
+          to parameters and is generally more efficient and stable than
+          IF1.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._6_5-_2:
+
+        • In the ‘pomp’ constructor, unrecognized arguments are stored
+          internally for use with user-supplied model functions.  As of
+          this version, an informative message is generated when this
+          happens.  Previously, this silent behavior was a source of
+          confusion for some users.
+
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._6_5-_1:
 
         • The unfortunately named ‘pomp’ arguments
@@ -42,8 +181,7 @@ _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._6_2-_1
 
         • ‘mif’ now has the default value ‘var.factor=1’.  Since
           ‘var.factor’ has long been a required parameter, this change
-          is backward compatible.  Since ‘var.factor’ has long been a
-          required parameter, this change is backward compatible.
+          is backward compatible.
 
         • The long-deprecated ‘cooling.factor’ option to ‘mif’ has now
           been removed.
@@ -659,7 +797,7 @@ _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._3_9-_4
         • The ‘sannbox’ algorithm now should work even when the
           objective function throws a non-finite value.  The behavior
           now is to replace non-finite values with a large number.
-          This behavior follows that of the 'SANN' method in ‘optim’.
+          This behavior follows that of the ‘SANN’ method in ‘optim’.
 
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _0._3_9-_3:
 

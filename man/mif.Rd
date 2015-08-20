@@ -13,13 +13,13 @@
 \alias{continue-mif}
 \alias{mif-class}
 \alias{mif-methods}
-\alias{logLik,mif-method}
-\alias{logLik-mif}
 \alias{conv.rec}
 \alias{conv.rec,mif-method}
 \alias{conv.rec-mif}
 \alias{conv.rec,mifList-method}
 \alias{conv.rec-mifList}
+\alias{coef,mifList-method}
+\alias{coef.rec-mifList}
 \alias{plot-mif}
 \alias{plot,mif-method}
 \alias{plot-mifList}
@@ -31,9 +31,14 @@
 \alias{c,mifList-method}
 \alias{[-mifList}
 \alias{[,mifList-method}
-\alias{compare.mif}
 \description{
   Iterated filtering algorithms for estimating the parameters of a partially-observed Markov process.
+  Running \code{mif} causes the iterated filtering algorithm to run for a specified number of iterations.
+  At each iteration, the particle filter is performed on a perturbed version of the model.
+  Specifically, parameters to be estimated are subjected to random perturbations at each observation.
+  This extra variability effectively smooths the likelihood surface and combats particle depletion by introducing diversity into the population of particles.
+  At the iterations progress, the magnitude of the perturbations is diminished according to a user-specified cooling schedule.
+  For most purposes, \code{mif} has been superseded by \code{\link{mif2}}.
 }
 \usage{
 \S4method{mif}{pomp}(object, Nmif = 1, start, ivps = character(0),
@@ -48,7 +53,6 @@
     cooling.type, cooling.fraction.50,
     method, tol, transform, \dots)
 \S4method{continue}{mif}(object, Nmif = 1, \dots)
-\S4method{logLik}{mif}(object, \dots)
 \S4method{conv.rec}{mif}(object, pars, transform = FALSE, \dots)
 \S4method{conv.rec}{mifList}(object, \dots)
 }
@@ -66,7 +70,7 @@
   \item{ivps}{
     optional character vector naming the initial-value parameters (IVPs) to be estimated.
     Every parameter named in \code{ivps} must have a positive random-walk standard deviation specified in \code{rw.sd}.
-    If there are no non-IVP parameters with positive \code{rw.sd}, i.e., only IVPs are to be estimated, see below \dQuote{"Using \code{mif} to estimate initial-value parameters only"}.
+    If there are no regular parameters with positive \code{rw.sd}, i.e., only IVPs are to be estimated, see below \dQuote{"Using \code{mif} to estimate initial-value parameters only"}.
   }
   \item{particles}{
     Function of prototype \code{particles(Np,center,sd,...)} which sets up the starting particle matrix by drawing a sample of size \code{Np} from the starting particle distribution centered at \code{center} and of width \code{sd}.
@@ -103,9 +107,10 @@
     For \code{method="mif2"}, the default is \code{ic.lag=length(times)}.
   }
   \item{var.factor}{
-    a positive number;
+    optional positive scalar;
     the scaling coefficient relating the width of the starting particle distribution to \code{rw.sd}.
     In particular, the width of the distribution of particles at the start of the first \code{mif} iteration will be \code{random.walk.sd*var.factor}.
+    By default, \code{var.factor=1}.
   }
   \item{cooling.type, cooling.fraction.50}{
     specifications for the cooling schedule, i.e., the manner in which the intensity of the parameter perturbations is reduced with successive filtering iterations.
@@ -139,9 +144,21 @@
   }
   \item{pars}{names of parameters.}
 }
+\value{
+  Upon successful completion, \code{mif} returns an object of class \code{mif}.
+  The latter inherits from the \code{\link{pfilterd.pomp}} and \code{\link{pomp}} classes.
+}
+\section{IF2}{
+  A more full-featured version of the improved iterated filtering algorithm (IF2) is implemented as \code{\link{mif2}}.
+}
+\section{Regular parameters vs initial-value parameters}{
+  Initial-value parameters (IVPs) differ from regular parameters in that the majority of the information about these parameters is restricted to the early part of the time series.
+  That is, increasing the length of the time series provides progressively less additional information about IVPs than it does about regular parameters.
+  In \code{mif}, while regular parameters are perturbed at the initial time and after every observation, IVPs are perturbed only at the initial time.
+}
 \section{Re-running \code{mif} Iterations}{
   To re-run a sequence of \code{mif} iterations, one can use the \code{mif} method on a \code{mif} object.
-  By default, the same parameters used for the original \code{mif} run are re-used (except for \code{weighted}, \code{tol}, \code{max.fail}, and \code{verbose}, the defaults of which are shown above).
+  By default, the same parameters used for the original \code{mif} run are re-used (except for \code{tol}, \code{max.fail}, and \code{verbose}, the defaults of which are shown above).
   If one does specify additional arguments, these will override the defaults.
 }
 \section{Continuing \code{mif} Iterations}{
@@ -169,7 +186,7 @@
       NB: this is \emph{not} the same as the likelihood of the model at the MLE!
     }
     \item{c}{
-      Concatenates \code{mif} objects into an \code{mifList}.
+      Concatenates \code{mif} objects into a \code{mifList}.
     }
     \item{plot}{
       Plots a series of diagnostic plots when applied to a \code{mif} or \code{mifList} object.
@@ -211,9 +228,9 @@
   Inapparent infections and cholera dynamics,
   Nature, 454:877--880, 2008.
 }
-\author{Aaron A. King \email{kingaa at umich dot edu}}
+\author{Aaron A. King}
 \seealso{
-  \code{\link{pomp}}, \code{\link{pfilter}}
+  \code{\link{pomp}}, \code{\link{pfilter}}, \code{\link{mif2}}
 }
 \keyword{optimize}
 \keyword{ts}

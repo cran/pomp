@@ -23,11 +23,11 @@
 
   \strong{Note to Windows and Mac users:}
   By default, your \R installation may not support \code{\link[=SHLIB]{R CMD SHLIB}}.
-  Have a look at the tutorials on the package website for instructions on enabling this powerful feature of \R.
+  The package website contains installation instructions that show how to enable this powerful feature of \R.
 
   In writing a \code{Csnippet} one must bear in mind both the \emph{goal} of the snippet, i.e., what computation it is intended to perform, and the \emph{context} in which it will be executed.
   Details of both of these are given below in the form of rules governing the use of \code{Csnippet}s.
-  Illustrative examples are given in the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.
+  Illustrative examples are given in the tutorials on the \href{http://kingaa.github.io/pomp}{package website}.
 }
 \section{General rules for writing C snippets}{
   \enumerate{
@@ -89,9 +89,18 @@
 }
 \section{Rules for writing parameter transformation snippets}{
   \enumerate{
-    \item The parameter transformation mapping a parameter vector from the scale defined by the model codes to another scale is specified as the \code{parameter.inv.transform} whilst the transformation mapping a parameter vector from the alternative scale to that on which the model is defined is specified as the \code{parameter.transform}.
-    \item The goal of a these snippets is the computation of the values of the transformed parameters.  The value of transformed parameter \code{x} should be assigned to variable \code{Tx}.
+    \item The parameter transformation mapping a parameter vector from the scale used by the model codes to another scale is specified using the \code{toEstimationScale} argument whilst the transformation mapping a parameter vector from the alternative scale to that on which the model is defined is specified with the \code{fromEstimationScale} argument.
+    \item The goal of these snippets is the computation of the values of the transformed parameters.  The value of transformed parameter \code{x} should be assigned to variable \code{Tx}.
     \item Time-, state-, and covariate-dependent transformations are not allowed.  Therefore, neither the time, nor any state variables, nor any of the covariates will be available in the context within which a parameter transformation snippet is executed.
+  }
+}
+\section{Rules for writing \code{initializer} snippets}{
+  \enumerate{
+    \item The goal of a this snippet is the construction of a state vector, i.e., the setting of the dynamical states at time \eqn{t_0}{\code{t0}}.
+    \item In addition to the parameters and covariates (if any), the variable \code{t}, containing the time of the observation, will be defined in the context in which the snippet is executed.
+    \item \strong{NB:} The \code{statenames} argument plays a particularly important role when the initializer is specified using a \code{Csnippet}.
+    In particular, every state variable must be named in \code{statenames}.
+    \strong{Failure to follow this rule will result in undefined behavior.}
   }
 }
 \section{Viewing the generated C code}{
@@ -99,9 +108,9 @@
   To do so, set \code{options(verbose=TRUE)} before calling \code{pomp}.
   A message giving the name of the generated C file (in the session temporary directory) will be printed.
 }
-\author{Aaron A. King \email{kingaa at umich dot edu}}
+\author{Aaron A. King}
 \seealso{
-  \code{\link{pomp}}, \code{\link{plugins}}, and the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.
+  \code{\link{pomp}}, \code{\link{plugins}}, and the tutorials on the \href{http://kingaa.github.io/pomp}{package website}.
 }
 \keyword{programming}
 \keyword{interface}

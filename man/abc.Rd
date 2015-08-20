@@ -23,6 +23,11 @@
 \alias{plot-abcList}
 \alias{plot,abcList-method}
 \alias{abcList-class}
+\alias{covmat}
+\alias{covmat,abc-method}
+\alias{covmat-abc}
+\alias{covmat,abcList-method}
+\alias{covmat-abcList}
 \alias{c-abc}
 \alias{c,abc-method}
 \alias{c-abcList}
@@ -33,8 +38,8 @@
   The approximate Bayesian computation (ABC) algorithm for estimating the parameters of a partially-observed Markov process.
 }
 \usage{
-\S4method{abc}{pomp}(object, Nabc = 1, start, proposal,
-    pars, rw.sd, probes, scale, epsilon,
+\S4method{abc}{pomp}(object, Nabc = 1, start,
+    proposal, probes, scale, epsilon,
     verbose = getOption("verbose"), \dots)
 \S4method{abc}{probed.pomp}(object, probes,
     verbose = getOption("verbose"), \dots)
@@ -64,10 +69,6 @@
     it is the user's responsibility to ensure that it is.
     Several functions that construct appropriate proposal function are provided:
     see \link{MCMC proposal functions} for more information.
-  }
-  \item{rw.sd}{
-    Deprecated.  Will be removed in a future release.
-    Specifying \code{rw.sd} is equivalent to setting \code{proposal=mvn.diag.rw(rw.sd)}.
   }
   \item{probes}{
     List of probes (AKA summary statistics).
@@ -113,8 +114,8 @@
 \section{Methods}{
   Methods that can be used to manipulate, display, or extract information from an \code{abc} object:
   \describe{
-    \item{conv.rec}{
-      \code{conv.rec(object, pars)} returns the columns of the convergence-record matrix corresponding to the names in \code{pars}.
+    \item{\code{conv.rec(object, pars)} }{
+      returns the columns of the convergence-record matrix corresponding to the names in \code{pars}.
       By default, all rows are returned.
     }
     \item{c}{
@@ -122,6 +123,11 @@
     }
     \item{plot}{
       Diagnostic plots.
+    }
+    \item{\code{covmat(object, start, thin, expand)}}{
+      computes the empirical covariance matrix of the ABC samples beginning with iteration \code{start} and thinning by factor \code{thin}.
+      It expands this by a factor \code{expand^2/n}, where \code{n} is the number of parameters estimated.
+      The intention is that the resulting matrix is a suitable input to the proposal function \code{\link{mvn.rw}}.
     }
   }
 }
@@ -134,8 +140,8 @@
   Approximate Bayesian computation scheme for parameter inference and model selection in dynamical systems
   Journal of the Royal Society, Interface 6:187--202, 2009.
 }
-\author{Edward L. Ionides \email{ionides at umich dot edu}, Aaron A. King \email{kingaa at umich dot edu}}
+\author{Edward L. Ionides, Aaron A. King}
 \seealso{
-  \code{\link{pomp}}, \code{\link{probe}}, and the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.  
+  \code{\link{pomp}}, \code{\link{probe}}, \link{MCMC proposal distributions}, and the tutorials on the \href{http://kingaa.github.io/pomp/}{package website}.  
 }
 \keyword{ts}

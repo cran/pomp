@@ -11,7 +11,7 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
                               fromEstimationScale, toEstimationScale,
                               parameter.transform = NULL, parameter.inv.transform = NULL,
                               globals, userdata, ...,
-                              .solibfile, .filename, .filedir,
+                              .solibs = list(),
                               verbose = getOption("verbose",FALSE)) {
 
   ## preliminary error checking
@@ -19,20 +19,24 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
   if (missing(times)) stop(sQuote("times")," is a required argument")
   if (missing(t0)) stop(sQuote("t0")," is a required argument")
   if (missing(params)) params <- numeric(0)
-  if (missing(.solibfile)) .solibfile <- list()
-  if (missing(.filename)) .filename <- NULL
-  if (missing(.filedir)) .filedir <- NULL
   
   if (missing(userdata)) userdata <- list()
   added.userdata <- list(...)
-  userdata[names(added.userdata)] <- added.userdata
+  if (length(added.userdata)>0) {
+    message("In ",sQuote("pomp"),
+            ": the following unrecognized argument(s) ",
+            "will be stored for use by user-defined functions: ",
+            paste(sQuote(names(added.userdata)),collapse=","))
+    userdata[names(added.userdata)] <- added.userdata
+  }
 
   ## name of shared object library
   if (missing(PACKAGE)) PACKAGE <- NULL
   PACKAGE <- as.character(PACKAGE)
 
   if (missing(globals)) globals <- NULL
-  globals <- as.character(globals)
+  if (!is(globals,"Csnippet"))
+    globals <- as.character(globals)
   
   ## deal with missing components
   if (missing(skeleton)) skeleton <- NULL
@@ -136,11 +140,10 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
   storage.mode(tcovar) <- "double"
   storage.mode(covar) <- "double"
   
-  ## check initializer
-  if (missing(initializer)) initializer <- default.initializer
-  if (!is.function(initializer))
-    stop("pomp error: ",sQuote("initializer")," must be a function")
-
+  ## handle initializer
+  default.init <- missing(initializer) || (is(initializer,"pomp.fun") && initializer@mode == pompfunmode$undef)
+  if (default.init) initializer <- pomp.fun()
+  
   ## default rprocess & dprocess
   if (missing(rprocess))
     rprocess <- function (xstart,times,params,...) stop(sQuote("rprocess")," not specified")
@@ -167,6 +170,8 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
     snips <- c(snips,fromEstimationScale=fromEstimationScale@text)
   if (is(toEstimationScale,"Csnippet"))
     snips <- c(snips,toEstimationScale=toEstimationScale@text)
+  if (is(initializer,"Csnippet"))
+    snips <- c(snips,initializer=initializer@text)
   if (length(snips)>0) {
     libname <- try(
                    do.call(
@@ -178,8 +183,6 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
                                   paramnames=paramnames,
                                   covarnames=covarnames,
                                   globals=globals,
-                                  name=.filename,
-                                  dir=.filedir,
                                   verbose=verbose
                                   ),
                              snips
@@ -191,11 +194,26 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
       stop("in ",sQuote("pomp"),": error in building shared-object library from Csnippets:\n",
            libname,call.=FALSE)
     } else {
-      .solibfile <- c(.solibfile,list(libname))
-      libname <- libname[1]
+      .solibs <- c(.solibs,list(libname))
+      libname <- libname$name
     }
   } else {
     libname <- ''
+  }
+  
+  ## handle initializer
+  if (!default.init) {
+    initializer <- pomp.fun(
+                            f=initializer,
+                            PACKAGE=PACKAGE,
+                            proto=quote(initializer(params,t0,...)),
+                            slotname="initializer",
+                            libname=libname,
+                            statenames=statenames,
+                            paramnames=paramnames,
+                            obsnames=obsnames,
+                            covarnames=covarnames
+                            )
   }
   
   ## handle rprocess
@@ -406,6 +424,7 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
       data = data,
       times = times,
       t0 = t0,
+      default.init = default.init,
       initializer = initializer,
       params = params,
       covar = covar,
@@ -414,7 +433,7 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
       has.trans = has.trans,
       from.trans = from.trans,
       to.trans = to.trans,
-      solibfile = .solibfile,
+      solibs = .solibs,
       userdata = userdata
       )
 }
@@ -743,7 +762,7 @@ setMethod(
                              toEstimationScale=to.trans,
                              params=params,
                              globals=globals,
-                             .solibfile=data@solibfile,
+                             .solibs=data@solibs,
                              userdata=data@userdata,
                              ...
                              )

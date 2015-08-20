@@ -11,6 +11,7 @@ useDynLib(
           SSA_simulator,
           R_Euler_Multinom,D_Euler_Multinom,R_GammaWN,
           mif_update,
+          mif2_computations,
           pfilter_computations,
           simulation_computations,
           iterate_map,traj_transp_and_copy,
@@ -33,8 +34,15 @@ useDynLib(
           )
 
 import(methods)
-importFrom(graphics,plot)		
-importFrom(stats,simulate,time,coef,logLik,window)
+importFrom(graphics,plot,par,abline,pairs,matplot,box,axis,mtext,
+           points,polygon,lines,plot.default,legend,hist,rect,text,title)	
+importFrom(utils,head)
+importFrom(grDevices,rgb,dev.interactive)
+importFrom(stats,simulate,time,coef,logLik,window,fitted,
+           dnorm,runif,sd,var,cov,cor,median,density,
+           spec.pgram,rnorm,weighted.mean,optim,
+           .lm.fit,setNames,kernel,quantile)
+importFrom(digest,digest)
 importFrom(mvtnorm,dmvnorm,rmvnorm)
 importFrom(subplex,subplex)
 importFrom(deSolve,ode)
@@ -45,6 +53,7 @@ exportClasses(
               pomp,
               pfilterd.pomp,
               mif,mifList,
+              mif2d.pomp,mif2List,
               pmcmc,pmcmcList,
               traj.matched.pomp,
               nlfd.pomp,
@@ -60,14 +69,16 @@ exportMethods(
               pompLoad,pompUnload,
               dprocess,rprocess,rmeasure,dmeasure,init.state,skeleton,
               dprior,rprior,
-              data.array,obs,partrans,coef,"coef<-",
+              obs,partrans,coef,"coef<-",
               time,"time<-",timezero,"timezero<-",
               simulate,pfilter,
               eff.sample.size,cond.logLik,
-              particles,mif,continue,states,trajectory,
-              pred.mean,pred.var,filter.mean,conv.rec,
-              values,
+              states,trajectory,
+              particles,mif,mif2,continue,
+              pred.mean,pred.var,filter.mean,filter.traj,
+              conv.rec,values,
               bsmc2,bsmc,pmcmc,abc,nlf,
+              covmat,
               traj.match.objfun,
               probe.match.objfun,
               spect,probe,probe.match,
@@ -79,6 +90,7 @@ S3method(as.data.frame,pfilterd.pomp)
 S3method(as.data.frame,probed.pomp)
 
 export(
+       bake,stew,freeze,
        Csnippet,
        reulermultinom,
        deulermultinom,
@@ -89,6 +101,8 @@ export(
        onestep.dens,
        gillespie.sim,
        mvn.diag.rw,mvn.rw,
+       mvn.rw.adaptive,
+       rw.sd,
        sobol,
        sobolDesign,
        sliceDesign,
@@ -109,6 +123,5 @@ export(
        probe.marginal,
        sannbox,
        spect.match,
-       pompBuilder,
        pompExample
        )

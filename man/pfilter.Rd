@@ -9,6 +9,7 @@
 \alias{pfilter,pfilterd.pomp-method}
 \alias{pfilter-pfilterd.pomp}
 \alias{pfilterd.pomp-class}
+\alias{pfilterd.pomp}
 \alias{logLik,pfilterd.pomp-method}
 \alias{logLik-pfilterd.pomp}
 \alias{$,pfilterd.pomp-method}
@@ -22,6 +23,9 @@
 \alias{filter.mean}
 \alias{filter.mean,pfilterd.pomp-method}
 \alias{filter.mean-pfilterd.pomp}
+\alias{filter.traj}
+\alias{filter.traj,pfilterd.pomp-method}
+\alias{filter.traj-pfilterd.pomp}
 \alias{eff.sample.size}
 \alias{eff.sample.size,pfilterd.pomp-method}
 \alias{eff.sample.size-pfilterd.pomp}
@@ -38,9 +42,8 @@
 \usage{
 \S4method{pfilter}{pomp}(object, params, Np, tol = 1e-17,
     max.fail = Inf, pred.mean = FALSE, pred.var = FALSE,
-    filter.mean = FALSE, save.states = FALSE,
-    save.params = FALSE, seed = NULL,
-    verbose = getOption("verbose"), \dots)
+    filter.mean = FALSE, filter.traj = FALSE, save.states = FALSE,
+    save.params = FALSE, verbose = getOption("verbose"), \dots)
 \S4method{pfilter}{pfilterd.pomp}(object, params, Np, tol, \dots)
 \S4method{logLik}{pfilterd.pomp}(object, \dots)
 \S4method{cond.logLik}{pfilterd.pomp}(object, \dots)
@@ -48,6 +51,7 @@
 \S4method{pred.mean}{pfilterd.pomp}(object, pars, \dots)
 \S4method{pred.var}{pfilterd.pomp}(object, pars, \dots)
 \S4method{filter.mean}{pfilterd.pomp}(object, pars, \dots)
+\S4method{filter.traj}{pfilterd.pomp}(object, vars, \dots)
 }
 \arguments{
   \item{object}{
@@ -88,20 +92,19 @@
   \item{filter.mean}{
     logical; if \code{TRUE}, the filtering means are calculated for the state variables and parameters.
   }
+  \item{filter.traj}{
+    logical; if \code{TRUE}, a filtered trajectory is returned for the state variables and parameters.
+  }
   \item{save.states, save.params}{
     logical.
     If \code{save.states=TRUE}, the state-vector for each particle at each time is saved in the \code{saved.states} slot of the returned \code{\link[=pfilterd.pomp-class]{pfilterd.pomp}} object.
     If \code{save.params=TRUE}, the parameter-vector for each particle at each time is saved in the \code{saved.params} slot of the returned \code{\link[=pfilterd.pomp-class]{pfilterd.pomp}} object.
   }
-  \item{seed}{
-    optional; an object specifying if and how the random number generator should be initialized (\sQuote{seeded}).
-    If \code{seed} is an integer, it is passed to \code{set.seed} prior to any simulation and is returned as the \dQuote{seed} element of the return list.
-    By default, the state of the random number generator is not changed and the value of \code{.Random.seed} on the call is stored in the \dQuote{seed} element of the return list.
-  }
   \item{verbose}{
     logical; if \code{TRUE}, progress information is reported as \code{pfilter} works.
   }
   \item{pars}{Names of parameters.}
+  \item{vars}{Names of state variables.}
   \item{\dots}{
     additional arguments that override the defaults.
   }
@@ -113,6 +116,9 @@
     \item{pred.mean, pred.var, filter.mean}{
       matrices of prediction means, variances, and filter means, respectively.
       In each of these, the rows correspond to states and parameters (if appropriate), in that order, the columns to successive observations in the time series contained in \code{object}.
+    }
+    \item{filter.traj}{
+      filtered trajectories returned by the particle filter
     }
     \item{eff.sample.size}{
       numeric vector containing the effective number of particles at each time point.
@@ -129,11 +135,6 @@
       If \code{pfilter} was called with \code{save.params=TRUE}, this is the list of parameter-vectors at each time point, for each particle.
       It is a length-\code{ntimes} list of \code{npars}-by-\code{Np} arrays.
       In particular, \code{saved.params[[t]][,i]} is the parameter portion of the i-th particle at time \eqn{t}.
-    }
-    \item{seed}{
-      the state of the random number generator at the time \code{pfilter} was called.
-      If the argument \code{seed} was specified, this is a copy;
-      if not, this is the internal state of the random number generator at the time of call.
     }
     \item{Np, tol, nfail}{
       the number of particles used, failure tolerance, and number of filtering failures, respectively.
@@ -186,9 +187,9 @@ fm <- filter.mean(pf)    	## extract the filtering means
   A Tutorial on Particle Filters for Online Nonlinear, Non-Gaussian Bayesian Tracking.
   IEEE Trans. Sig. Proc. 50:174--188, 2002.
 }
-\author{Aaron A. King \email{kingaa at umich dot edu}}
+\author{Aaron A. King}
 \seealso{
   \code{\link{pomp}}, \code{\link{mif}}, \code{\link{pmcmc}}, \code{\link{bsmc2}},
-  and the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.
+  and the tutorials on the \href{http://kingaa.github.io/pomp}{package website}.
 }
 \keyword{ts}

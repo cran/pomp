@@ -24,7 +24,7 @@
      skip.se = FALSE, verbose = getOption("verbose"),
      bootstrap=FALSE, bootsamp = NULL,
      lql.frac = 0.1, se.par.frac = 0.1, eval.only = FALSE,
-     transform.params, transform = FALSE, \dots)
+     transform = FALSE, \dots)
 \S4method{nlf}{nlfd.pomp}(object, start, est, lags, period, tensor,
      nconverge, nasymp, seed, transform.data, nrbf, method,
      lql.frac, se.par.frac, transform, \dots)
@@ -62,11 +62,6 @@
     Integer specifying the random number seed to use.
     When fitting, it is usually best to always run the simulations with the same sequence of random numbers, which is accomplished by setting \code{seed} to an integer.
     If you want a truly random simulation, set \code{seed=NULL}.
-  }
-  \item{transform.params}{
-    deprecated.
-    Will be removed in a future version.
-    Use \code{transform} instead.
   }
   \item{transform}{
     logical;
@@ -135,10 +130,6 @@
  Population cycles in the pine looper moth (\emph{Bupalus piniarius}): dynamical tests of mechanistic hypotheses.
  \emph{Ecological Monographs} \bold{75}, 259--276.
 }
-\author{
-  Stephen P. Ellner \email{spe2 at cornell dot edu},
-  Bruce E. Kendall \email{kendall at bren dot ucsb dot edu},
-  Aaron A. King \email{kingaa at umich dot edu}
-}
+\author{Stephen P. Ellner, Bruce E. Kendall, Aaron A. King}
 \keyword{optimize}
 \keyword{ts}

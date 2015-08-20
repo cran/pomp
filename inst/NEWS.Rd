@@ -1,5 +1,109 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 0.78-1}{
+  \itemize{
+    \item There is a new, adaptive MCMC proposal function, \code{mvn.rw.adaptive} that can be used in \code{pmcmc} and \code{abc}.
+    \item The new \code{covmat} method, applied to \code{abc}, \code{abcList}, \code{pmcmc}, or \code{pmcmcList} objects, returns an inflated empirical covariance matrix suitable for use as input to the proposal generator \code{mvn.rw}.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.77-1}{
+  \itemize{
+    \item The deprecated \code{transform.params} argument from \code{nlf} has been removed.
+    \item The deprecated \code{pars} and \code{rw.sd} arguments from \code{abc} and \code{pmcmc} have been removed.
+    \item The deprecated \code{data.array} method has been removed.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.76-2}{
+  \itemize{
+    \item The default value of \code{max.fail} for \code{pmcmc} is now \code{Inf}.
+    That is, by default \code{pmcmc} will not halt (but will issue a warning) when filtering failure occurs (i.e., no particles are consistent with the data, as defined by the likelihood threshold \code{tol}).
+  }
+}
+\section{Changes in \pkg{pomp} version 0.76-1}{
+  \itemize{
+    \item \code{logmeanexp} has used a delta-method estimate of the variance in \eqn{log(mean(exp(x)))} when \code{se = TRUE}.
+    This gave misleadingly small values when the variance in \eqn{exp(x)} was large.
+    The new \code{logmeanexp} uses a jackknife estimate of the variance.
+    This is still conservative, in that it is biased upwards, but is more robust.
+    \item \pkg{pomp} now includes \pkg{magrittr}, \pkg{plyr}, \pkg{reshape2}, \pkg{ggplot2}, and \pkg{knitr} in its \code{Suggests} field:
+    these packages are available for use in \code{pompExample}s and package tests.
+    \item There is now a \code{coef} method for \code{mifList} and \code{mif2List} objects.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.75-1}{
+  \itemize{
+    \item By default, when \code{Csnippet}s are used, the source code is now stored internally to the \code{pomp} object.
+    When a \code{pomp} object is used, a test is first performed to see if the needed shared-object file exists.
+    If it does not, the source code is written to a file in the session's temporary directory, which is then compiled and loaded.
+    This feature allows \code{pomp} objects to be stored and reused across \R sessions.
+    The name of the file is constructed using a hash of the file's contents.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.74-1}{
+  \itemize{
+    \item The functions \code{bake} and \code{stew} have arguments that allow the control of the RNG.
+    These functions can now set the state (and kind) of the RNG and restore it when they return.
+    \item The new function \code{freeze} allows control of the RNG similarly.
+    \item The \code{seed} argument of \code{bsmc} and \code{bsmc2} has been removed.
+    Its use now generates a warning, stating that it has no effect.
+    \item The \code{seed} argument to \code{pfilter} is now deprecated and will be removed soon.
+    Equivalent functionality is provided via \code{freeze}, \code{bake}, or \code{stew}.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.73-1}{
+  \itemize{
+    \item The new functions \code{bake} and \code{stew} faciliate storing expensive calculations for later retrieval in a transparent fashion.
+    \item \code{pompBuilder}, which has not been actively maintained for time due to the fact that its facilities are all provided by \code{pomp} via \code{Csnippet}s, is now no longer exported.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.72-1}{
+  \itemize{
+    \item \code{pmcmc} and \code{pfilter} now have the capability of saving filtered trajectories.
+    These can be extracted using the new method \code{filter.traj}.
+    The principal use will be in conjunction with \code{pmcmc}, where, upon convergence to the posterior, samples from the filtered trajectories are draws from the posterior \eqn{P[x_{1:T} | y_{1:T}]}{P[x[1:T] | y[1:T]]}.
+    Thanks to Sebastian Funk for initiating this development.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.71-1}{
+  \itemize{
+    \item \code{partrans} and \code{parmat} have been jiggered to make them play better with \code{reshape2::melt}.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.70-1}{
+  \itemize{
+    \item Some of the underpinnings of \code{nlf} have been streamlined for speed.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.69-2}{
+  \itemize{
+    \item Measles data from England and Wales, kindly provided by Ben Bolker, are now included as \code{ewmeas} and \code{ewcitmeas}.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.68-2}{
+  \itemize{
+    \item When using \code{Csnippet}s, by default, the C codes and shared-object files are stored in the R session's temporary directory.
+    One can override this behavior by setting the global \code{pomp.cache} option.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.67-1}{
+  \itemize{
+    \item A \code{pomp} object's initializer can now be specified as a Csnippet.
+    \item The default initializer is now considerably faster.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.66-4}{
+  \itemize{
+    \item A full-featured version of IF2, an improved iterated filtering algorithm, is now available as \code{mif2}.
+    This allows a more general structure for the random perturbations applied to parameters and is generally more efficient and stable than IF1.
+  }
+}
+\section{Changes in \pkg{pomp} version 0.65-2}{
+  \itemize{
+    \item In the \code{pomp} constructor, unrecognized arguments are stored internally for use with user-supplied model functions.
+    As of this version, an informative message is generated when this happens.
+    Previously, this silent behavior was a source of confusion for some users.
+  }
+}
 \section{Changes in \pkg{pomp} version 0.65-1}{
   \itemize{
     \item The unfortunately named \code{pomp} arguments \code{parameter.transform} and \code{parameter.inv.transform} have been deprecated in favor of the more mnemonic \code{toEstimationScale} and \code{fromEstimationScale}.
@@ -38,7 +142,6 @@
 \section{Changes in \pkg{pomp} version 0.62-1}{
   \itemize{
     \item \code{mif} now has the default value \code{var.factor=1}.
-    Since \code{var.factor} has long been a required parameter, this change is backward compatible.
     Since \code{var.factor} has long been a required parameter, this change is backward compatible.
     \item The long-deprecated \code{cooling.factor} option to \code{mif} has now been removed.
   }
@@ -504,7 +607,7 @@
     Rownames are not strictly required for the \code{data} slot.
     \item The \code{sannbox} algorithm now should work even when the objective function throws a non-finite value.
     The behavior now is to replace non-finite values with a large number.
-    This behavior follows that of the 'SANN' method in \code{optim}.
+    This behavior follows that of the \code{SANN} method in \code{optim}.
   }
 }
 \section{Changes in \pkg{pomp} version 0.39-3}{
@@ -517,7 +620,7 @@
 }
 \section{Changes in \pkg{pomp} version 0.39-2}{
   \itemize{
-    \item When \code{po} is a \code{pomp}-class object with covariates, \code{as.data.frame(po)} and \code{as(po,"data.frame")} now contain columns for the covariates. 
+    \item When \code{po} is a \code{pomp}-class object with covariates, \code{as.data.frame(po)} and \code{as(po,"data.frame")} now contain columns for the covariates.
     The latter are interpolated, if necessary, at the observation times.
     \item Bug fix: when \code{pfilter} is called with a single parameter vector supplied in the \code{params} argument, these parameters are copied into the \code{params} slot of the resulting \code{pfilterd.pomp} object.
     Before, this failed when the \code{params} slot of the \code{pomp} object was empty.
@@ -580,9 +683,9 @@
   \itemize{
     \item The arguments \code{skeleton.map} and \code{skeleton.vectorfield} are now deprecated.
     Specify a discrete-time skeleton using \code{skeleton.type="map"} and a continuous-time skeleton via \code{skeleton.type="vectorfield"}.
-    \item \code{pomp} is now a generic function.  
+    \item \code{pomp} is now a generic function.
     Calling it on a \code{pomp} object copies the object; one can optionally modify some of the slots.
-    \item Two new files \file{gompertz.R} and \file{gompertz.c} are in the \file{examples} directory.  
+    \item Two new files \file{gompertz.R} and \file{gompertz.c} are in the \file{examples} directory.
     These contain codes needed to reproduce the Gompertz example in the \dQuote{intro_to_pomp} vignette.
     \item The warning messages to do with the default behaviors of \code{simulate} and \code{trajectory} with respect to the arguments \code{times} and \code{t0} have been removed.
     These warnings were introduced in version 0.34-1 to alert users to changes in the default behavior of \code{simulate} and \code{trajectory} introduced with that version.
@@ -650,7 +753,7 @@
     The default for \code{t0} is \code{timezero(object)}.
     The default for \code{times} is now \code{time(object,t0=FALSE)} (it was \code{time(object,t0=TRUE)}).
     This change eliminates an infelicity in which \code{simulate} and \code{trajectory} returned undesired values at the initial time.
-    Users can ensure that their codes will continue to function as intended by specifying the values of the \code{times} and \code{t0} arguments to these functions, thus removing dependence on the defaults. 
+    Users can ensure that their codes will continue to function as intended by specifying the values of the \code{times} and \code{t0} arguments to these functions, thus removing dependence on the defaults.
     To aid users in  modifying their codes, a warning is now displayed whenever a potentially affected call is made.
     These warnings will be removed in a future release.
     See the documentation (\code{pomp?simulate}, \code{pomp?trajectory}) for a description of the new default behaviors.
@@ -659,11 +762,11 @@
     \item \code{simulate} has been re-implemented in C for speed.
     \item A new method \code{obs} for \code{pomp} objects returns the contents of the \code{data} slot.
     It is synonymous with \code{data.array}.
-    \item A banner is now displayed on package attachment.  
+    \item A banner is now displayed on package attachment.
     \item \code{coef<-} now behaves like ordinary vector assignment.
     \item \code{probe} and \code{spect} now take an argument \code{params}.
     \item \code{probe.cov} and \code{probe.cor} have been removed in favor of \code{probe.acf} and \code{probe.ccf}.
-    \item The functions \code{euler.simulate}, \code{onestep.simulate}, and \code{onestep.density}, deprecated since version 0.29-1, have been removed.  
+    \item The functions \code{euler.simulate}, \code{onestep.simulate}, and \code{onestep.density}, deprecated since version 0.29-1, have been removed.
   }
 }
 \section{Changes in \pkg{pomp} version 0.33-1}{
@@ -713,7 +816,7 @@
     \item A plugin for continuous-time Markov process models using the Gillespie algorithm is available.
     \item A plugin for discrete-time Markov processes is now available.
     \item Several example pomps are now loadable via the \code{data()} command.
-    \item There are changes in the C interface to measurement models that are NOT BACKWARD COMPATIBLE.  
+    \item There are changes in the C interface to measurement models that are NOT BACKWARD COMPATIBLE.
     Existing user measurement model codes will need to be modified, but these changes are minor.
     \item The changes are documented in detail in the file \file{CHANGES_0.29-1.txt}.
   }
@@ -769,7 +872,7 @@
     \item The lookup_table (see file \file{include/pomp.h}) interface for C codes has been streamlined.
     It is now slightly more straightforward to set up a \code{struct lookup_table}.
     See the examples (\file{include/examples}).
-    \item Added \file{logistic.R} to the \file{tests} directory.  
+    \item Added \file{logistic.R} to the \file{tests} directory.
     This is a one-variable stochastic differential equation simulated using Euler-Maruyama.
     \item The SIR example (\file{examples/sir.R}) now includes two pomps: one with native routines implementing rprocess, dprocess, and skeleton, the other using R files.
     The comparison may be instructive.

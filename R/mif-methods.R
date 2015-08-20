@@ -40,10 +40,6 @@ setMethod(
           }
           )
 
-
-## extract the estimated log likelihood
-setMethod('logLik','mif',function(object,...)object@loglik)
-
 ## extract the convergence record
 conv.rec.internal <- function (object, pars, transform = FALSE, ...) {
   if (transform) {
@@ -54,7 +50,7 @@ conv.rec.internal <- function (object, pars, transform = FALSE, ...) {
                       partrans(
                                object,
                                params=t(object@conv.rec[,pars.proper]),
-                               dir="forward"
+                               dir="fromEstimationScale"
                                )
                       ),
                     object@conv.rec[,pars.improper]
@@ -133,7 +129,7 @@ setMethod(
             } else {
               p <- sapply(y,is,'mif')
               pl <- sapply(y,is,'mifList')
-              if (any(!(p||pl)))
+              if (!all(p||pl))
                 stop("cannot mix ",sQuote("mif"),
                      " and non-",sQuote("mif")," objects")
               y[p] <- lapply(y[p],list)
@@ -153,7 +149,7 @@ setMethod(
             } else {
               p <- sapply(y,is,'mif')
               pl <- sapply(y,is,'mifList')
-              if (any(!(p||pl)))
+              if (!all(p||pl))
                 stop("cannot mix ",sQuote("mif"),
                      " and non-",sQuote("mif")," objects")
               y[p] <- lapply(y[p],list)
@@ -176,6 +172,14 @@ setMethod(
           signature=signature(object='mifList'),
           definition=function (object, ...) {
             lapply(object,conv.rec,...)
+          }
+          )
+
+setMethod(
+          'coef',
+          signature=signature(object='mifList'),
+          definition=function (object, ...) {
+            do.call(rbind,lapply(object,coef,...))
           }
           )
 

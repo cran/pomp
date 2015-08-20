@@ -26,7 +26,7 @@ setGeneric("coef<-",function(object,...,value)standardGeneric("coef<-"))
 setGeneric("states",function(object,...)standardGeneric("states"))
 setGeneric("timezero",function(object,...)standardGeneric("timezero"))
 setGeneric("timezero<-",function(object,...,value)standardGeneric("timezero<-"))
-setGeneric("partrans",function(object,params,dir=c("forward","inverse"),...)standardGeneric("partrans"))
+setGeneric("partrans",function(object,params,dir,...)standardGeneric("partrans"))
 setGeneric("logLik",function(object,...)standardGeneric("logLik"))
 
 ## internals
@@ -39,6 +39,8 @@ setGeneric("pred.mean",function(object,...)standardGeneric("pred.mean"))
 setGeneric("pred.var",function(object,...)standardGeneric("pred.var"))
 ## filter mean
 setGeneric("filter.mean",function(object,...)standardGeneric("filter.mean"))
+## filter trajectory
+setGeneric("filter.traj",function(object,...)standardGeneric("filter.traj"))
 ## conditional log likelihood
 setGeneric("cond.logLik",function(object,...)standardGeneric("cond.logLik"))
 ## effective sample size
@@ -69,11 +71,15 @@ setGeneric("pfilter",function(object,...)standardGeneric("pfilter"))
 ## particle Markov chain Monte Carlo (PMCMC)
 setGeneric('pmcmc',function(object,...)standardGeneric("pmcmc"))
 
+## helper for ABC and PMCMC
+setGeneric("covmat",function(object,...)standardGeneric("covmat"))
+
 ## nonlinear forecasting
 setGeneric('nlf',function(object,...)standardGeneric("nlf"))
 
 ## iterated filtering
 setGeneric('mif',function(object,...)standardGeneric("mif"))
+setGeneric("mif2",function(object,...)standardGeneric("mif2"))
 ## generate new particles
 setGeneric('particles',function(object,...)standardGeneric("particles"))
 

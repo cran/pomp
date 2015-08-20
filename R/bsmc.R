@@ -21,7 +21,6 @@ setClass(
            est="character",
            eff.sample.size="numeric",
            smooth="numeric",
-           seed="integer",
            nfail="integer",
            cond.log.evidence="numeric",
            log.evidence="numeric"
@@ -46,13 +45,10 @@ bsmc.internal <- function (object, params, Np, est,
   ptsi.inv <- ptsi.for <- TRUE
   transform <- as.logical(transform)
 
-  if (missing(seed)) seed <- NULL
-  if (!is.null(seed)) {
-    if (!exists(".Random.seed",where=.GlobalEnv))
-      runif(n=1L) ## need to initialize the RNG
-    save.seed <- get(".Random.seed",pos=.GlobalEnv)
-    set.seed(seed)
-  }
+  if (!is.null(seed))
+    warning("in ",sQuote("bsmc"),": argument ",sQuote("seed"),
+            " now has no effect.  Consider using ",
+            sQuote("freeze"),".")
 
   error.prefix <- paste(sQuote("bsmc"),"error: ")
 
@@ -72,7 +68,7 @@ bsmc.internal <- function (object, params, Np, est,
     params <- rprior(object,params=parmat(params,Np))
   
   if (transform)
-    params <- partrans(object,params,dir="inverse",
+    params <- partrans(object,params,dir="toEstimationScale",
                        .getnativesymbolinfo=ptsi.inv)
   ptsi.inv <- FALSE
   
@@ -127,7 +123,7 @@ bsmc.internal <- function (object, params, Np, est,
   xstart <- init.state(
                        object,
                        params=if (transform) {
-                         partrans(object,params,dir="forward",
+                         partrans(object,params,dir="fromEstimationScale",
                                   .getnativesymbolinfo=ptsi.for)
                        } else {
                          params
@@ -172,7 +168,7 @@ bsmc.internal <- function (object, params, Np, est,
                       xstart=parmat(x,nrep=ntries),
                       times=times[c(nt,nt+1)],
                       params=if (transform) {
-                        partrans(object,params,dir="forward",
+                        partrans(object,params,dir="fromEstimationScale",
                                  .getnativesymbolinfo=ptsi.for)
                       } else {
                         params
@@ -194,7 +190,7 @@ bsmc.internal <- function (object, params, Np, est,
                   x=mu,
                   times=times[nt+1],
                   params=if (transform) {
-                    partrans(object,m,dir="forward",
+                    partrans(object,m,dir="fromEstimationScale",
                              .getnativesymbolinfo=ptsi.for)
                   } else {
                     m
@@ -222,12 +218,12 @@ bsmc.internal <- function (object, params, Np, est,
                 )
     if (inherits(pvec,"try-error"))
       stop(error.prefix,"error in ",sQuote("rmvnorm"),call.=FALSE)
-    if (any(!is.finite(pvec)))
+    if (!all(is.finite(pvec)))
       stop(error.prefix,"extreme particle depletion",call.=FALSE)
     params[estind,] <- m[estind,]+t(pvec)
 
     if (transform)
-      tparams <- partrans(object,params,dir="forward",
+      tparams <- partrans(object,params,dir="fromEstimationScale",
                           .getnativesymbolinfo=ptsi.for)
     
     ## sample current state vector x^(g)_(t+1) as per L&W AGM (4)
@@ -282,7 +278,7 @@ bsmc.internal <- function (object, params, Np, est,
       ##               )
       ##   if (inherits(pvec,"try-error"))
       ##     stop(error.prefix,"error in ",sQuote("rmvnorm"),call.=FALSE)
-      ##   if (any(!is.finite(pvec)))
+      ##   if (!all(is.finite(pvec)))
       ##     stop(error.prefix,"extreme particle depletion",call.=FALSE)
       ##   params[estind,j] <- m[estind,j]+pvec[1,]
       ## }
@@ -329,11 +325,6 @@ bsmc.internal <- function (object, params, Np, est,
     
   }
 
-  if (!is.null(seed)) {
-    assign(".Random.seed",save.seed,pos=.GlobalEnv)
-    seed <- save.seed
-  }
-  
   ## replace parameters with point estimate (posterior median)
   coef(object,transform=transform) <- apply(params,1,median)
 
@@ -348,7 +339,6 @@ bsmc.internal <- function (object, params, Np, est,
       est=as.character(est),
       eff.sample.size=eff.sample.size,
       smooth=smooth,
-      seed=as.integer(seed),
       nfail=as.integer(nfail),
       cond.log.evidence=evidence,
       log.evidence=sum(evidence)
@@ -363,7 +353,6 @@ setMethod(
             ntries = 1,
             tol = 1e-17,
             lower = -Inf, upper = Inf,
-            seed = NULL,
             verbose = getOption("verbose"),
             max.fail = 0,
             transform = FALSE,
@@ -378,7 +367,6 @@ setMethod(
                           tol=tol,
                           lower=lower,
                           upper=upper,
-                          seed=seed,
                           verbose=verbose,
                           max.fail=max.fail,
                           transform=transform,
@@ -436,8 +424,8 @@ setMethod(
             if (missing(pars)) pars <- x@est
             if (missing(thin)) thin <- Inf
             bsmc.plot(
-                      prior=if (x@transform) partrans(x,x@prior,dir="forward") else x@prior,
-                      post=if (x@transform) partrans(x,x@post,dir="forward") else x@post,
+                      prior=if (x@transform) partrans(x,x@prior,dir="fromEstimationScale") else x@prior,
+                      post=if (x@transform) partrans(x,x@post,dir="fromEstimationScale") else x@post,
                       pars=pars,
                       thin=thin,
                       ...

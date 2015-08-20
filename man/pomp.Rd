@@ -80,7 +80,7 @@
     This can be specified in one of four ways:
     \enumerate{
       \item as a function of prototype \preformatted{rmeasure(x,t,params,\dots)} that makes a draw from the observation process given states \code{x}, time \code{t}, and parameters \code{params}.
-      \item as the name of a native (compiled) routine with prototype \code{pomp_measure_model_simulator} as defined in the header file \file{pomp.h}.
+      \item as the name of a native (compiled) routine of type \preformatted{pomp_measure_model_simulator} as defined in the header file \file{pomp.h}.
       (To view the header file, execute \preformatted{file.show(system.file("include/pomp.h",package="pomp"))} in an \R session.)
       \item using the formula-based \code{measurement.model} facility (see below).
       \item as a snippet of C code (via \code{\link{Csnippet}}) that draws from the observation process as above.
@@ -92,7 +92,7 @@
     This can be specified in one of four ways:
     \enumerate{
       \item as a function of prototype \preformatted{dmeasure(y,x,t,params,log,\dots)} that computes the p.d.f. of \code{y} given \code{x}, \code{t}, and \code{params}.
-      \item as the name of a native (compiled) routine with prototype \code{pomp_measure_model_density} as defined in the header file \file{pomp.h}.
+      \item as the name of a native (compiled) routine of type \preformatted{pomp_measure_model_density} as defined in the header file \file{pomp.h}.
       (To view the header file, execute \preformatted{file.show(system.file("include/pomp.h",package="pomp"))} in an \R session.)
       \item using the formula-based \code{measurement.model} facility (see below).
       \item as a snippet of C code (via \code{\link{Csnippet}}) that computes the p.d.f. as above.
@@ -119,25 +119,33 @@
     The skeleton function can be specified in one of three ways:
     \enumerate{
       \item as an \R function of prototype \preformatted{skeleton(x,t,params,\dots)} that evaluates the deterministic skeleton at state \code{x} and time \code{t} given the parameters \code{params},
-      \item as the name of a native (compiled) routine with prototype \code{pomp_skeleton} as defined in the header file \file{pomp.h}.
+      \item as the name of a native (compiled) routine of type \preformatted{pomp_skeleton} as defined in the header file \file{pomp.h}.
       (To view the header file, execute \preformatted{file.show(system.file("include/pomp.h",package="pomp"))} in an \R session.)
       \item as a snippet of C code (via \code{\link{Csnippet}}) that performs this evaluation.
       The latter is typically the preferred option, for reasons of computational efficiency.
     }
   }
   \item{initializer}{
-    optional function of prototype \preformatted{initializer(params,t0,\dots)} that yields initial conditions for the state process when given a vector, \code{params}, of parameters.
+    The initializer gives the parameterization of the initial state of the unobserved Markov process.
+    Specifically, given a vector of parameters, \code{params} and an initial time, \code{t0}, the initializer determines the state vector at time \code{t0}.
 
     By default, any parameters in \code{params}, the names of which end in \dQuote{\code{.0}}, are assumed to be initial values of states.
     To initialize the unobserved state process, these are simply copied over as initial conditions.
     The names of the resulting state variables are obtained by dropping the \dQuote{\code{.0}} suffix.
+
+    A custom initializer can be supplied here in one of two formats:
+    \enumerate{
+      \item as an \R function of prototype \preformatted{initializer(params,t0,\dots)} that yields initial conditions for the state process when given a vector, \code{params}, of parameters.
+      \item as a snippet of C code (via \code{\link{Csnippet}}).
+      See the \code{\link{Csnippet}} help for rules on writing a custom initializer.
+    }
   }
   \item{rprior}{
     optional; function drawing a sample from a prior distribution on parameters.
     This can be specified in one of three ways:
     \enumerate{
       \item as an \R function of prototype \preformatted{rprior(params,\dots)} that makes a draw from the prior distribution given \code{params},
-      \item as the name of a native (compiled) routine with prototype \code{pomp_rprior} as defined in the header file \file{pomp.h}, or
+      \item as the name of a native (compiled) routine of type \preformatted{pomp_rprior} as defined in the header file \file{pomp.h}, or
       (To view the header file, execute \preformatted{file.show(system.file("include/pomp.h",package="pomp"))} in an \R session.)
       \item as a snippet of C code (via \code{\link{Csnippet}}).
     }
@@ -148,7 +156,7 @@
     This can be specified in one of three ways:
     \enumerate{
       \item as an \R function of prototype \preformatted{dprior(params,log=FALSE,\dots)} that evaluates the prior probability density,
-      \item as the name of a native (compiled) routine with prototype \code{pomp_dprior} as defined in the header file \file{pomp.h}, or
+      \item as the name of a native (compiled) routine of type \preformatted{pomp_dprior} as defined in the header file \file{pomp.h}, or
       (To view the header file, execute \preformatted{file.show(system.file("include/pomp.h",package="pomp"))} in an \R session.)
       \item as a snippet of C code (via \code{\link{Csnippet}}).
     }
@@ -187,7 +195,7 @@
     When working with such an algorithm and a model for which the parameters are constrained, it can be useful to transform parameters.
     \code{toEstimationScale} and \code{fromEstimationScale} are transformations from the model scale to the estimation scale, and vice versa, respectively.
     These functions must have arguments \code{params} and \code{\dots}.
-    \code{toEstimationScale} should transform parameters from the scale that \code{rprocess}, \code{dprocess}, \code{rmeasure}, \code{dmeasure}, \code{skeleton}, and \code{initializer} use internally to the scale used in estimation.
+    \code{toEstimationScale} should transform parameters from the scale that \code{rprocess}, \code{dprocess}, \code{rmeasure}, \code{dmeasure}, and \code{skeleton} use internally to the scale used in estimation.
     \code{fromEstimationScale} should be the inverse of \code{toEstimationScale}.
     The parameter transformations can be defined (as above) using either \R functions, native routines, or \code{\link{Csnippet}}s.
 
@@ -199,11 +207,11 @@
       identical(coef(obj),coef(obj1))
       identical(coef(obj1,transform=TRUE),x).
     } By default, both functions are the identity transformation.
-    See the demos, \preformatted{demo(package="pomp"),} \code{\link{pompExample}}, and the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website} for examples.
+    See the demos, \preformatted{demo(package="pomp"),} \code{\link{pompExample}}, and the tutorials on the \href{http://kingaa.github.io/pomp}{package website} for examples.
   }
   \item{globals}{
     optional character;
-    C code that will be included in the source for (and therefore hard-coded into) the shared-object library created when the call to \code{pomp} uses \code{Csnippets}.
+    C code that will be included in the source for (and therefore hard-coded into) the shared-object library created when the call to \code{pomp} uses \code{\link{Csnippet}}s.
     If no \code{Csnippet}s are used, \code{globals} has no effect.
   }
   \item{\dots}{
@@ -226,7 +234,7 @@
   Specification of process-model codes \code{rprocess} and/or \code{dprocess} in most cases is facilitated by \pkg{pomp}'s so-called \code{\link{plugins}}, which have been developed to handle common use-cases.
   Currently, if one's process model evolves in discrete time or one is willing to make such an approximation (e.g., via an Euler approximation), then the \code{\link{euler.sim}}, \code{\link{discrete.time.sim}}, and \code{\link{onestep.sim}} plugins for \code{rprocess} and \code{\link{onestep.dens}} plugin for \code{dprocess} are available.
   In addition, for exact simulation of certain continuous-time Markov chains, an implementation of Gillespie's algorithm is available (see \code{\link{gillespie.sim}}).
-  To learn more about the use of plugins, consult the help documentation (\code{\link{plugins}}) and the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.
+  To learn more about the use of plugins, consult the help documentation (\code{\link{plugins}}) and the tutorials on the \href{http://kingaa.github.io/pomp}{package website}.
   Several of the demos and examples make use of these as well.
 
   In specific cases, it may be possible to obtain increased computational efficiency by writing custom versions of \code{rprocess} and/or \code{dprocess} instead of using the plugins.
@@ -277,7 +285,7 @@
 }
 \section{The observation process model}{
   The following is a guide to writing the measurement model components as \R functions.
-  For a description on how to write these components using \code{Csnippet}s, see the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.
+  For a description on how to write these components using \code{\link{Csnippet}}s, see the tutorials on the \href{http://kingaa.github.io/pomp}{package website}.
   \describe{
     \item{\code{rmeasure}}{
       if provided, must take at least the arguments \code{x}, \code{t}, \code{params}, and \code{\dots}.
@@ -304,7 +312,7 @@
 }
 \section{The deterministic skeleton}{
   The following describes how to specify the deterministic skeleton as an \R function.
-  For a description on how to write this component using \code{Csnippet}s, see the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.
+  For a description on how to write this component using \code{\link{Csnippet}}s, see the tutorials on the \href{http://kingaa.github.io/pomp}{package website} and the \code{\link{Csnippet}} help.
 
   If \code{skeleton} if provided, must have at least the arguments \code{x}, \code{t}, \code{params}, and \code{\dots}.
   \code{x} is a numeric vector containing the coordinates of a point in state space at which evaluation of the skeleton is desired.
@@ -330,7 +338,7 @@
   In formulating models, one often wishes to define a state variable that will accumulate some quantity over the interval between successive observations.
   \pkg{pomp} provides a facility to make such features more convenient.
   Specifically, variables named in the \code{pomp}'s \code{zeronames} argument will be set to zero immediately following each observation.
-  See \code{euler.sir} and the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website} for examples.
+  See \code{euler.sir} and the tutorials on the \href{http://kingaa.github.io/pomp}{package website} for examples.
 }
 \examples{
 \dontrun{
@@ -351,7 +359,7 @@ file.show(
   Each \pkg{pomp}-package algorithm uses some subset of the five basic functions (\code{rprocess}, \code{dprocess}, \code{rmeasure}, \code{dmeasure}, \code{skeleton}).
   If an algorithm requires a component that has not been specified, an informative error will be generated.
 }
-\author{Aaron A. King \email{kingaa at umich dot edu}}
+\author{Aaron A. King}
 \seealso{
   \link{pomp methods},
   \link{pomp low-level interface},

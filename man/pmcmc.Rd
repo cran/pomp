@@ -23,6 +23,10 @@
 \alias{plot-pmcmcList}
 \alias{plot,pmcmcList-method}
 \alias{pmcmcList-class}
+\alias{covmat,pmcmc-method}
+\alias{covmat-pmcmc}
+\alias{covmat,pmcmcList-method}
+\alias{covmat-pmcmcList}
 \alias{c-pmcmc}
 \alias{c,pmcmc-method}
 \alias{c-pmcmcList}
@@ -31,13 +35,14 @@
 \alias{[,pmcmcList-method}
 \description{
   The Particle MCMC algorithm for estimating the parameters of a partially-observed Markov process.
+  Running \code{pmcmc} causes a particle random-walk Metropolis-Hastings Markov chain algorithm to run for the specified number of proposals.
 }
 \usage{
-\S4method{pmcmc}{pomp}(object, Nmcmc = 1, start, proposal, pars, rw.sd, Np,
-    tol = 1e-17, max.fail = 0, verbose = getOption("verbose"), \dots)
+\S4method{pmcmc}{pomp}(object, Nmcmc = 1, start, proposal, Np,
+    tol = 1e-17, max.fail = Inf, verbose = getOption("verbose"), \dots)
 \S4method{pmcmc}{pfilterd.pomp}(object, Nmcmc = 1, Np, tol, \dots)
 \S4method{pmcmc}{pmcmc}(object, Nmcmc, start, proposal, Np, tol,
-    max.fail = 0, verbose = getOption("verbose"), \dots)
+    max.fail = Inf, verbose = getOption("verbose"), \dots)
 \S4method{continue}{pmcmc}(object, Nmcmc = 1, \dots)
 }
 \arguments{
@@ -58,7 +63,6 @@
     Several functions that construct appropriate proposal function are provided:
     see \link{MCMC proposal functions} for more information.
   }
-  \item{pars, rw.sd}{Deprecated.  Will be removed in a future release.}
   \item{Np}{
     a positive integer;
     the number of particles to use in each filtering operation.
@@ -75,8 +79,7 @@
     logical; if TRUE, print progress reports.
   }
   \item{\dots}{
-    Additional arguments.
-    These are currently ignored.
+    additional arguments that override the defaults.
   }
 }
 \value{
@@ -100,8 +103,11 @@
 }
 \section{Methods}{
   \describe{
-    \item{conv.rec}{
-      \code{conv.rec(object, pars)} returns the columns of the convergence-record matrix corresponding to the names in \code{pars} as an object of class \code{\link[coda]{mcmc}} or \code{\link[coda]{mcmc.list}}.
+    \item{\code{conv.rec(object, pars)}}{
+      returns the columns of the convergence-record matrix corresponding to the names in \code{pars} as an object of class \code{\link[coda]{mcmc}} or \code{\link[coda]{mcmc.list}}.
+    }
+    \item{\code{filter.traj(object, vars)}}{
+      returns filter trajectories.
     }
     \item{plot}{
       Diagnostic plots.
@@ -112,7 +118,47 @@
     \item{c}{
       Concatenates \code{pmcmc} objects into a \code{pmcmcList}.
     }
+    \item{\code{covmat(object, start, thin, expand)}}{
+      computes the empirical covariance matrix of the MCMC samples beginning with iteration \code{start} and thinning by factor \code{thin}.
+      It expands this by a factor \code{expand^2/n}, where \code{n} is the number of parameters estimated.
+      By default, \code{expand=2.38}.
+      The intention is that the resulting matrix is a suitable input to the proposal function \code{\link{mvn.rw}}.
+    }
   }
+}
+\examples{
+\dontrun{
+library(pomp)
+
+pompExample(ou2)
+
+pmcmc(
+      pomp(ou2,dprior=Csnippet("
+   lik = dnorm(alpha_2,-0.5,1,1) + dnorm(alpha_3,0.3,1,1);
+   lik = (give_log) ? lik : exp(lik);"),
+           paramnames=c("alpha.2","alpha.3")),
+      Nmcmc=2000,Np=500,verbose=TRUE,
+      proposal=mvn.rw.adaptive(rw.sd=c(alpha.2=0.01,alpha.3=0.01),
+        scale.start=200,shape.start=100)) -> chain
+continue(chain,Nmcmc=2000,proposal=mvn.rw(covmat(chain))) -> chain
+plot(chain)
+chain <- pmcmc(chain)
+plot(chain)
+
+require(coda)
+trace <- window(conv.rec(chain,c("alpha.2","alpha.3")),start=2000)
+rejectionRate(trace)
+effectiveSize(trace)
+autocorr.diag(trace)
+
+plot(trace)
+heidel.diag(trace)
+geweke.diag(trace)
+}
+}
+\seealso{
+  \code{\link{pomp}}, \code{\link{pfilter}}, \link{MCMC proposal distributions},
+  and the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.
 }
 \references{
   C. Andrieu, A. Doucet and R. Holenstein, 
@@ -123,9 +169,5 @@
   The pseudo-marginal approach for efficient computation,
   Ann. Stat. 37:697-725, 2009.
 }
-\author{Edward L. Ionides \email{ionides at umich dot edu}, Aaron A. King \email{kingaa at umich dot edu}}
-\seealso{
-  \code{\link{pomp}}, \code{\link{pfilter}},
-  and the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.
-}
+\author{Edward L. Ionides, Aaron A. King, Sebastian Funk}
 \keyword{ts}

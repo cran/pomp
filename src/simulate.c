@@ -14,7 +14,6 @@ SEXP simulation_computations (SEXP object, SEXP params, SEXP times, SEXP t0,
   SEXP ans, ans_names;
   SEXP po, popo;
   SEXP statenames, paramnames, obsnames, statedim, obsdim;
-  SEXP rmeas;
   int nsims, nparsets, nreps, npars, nvars, ntimes, nobs;
   int qobs, qstates;
   int *dim, dims[3];
@@ -41,7 +40,7 @@ SEXP simulation_computations (SEXP object, SEXP params, SEXP times, SEXP t0,
   nreps = nsims*nparsets;
 
   // initialize the simulations
-  PROTECT(xstart = do_init_state(object,params,t0)); nprotect++;
+  PROTECT(xstart = do_init_state(object,params,t0,gnsi)); nprotect++;
   PROTECT(statenames = GET_ROWNAMES(GET_DIMNAMES(xstart))); nprotect++;
   dim = INTEGER(GET_DIM(xstart));
   nvars = dim[0];

@@ -6,8 +6,6 @@
 ##          these should be drawn from the prior distribution for the parameters
 ## est = names of parameters to estimate; other parameters are not updated.
 ## smooth = parameter 'h' from AGM
-## ntries = number of samplesto draw from x_{t+1} | x(k)_{t} to estimate
-##          mean of mu(k)_t+1 as in sect 2.2 Liu & West
 
 bsmc2.internal <- function (object, params, Np, est,
                             smooth, tol, seed = NULL,
@@ -15,19 +13,17 @@ bsmc2.internal <- function (object, params, Np, est,
                             max.fail, transform, .getnativesymbolinfo = TRUE,
                             ...) {
 
+  object <- as(object,"pomp")
   pompLoad(object)
             
   gnsi.rproc <- gnsi.dmeas <- as.logical(.getnativesymbolinfo)
   ptsi.inv <- ptsi.for <- TRUE
   transform <- as.logical(transform)
 
-  if (missing(seed)) seed <- NULL
-  if (!is.null(seed)) {
-    if (!exists(".Random.seed",where=.GlobalEnv))
-      runif(n=1L) ## need to initialize the RNG
-    save.seed <- get(".Random.seed",pos=.GlobalEnv)
-    set.seed(seed)
-  }
+  if (!is.null(seed))
+    warning("in ",sQuote("bsmc2"),": argument ",sQuote("seed"),
+            " now has no effect.  Consider using ",
+            sQuote("freeze"),".")
 
   error.prefix <- paste(sQuote("bsmc2"),"error: ")
 
@@ -47,7 +43,7 @@ bsmc2.internal <- function (object, params, Np, est,
     params <- rprior(object,params=parmat(params,Np))
   
   if (transform)
-    params <- partrans(object,params,dir="inverse",
+    params <- partrans(object,params,dir="toEstimationScale",
                        .getnativesymbolinfo=ptsi.inv)
   ptsi.inv <- FALSE
   
@@ -76,13 +72,12 @@ bsmc2.internal <- function (object, params, Np, est,
   xstart <- init.state(
                        object,
                        params=if (transform) {
-                         partrans(object,params,dir="forward",
+                         partrans(object,params,dir="fromEstimationScale",
                                   .getnativesymbolinfo=ptsi.for)
                        } else {
                          params
                        }
                        )
-  statenames <- rownames(xstart)
   nvars <- nrow(xstart)
   ptsi.for <- FALSE
   
@@ -119,22 +114,23 @@ bsmc2.internal <- function (object, params, Np, est,
     
     ## sample new parameter vector as per L&W AGM (3) and Liu & West eq(3.2)
     pert <- try(
-                mvtnorm::rmvnorm(
-                                 n=Np,
-                                 mean=rep(0,npars.est),
-                                 sigma=hsq*params.var,
-                                 method="svd"
-                                 ),
+                rmvnorm(
+                        n=Np,
+                        mean=rep(0,npars.est),
+                        sigma=hsq*params.var,
+                        method="svd"
+                        ),
                 silent=FALSE
                 )
     if (inherits(pert,"try-error"))
       stop(error.prefix,"error in ",sQuote("rmvnorm"),call.=FALSE)
-    if (any(!is.finite(pert)))
+    if (!all(is.finite(pert)))
       stop(error.prefix,"extreme particle depletion",call.=FALSE)
+
     params[estind,] <- m[estind,]+t(pert)
 
     if (transform)
-      tparams <- partrans(object,params,dir="forward",
+      tparams <- partrans(object,params,dir="fromEstimationScale",
                           .getnativesymbolinfo=ptsi.for)
     
     xpred <- rprocess(
@@ -201,18 +197,12 @@ bsmc2.internal <- function (object, params, Np, est,
     ## Matrix with samples (columns) from filtering distribution theta.t | Y.t
     if (!all.fail) {
       smp <- .Call(systematic_resampling,weights)
-###      smp <- sample.int(n=Np,size=Np,replace=TRUE,prob=weights)
       x <- x[,smp,drop=FALSE]
       params[estind,] <- params[estind,smp,drop=FALSE]
     }
 
     .getnativesymbolinfo <- FALSE
     
-  }
-
-  if (!is.null(seed)) {
-    assign(".Random.seed",save.seed,pos=.GlobalEnv)
-    seed <- save.seed
   }
   
   ## replace parameters with point estimate (posterior median)
@@ -229,7 +219,6 @@ bsmc2.internal <- function (object, params, Np, est,
       est=as.character(est),
       eff.sample.size=eff.sample.size,
       smooth=smooth,
-      seed=as.integer(seed),
       nfail=as.integer(nfail),
       cond.log.evidence=evidence,
       log.evidence=sum(evidence)
@@ -240,7 +229,7 @@ setMethod(
           "bsmc2",
           signature=signature(object="pomp"),
           definition = function (object, params, Np, est,
-            smooth = 0.1, tol = 1e-17, seed = NULL,
+            smooth = 0.1, tol = 1e-17,
             verbose = getOption("verbose"),
             max.fail = 0, transform = FALSE,
             ...) {
@@ -251,7 +240,6 @@ setMethod(
                            est=est,
                            smooth=smooth,
                            tol=tol,
-                           seed=seed,
                            verbose=verbose,
                            max.fail=max.fail,
                            transform=transform,

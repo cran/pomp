@@ -36,12 +36,13 @@ pomp.detrend <- function (tseries, type)
          type,
          mean=tseries-mean(tseries),
          linear={
-           x <- seq_along(tseries)
-           lm(tseries~x)$residuals
+           m <- cbind(1,seq_along(tseries))
+           .lm.fit(m,tseries)$residuals
          },
          quadratic={
            x <- seq_along(tseries)
-           lm(tseries~x+I(x^2))$residuals
+           m <- cbind(1,x,x*x)
+           .lm.fit(m,tseries)$residuals
          },
          tseries
          )
@@ -222,7 +223,7 @@ setMethod(
           signature(object="spect.pomp"),
           function (object, params, vars, kernel.width, nsim, seed = NULL, transform, detrend, ...) {
             if (missing(params)) params <- coef(object)
-            if (missing(vars)) probes <- rownames(object@datspec)
+            if (missing(vars)) vars <- rownames(object@datspec)
             if (missing(kernel.width)) kernel.width <- object@kernel.width
             if (missing(nsim)) nsim <- nrow(object@simspec)
             if (missing(transform)) transform <- object@transform
@@ -292,7 +293,6 @@ setMethod(
             }
 
             dimsim <- dim(spomp@simspec)
-            nsim <- dimsim[1]
             nfreq <- dimsim[2]
             nobs <- dimsim[3]
             oldpar <- par(
@@ -317,10 +317,10 @@ setMethod(
                              max(spectraquants,spomp@datspec[,i])
                              )
               } else {
-                ylimit <- c(
-                            min(spectraquants),
-                            max(spectraquants)
-                            )
+                ylimits <- c(
+                             min(spectraquants),
+                             max(spectraquants)
+                             )
               }
               plot(
                    NULL,

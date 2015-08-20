@@ -4,7 +4,7 @@
 \description{
   \code{pompBuilder} is a tool for producing compiled \code{pomp} objects.
   It was an early attempt to facilitate the use of compiled codes but has been replaced by the more flexible use of \code{\link{Csnippet}}s in the regular \code{pomp} constructor function.
-  It is not being actively maintained and users are encouraged to migrate to using \code{\link{Csnippet}}s.
+  \strong{It is not being actively maintained and is no longer exported: users are encouraged to migrate to using \code{\link{Csnippet}}s}.
 }
 \usage{
 pompBuilder(data, times, t0, name, statenames, paramnames, 
@@ -83,6 +83,6 @@ pompBuilder(data, times, t0, name, statenames, paramnames,
 \seealso{
   \code{\link{pomp}}, \code{\link{Csnippet}}
 }
-\author{Aaron A. King \email{kingaa at umich dot edu}}
+\author{Aaron A. King}
 \keyword{programming}
 \keyword{internal}

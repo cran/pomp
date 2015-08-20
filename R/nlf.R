@@ -64,7 +64,7 @@ nlf.internal <- function (object, start, est, lags, period, tensor,
   if (eval.only) est <- character(0)
   if (missing(start)) start <- coef(object)
   if (transform)
-    params <- partrans(object,start,dir="inverse")
+    params <- partrans(object,start,dir="toEstimationScale")
   else
     params <- start
 
@@ -161,7 +161,7 @@ nlf.internal <- function (object, start, est, lags, period, tensor,
     }
 
     params[par.index] <- opt$par
-    opt$params <- if (transform) partrans(object,params,dir="forward") else params
+    opt$params <- if (transform) partrans(object,params,dir="fromEstimationScale") else params
     
   }
 
@@ -193,8 +193,7 @@ nlf.internal <- function (object, start, est, lags, period, tensor,
 
     ## find a good epsilon 
     h <- se.par.frac
-    if (verbose)
-      cat("h in NLF = ", h, "\n")
+    if (verbose) cat("h in NLF = ", h, "\n")
     eps <- rep(h,nfitted)
 
     for (i in seq_len(nfitted)) {
@@ -250,13 +249,12 @@ nlf.internal <- function (object, start, est, lags, period, tensor,
                        )
       FAILED <- -999999
       Fvals[Fvals < FAILED+10] <- NA
-      xvals <- c(sqrt(2),1,0,1,sqrt(2))*h*fitted[i]
-      c2 <- lm(Fvals~I(xvals^2))$coef[2]
+      xvals <- cbind(1,(c(sqrt(2),1,0,1,sqrt(2))*h*fitted[i])^2)
+      c2 <- .lm.fit(xvals,Fvals)$coefficients[2]
       eps[i] <- sqrt(abs(lql.frac/c2))
     }
 
-    if (verbose)
-      cat("epsilon in NLF =",t(eps), "\n")
+    if (verbose) cat("epsilon in NLF =",t(eps), "\n")
 
     Imat <- matrix(0,npts,nfitted)
     for (i in seq_len(nfitted)) {
@@ -279,8 +277,7 @@ nlf.internal <- function (object, start, est, lags, period, tensor,
                        verbose=FALSE
                        )
 
-      if (verbose)
-        cat("Fitted param ", i, F.up, mean(f.up2,na.rm=T)," up in ",sQuote("nlf"),"\n")
+      if (verbose) cat("Fitted param ", i, F.up, mean(f.up2,na.rm=T)," up in ",sQuote("nlf"),"\n")
 
       guess.down <- fitted
       guess.down[i] <- guess.down[i]-eps[i]
@@ -293,8 +290,7 @@ nlf.internal <- function (object, start, est, lags, period, tensor,
                         )
       F.down <- mean(f.down,na.rm=T)
 
-      if (verbose)
-        cat("Fitted param ",i, F.down," down in ",sQuote("NLF"),"\n")
+      if (verbose) cat("Fitted param ",i, F.down," down in ",sQuote("NLF"),"\n")
 
       Jhat[i,i] <- (F.up + F.down-2*F0)/(eps[i]*eps[i])
       Imat[,i] <- (f.up-f.down)/(2*eps[i])
@@ -418,15 +414,9 @@ setMethod(
             verbose = getOption("verbose"),
             bootstrap = FALSE, bootsamp = NULL,
             lql.frac = 0.1, se.par.frac = 0.1,
-            eval.only = FALSE, transform.params,
+            eval.only = FALSE,
             transform = FALSE, ...)
           {
-            if (!missing(transform.params)) {
-              warning("argument ",sQuote("transform.params"),
-                      " is deprecated and will be removed in a future release.\n",
-                      "Use ",sQuote("transform")," instead.")
-              if (missing(transform)) transform <- transform.params
-            }
             transform <- as.logical(transform)
             if (missing(transform.data)) transform.data <- identity
             transform.data <- match.fun(transform.data)

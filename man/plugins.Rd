@@ -24,14 +24,14 @@ onestep.dens(dens.fun, PACKAGE)
     The latter is the preferred option.
     It should be written to take a single Euler step from a single point in state space.
 
-    For an explanation and examples on the use of \code{\link{Csnippet}} to write fast simulators, see the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.
+    For an explanation and examples on the use of \code{\link{Csnippet}} to write fast simulators, see the tutorials on the \href{http://kingaa.github.io/pomp}{package website}.
 
     If it is an \R function, it should have prototype \preformatted{step.fun(x,t,params,delta.t,...).}
     Here, \code{x} is a named numeric vector containing the value of the state process at time \code{t},
     \code{params} is a named numeric vector containing parameters,
     and \code{delta.t} is the length of the Euler time-step.
 
-    If \code{step.fun} is the name of a native function, it must be of type \code{pomp_onestep_sim} as defined in the header file \file{pomp.h}, which is included with the \pkg{pomp} package.
+    If \code{step.fun} is the name of a native function, it must be of type \preformatted{pomp_onestep_sim} as defined in the header file \file{pomp.h}, which is included with the \pkg{pomp} package.
     Do \preformatted{file.show(system.file("include/pomp.h",package="pomp"))} to view this header file.
     For details on how to write such codes, see Details.
   }
@@ -42,9 +42,9 @@ onestep.dens(dens.fun, PACKAGE)
     \code{x} is a named numeric vector containing the value of the state process at time \code{t} and 
     \code{params} is a named numeric vector containing parameters.
 
-    For examples on the use of \code{\link{Csnippet}} to write fast simulators easily, see tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.
+    For examples on the use of \code{\link{Csnippet}} to write fast simulators easily, see tutorials on the \href{http://kingaa.github.io/pomp}{package website}.
 
-    If \code{rate.fun} is a native function, it must be of type \code{pomp_ssa_rate_fn} as defined in the header \file{pomp.h}, which is included with the package.
+    If \code{rate.fun} is a native function, it must be of type \preformatted{pomp_ssa_rate_fn} as defined in the header \file{pomp.h}, which is included with the package.
     For details on how to write such codes, see Details.
   }
   \item{v, d}{
@@ -62,7 +62,7 @@ onestep.dens(dens.fun, PACKAGE)
     Here, \code{x1} and \code{x2} are named numeric vectors containing the values of the state process at times \code{t1} and \code{t2},
     \code{params} is a named numeric vector containing parameters.
 
-    If \code{dens.fun} is the name of a native function, it should be of type \code{pomp_onestep_pdf} as defined in the header \file{pomp.h}, which is included with the \pkg{pomp} package.
+    If \code{dens.fun} is the name of a native function, it should be of type \preformatted{pomp_onestep_pdf} as defined in the header \file{pomp.h}, which is included with the \pkg{pomp} package.
     This function should return the log likelihood of a transition from \code{x1} at time \code{t1} to \code{x2} at time \code{t2}, assuming that no intervening transitions have occurred.
     For details on how to write such codes, see Details.
   }
@@ -101,7 +101,7 @@ onestep.dens(dens.fun, PACKAGE)
   This is accomplished via interpolation of the user-supplied covariate table.
   Additional arguments may be given: these will be filled by the correspondingly-named elements in the \code{userdata} slot of the \code{pomp} object (see \code{\link{pomp}}).
 
-  If \code{step.fun} is written in a native language, it must be a function of type \code{pomp_onestep_sim} as specified in the header \file{pomp.h} included with the package.
+  If \code{step.fun} is written in a native language, it must be a function of type \preformatted{pomp_onestep_sim} as specified in the header \file{pomp.h} included with the package.
   Execute \preformatted{file.show(system.file("include/pomp.h",package="pomp.h"))} to view this file.
 
   If \code{rate.fun} is written as an \R function, it must have at least the arguments \code{j}, \code{x}, \code{t}, \code{params}, and \code{\dots}.
@@ -110,7 +110,7 @@ onestep.dens(dens.fun, PACKAGE)
   \code{params} is a named vector containing parameters.
   If the argument \code{covars} is included and a covariate table has been included in the \code{pomp} object, then on a call to this function, \code{covars} will be filled with the values, at time \code{t}, of the covariates.
   This is accomplished via interpolation of the covariate table.
-  If \code{rate.fun} is a native function, it must be of type \code{pomp_ssa_rate_fn} as defined in the header \file{pomp.h}; see above for instructions on how to view this file.
+  If \code{rate.fun} is a native function, it must be of type \preformatted{pomp_ssa_rate_fn} as defined in the header \file{pomp.h}; see above for instructions on how to view this file.
   
   In writing \code{dens.fun}, you must assume that no state transitions have occurred between \code{t1} and \code{t2}.
   If \code{dens.fun} is written as an \R function, it must have at least the arguments \code{x1}, \code{x2}, \code{t1}, \code{t2}, \code{params}, and \code{\dots}.
@@ -120,15 +120,15 @@ onestep.dens(dens.fun, PACKAGE)
   If the argument \code{covars} is included and a covariate table has been included in the \code{pomp} object, then on a call to this function, \code{covars} will be filled with the values, at time \code{t1}, of the covariates.
   This is accomplished via interpolation of the covariate table.
   As above, any additional arguments will be filled by the correspondingly-named elements in the \code{userdata} slot of the \code{pomp} object (see \code{\link{pomp}}).
-  If \code{dens.fun} is written in a native language, it must be a function of type \code{pomp_onestep_pdf} as defined in the header \file{pomp.h} included with the package; see above for instructions on how to view this file.
+  If \code{dens.fun} is written in a native language, it must be a function of type \preformatted{pomp_onestep_pdf} as defined in the header \file{pomp.h} included with the package; see above for instructions on how to view this file.
 }
 \value{
   \code{onestep.sim}, \code{euler.sim}, \code{discrete.time.sim}, and \code{gillespie.sim} each return functions suitable for use as the argument \code{rprocess} argument in \code{\link{pomp}}.
 
   \code{onestep.dens} returns a function suitable for use as the argument \code{dprocess} in \code{\link{pomp}}.
 }
-\author{Aaron A. King \email{kingaa at umich dot edu}}
+\author{Aaron A. King}
 \seealso{
-  \code{\link{pomp}} and the tutorials on the \href{http://pomp.r-forge.r-project.org}{package website}.
+  \code{\link{pomp}} and the tutorials on the \href{http://kingaa.github.io/pomp}{package website}.
 }
 \keyword{models}

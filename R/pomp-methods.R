@@ -26,19 +26,23 @@ as.data.frame.pomp <- function (x, row.names, optional, ...) as(x,"data.frame")
 
 ## parameter transformations
 partrans.internal <- function (object, params,
-                               dir = c("fromEstimationScale","toEstimationScale",
+                               dir = c("fromEstimationScale",
+                                 "toEstimationScale",
                                  "forward","inverse"),
                                .getnativesymbolinfo = TRUE, ...) {
   if (!object@has.trans) return(params)
   pompLoad(object)
-  dir <- switch(match.arg(dir),fromEstimationScale=1L,toEstimationScale=-1L,forward=1L,inverse=-1L)
+  dir <- switch(match.arg(dir),fromEstimationScale=1L,toEstimationScale=-1L,
+                forward=1L,inverse=-1L)
   rv <- .Call(do_partrans,object,params,dir,.getnativesymbolinfo)
   pompUnload(object)
   rv
 }
 
 setMethod("partrans","pomp",
-          function (object, params, dir = c("fromEstimationScale","toEstimationScale", "forward","inverse"),...)
+          function (object, params, dir = c("fromEstimationScale",
+                                      "toEstimationScale", "forward","inverse"),
+                    ...)
           partrans.internal(object=object,params=params,dir=dir,...)
           )
 
@@ -56,12 +60,6 @@ obs.internal <- function (object, vars, ...) {
 
 ## a simple method to extract the data array
 setMethod("obs","pomp",obs.internal)
-setMethod("data.array","pomp",function (object, ...) {
-  warning(sQuote("data.array")," is deprecated and will be removed ",
-          "in a future release.  Use ",sQuote("obs")," instead.")
-  obs.internal(object,...)
-})
-
 
 ## a simple method to extract the array of states
 states.internal <- function (object, vars, ...) {
@@ -95,7 +93,6 @@ setMethod(
             if (!is.numeric(value))
               stop(sQuote("value")," must be a numeric vector",call.=TRUE)
             storage.mode(value) <- "double"
-            tt0 <- object@t0
             tt <- object@times
             dd <- object@data
             ss <- object@states
