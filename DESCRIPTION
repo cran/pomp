@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 1.1.1.1
-Date: 2015-08-20
+Version: 1.2.1.1
+Date: 2015-09-24
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -19,7 +19,7 @@ Authors@R: c(person(given=c("Aaron","A."),family="King",
 	  )
 URL: http://kingaa.github.io/pomp
 Description: Tools for working with partially observed Markov processes (POMPs, AKA stochastic dynamical systems, state-space models).  'pomp' provides facilities for implementing POMP models, simulating them, and fitting them to time series data by a variety of frequentist and Bayesian methods.  It is also a platform for the implementation of new inference methods.
-Depends: R(>= 3.0.0), methods
+Depends: R(>= 3.1.0), methods
 Imports: stats, graphics, digest, mvtnorm, deSolve, coda, subplex,
         nloptr
 Suggests: magrittr, plyr, reshape2, ggplot2, knitr
@@ -42,7 +42,7 @@ Collate: aaa.R authors.R bake.R generics.R eulermultinom.R csnippet.R
         probe.R probe-match.R basic-probes.R spect.R spect-match.R
         abc.R abc-methods.R covmat.R example.R
 NeedsCompilation: yes
-Packaged: 2015-08-20 11:21:56 UTC; kingaa
+Packaged: 2015-09-24 13:37:38 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -57,4 +57,4 @@ Author: Aaron A. King [aut, cre],
   Sebastian Funk [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2015-08-20 19:24:05
+Date/Publication: 2015-09-25 00:55:32

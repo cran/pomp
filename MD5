@@ -1,4 +1,4 @@
-3e226ff88664e45d33e6c47a67498a78 *DESCRIPTION
+061bcf54a5184bb9f237b0ba6cba9e79 *DESCRIPTION
 6d15b3a243b914cb7e7427888a0af337 *NAMESPACE
 7d8ac54ea547777f454ffca21189460f *R/aaa.R
 b88f25b932f4977641be1eb16db35f40 *R/abc-methods.R
@@ -22,7 +22,7 @@ f77e85648298426d1b6d32e358693aad *R/init-state-pomp.R
 c52f8c1cd3a154baeb313be12872498e *R/load.R
 9d02dec82f3bb7ac32dfba0bd5643e0c *R/logmeanexp.R
 f6620890976a781d037537ec496e89a2 *R/mif-methods.R
-65ed33b85adc515bac31a964d8cdfbc3 *R/mif.R
+1b8bc1fbd4e647f9e22382c30499ef93 *R/mif.R
 2afd41b03dc58b1c315ff5ec4d73301f *R/mif2-methods.R
 b11f4068ee1165188781190d8915fe75 *R/mif2.R
 2d7f904c0f64b73fd72ebaf9ce12d737 *R/minim.R
@@ -31,11 +31,11 @@ b11f4068ee1165188781190d8915fe75 *R/mif2.R
 77fdd36cb8afd4d9526314c2a3db3f0a *R/nlf-objfun.R
 d6f59f7d3c4c359d842dc081ba55fceb *R/nlf.R
 f6a4731c9922c175f79d3302b6a47aaa *R/parmat.R
-e6b8ae766cf4f9a952cb1b5cc0b1678b *R/pfilter-methods.R
+8dc1b73601facb4293aa4f1f4b52120b *R/pfilter-methods.R
 e6b64c18bb158bcdb6a86a8616a282f6 *R/pfilter.R
 bf0bf6d8b7e7cb9aaac15f6950430c3a *R/plot-pomp.R
 eda9888abc1277110db3e9e8b9af3a74 *R/plugins.R
-46b37d2a5996916d7f320fa64a04d4e2 *R/pmcmc-methods.R
+a36ab92f7f4255c9913536cfe0f4297c *R/pmcmc-methods.R
 d1b089ad4360851c08eae02c5478a664 *R/pmcmc.R
 031c134faa751693d2e5d90e23e4a88e *R/pomp-class.R
 da39238cdabb1140188677a8f0b43df4 *R/pomp-fun.R
@@ -57,7 +57,7 @@ bc81cbdf8110d535c0d3b1bdeac1592d *R/simulate-pomp.R
 50bd599ef2e40eb14fc8eaf1b8a1373a *R/spect.R
 c70a755010136e33a488265ed5d88fec *R/traj-match.R
 a2341bc1263e5192fe1db0ba0a980010 *R/trajectory-pomp.R
-429e435d1caf1c3f9c0322aeacccdec0 *build/partial.rdb
+cb057fe91e4997f9ccd7473fbb8360a7 *build/partial.rdb
 774693ca5abbdade512923a1efb558ae *data/LondonYorke.rda
 881559c891cce343da2e21c50715d3cb *data/ewcitmeas.rda
 65dde4e794703f8e0a0c3d3ded3e0205 *data/ewmeas.rda
@@ -68,14 +68,12 @@ b86f2da79a1f6343c3f8be2ed4cd1c82 *demo/rw2.R
 9146f19c2551486d88e7377f36f4171c *demo/sir.R
 3efe09cdb3878a7a3b898a17e56c19d0 *inst/CITATION
 37483d9025577e53130dc59df034c53f *inst/GPL
-175ffb079137b58e4623fc0f9db2ab30 *inst/NEWS
-826219ea7e152f2528210185e25e012b *inst/NEWS.Rd
+b7ddd030824225daac7364e8938c52dc *inst/NEWS
+4589961462a475fffb1088a4d50c37eb *inst/NEWS.Rd
 46f833a637d26aa7db358c9a91b59187 *inst/doc/index.html
 d909d73a1428c511532cc3939df86cd7 *inst/examples/bbs.R
 902f5acdfa2ac3d4026f1d9275625dbf *inst/examples/blowflies.R
 c6adfdbbd8747f565d9983d6c463e269 *inst/examples/dacca.R
-bcd05ca2f31dd6dd873636f2f2b81096 *inst/examples/dacca2.R
-db531f18b8fe59c80f260e8164da3a6f *inst/examples/ebola.R
 d1cfe42ffdfc385b47738c1ab6e2f950 *inst/examples/euler.sir.R
 ea7f18e8c9c85433b7342c186f729cce *inst/examples/gillespie.sir.R
 4239feaf067c7c0102a20399731467e3 *inst/examples/gompertz.R
@@ -107,8 +105,8 @@ e354bf655216088928abea9fe6dc6b60 *man/mif2.Rd
 476478b241b178415a4d4a43a4f487e7 *man/parmat.Rd
 6396b17722bd78e695313ea4c14110f2 *man/particles-mif.Rd
 5fe899f66024c5faf488238479051490 *man/pfilter.Rd
-c787be38c2e28f0700f2ab06010b0cc5 *man/plugins.Rd
-4f9e90125d6fa46ad8e6a44db2903bbf *man/pmcmc.Rd
+bde6c9d882181b0e39d71c50c4fd348d *man/plugins.Rd
+37456d1fdc54520bd026c9b367429333 *man/pmcmc.Rd
 124903493d7846790adabba70e0548c3 *man/pomp-fun.Rd
 bc1d89a2fbac51c2f44eeffb13cb0f72 *man/pomp-methods.Rd
 ec807e8364621fa2fd884db2a6ea7df4 *man/pomp.Rd
@@ -116,7 +114,7 @@ a0e1958bfcbc1ebda4885fc3fa8696ce *man/probe.Rd
 719136dc6b7e8d62f92e731740570379 *man/proposals.Rd
 307a99b8bfbd6770480bf3b81c971beb *man/ricker.Rd
 1539d1bc4226a799a83217aa581cb676 *man/rw2.Rd
-8e04b9699f3442d3b0699f649347ad17 *man/sannbox.Rd
+20d1d3d87216b1678a5ce9c034ad8fd9 *man/sannbox.Rd
 447678f556bc76fe0bedf46ddd5e9450 *man/simulate-pomp.Rd
 0c9492fb85979d2afd43798d2c6eece9 *man/sir.Rd
 5e8acfbb69cc2c1d628aceeb4da2659a *man/spect.Rd
