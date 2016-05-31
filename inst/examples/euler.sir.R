@@ -1,4 +1,4 @@
-require(pomp)
+library(pomp)
 
 dat <- '"time";"reports"
 0,0192307692307692;617
@@ -228,8 +228,7 @@ pomp(
        delta.t=1/52/20,
        PACKAGE="pomp"
        ),
-     skeleton.type="vectorfield",
-     skeleton="_sir_ODE",
+     skeleton=vectorfield("_sir_ODE"),
      rmeasure="_sir_binom_rmeasure",
      dmeasure="_sir_binom_dmeasure",
      PACKAGE="pomp",

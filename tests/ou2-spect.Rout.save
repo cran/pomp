@@ -1,0 +1,73 @@
+
+R version 3.2.4 Revised (2016-03-16 r70336) -- "Very Secure Dishes"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(pomp)
+> pompExample(ou2)
+newly created object(s):
+ ou2 
+> 
+> set.seed(362083261L)
+> 
+> pdf(file="ou2-spect.pdf")
+> 
+> gm1 <- spect.match(ou2,
++                   kernel.width=3,
++                   detrend="mean",
++                   nsim=50,
++                   est=c("alpha.1","alpha.4"),
++                   method="Nelder-Mead")
+> gm1@value
+[1] 64.89552
+> plot(gm1)
+> 
+> gm2 <- spect.match(ou2,
++                    kernel.width=3,
++                    detrend="mean",
++                    nsim=49,
++                    est=c("alpha.1","alpha.4"),
++                    method="Nelder-Mead")
+> gm2@value
+[1] 73.42989
+> plot(gm2)
+> 
+> gm3 <- spect.match(ou2,
++                    kernel.width=3,
++                    detrend="linear",
++                    nsim=50,
++                    est=c("alpha.1","alpha.4"),
++                    method="Nelder-Mead")
+> gm3@value
+[1] 60.4426
+> plot(gm3)
+> 
+> gm4 <- spect.match(ou2,
++                    kernel.width=3,
++                    detrend="quadratic",
++                    nsim=50,
++                    est=c("alpha.1","alpha.4"),
++                    method="Nelder-Mead")
+> gm4@value
+[1] 66.11778
+> plot(gm4)
+> 
+> dev.off()
+null device 
+          1 
+> 
+> proc.time()
+   user  system elapsed 
+ 34.148   0.020  34.124 

@@ -1,4 +1,4 @@
-require(pomp)
+library(pomp)
 
 dat <- '"time";"X";"Y"
 0;1;1,07952841598157
@@ -114,8 +114,7 @@ pomp(
        ),
      rmeasure="_gompertz_normal_rmeasure",
      dmeasure="_gompertz_normal_dmeasure",
-     skeleton.type="map",
-     skeleton="_gompertz_skeleton",
+     skeleton=map("_gompertz_skeleton",delta.t=1),
      paramnames=c("r","K","sigma","tau"),
      statenames=c("X"),
      fromEstimationScale=function(params,...){

@@ -3,7 +3,9 @@
 #include "pomp_internal.h"
 #include <Rdefines.h>
 
-SEXP mif2_computations (SEXP params, SEXP rw_sd)
+// NB: this function modifies 'params' in-place, violating R's injunction
+// against call by reference.  Beware!!
+SEXP randwalk_perturbation (SEXP params, SEXP rw_sd)
 {
   int nprotect = 0;
   double *xp = 0, *rw, *xrw, *xs;
@@ -13,7 +15,6 @@ SEXP mif2_computations (SEXP params, SEXP rw_sd)
   int j, k;
 
   // unpack parameter matrix
-  PROTECT(params = duplicate(params)); nprotect++;
   xp = REAL(params);
   dim = INTEGER(GET_DIM(params)); npars = dim[0]; nreps = dim[1];
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
@@ -37,5 +38,5 @@ SEXP mif2_computations (SEXP params, SEXP rw_sd)
   PutRNGstate();
 
   UNPROTECT(nprotect);
-  return(params);
+  return(R_NilValue);
 }
