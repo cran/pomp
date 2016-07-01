@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 1.5
-Date: 2016-05-30
+Version: 1.6
+Date: 2016-06-30
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -36,13 +36,13 @@ Collate: aaa.R authors.R bake.R generics.R eulermultinom.R csnippet.R
         rprocess_pomp.R initstate_pomp.R dmeasure_pomp.R
         dprocess_pomp.R skeleton_pomp.R dprior_pomp.R rprior_pomp.R
         simulate_pomp.R trajectory_pomp.R plot_pomp.R pfilter.R
-        pfilter_methods.R minim.R traj_match.R bsmc.R bsmc2.R mif.R
-        mif_methods.R mif2.R mif2_methods.R proposals.R pmcmc.R
-        pmcmc_methods.R nlf_funcs.R nlf_guts.R nlf_objfun.R nlf.R
-        probe.R probe_match.R basic_probes.R spect.R spect_match.R
-        abc.R abc_methods.R covmat.R example.R
+        pfilter_methods.R minim.R traj_match.R bsmc.R bsmc2.R kalman.R
+        kalman_methods.R mif.R mif_methods.R mif2.R mif2_methods.R
+        proposals.R pmcmc.R pmcmc_methods.R nlf_funcs.R nlf_guts.R
+        nlf_objfun.R nlf.R probe.R probe_match.R basic_probes.R spect.R
+        spect_match.R abc.R abc_methods.R covmat.R example.R
 NeedsCompilation: yes
-Packaged: 2016-05-30 16:20:20 UTC; kingaa
+Packaged: 2016-06-30 21:22:06 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -57,4 +57,4 @@ Author: Aaron A. King [aut, cre],
   Sebastian Funk [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2016-05-31 11:29:42
+Date/Publication: 2016-07-01 01:20:50

@@ -1,6 +1,59 @@
 _N_e_w_s _f_o_r _p_a_c_k_a_g_e '_p_o_m_p'
 
-_C_h_a_n_g_e_s _s_i_n_c_e '_p_o_m_p' _v_e_r_s_i_o_n _1._4:
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._6:
+
+        • Major revisions to the package help pages and manual.  The
+          separate documentation on C snippets and process-model
+          plugins has been merged into the main ‘pomp’ help page, which
+          now has comprehensive instructions on building a ‘pomp’
+          object.
+
+        • Update to the package help page.
+
+        • New methods for the Ensemble Kalman Filter (‘enkf’) and
+          Ensemble Adjustment Kalman Filter (‘eakf’) have been added to
+          the package.
+
+        • There is a new plugin for ‘rprocess’ called ‘kleap.sim’.
+          This implements the so-called “K-leap method” of Cai & Xu
+          (2007).
+
+        • Major overhaul of error handling system and to error and
+          warning messages.  Many more errors are now trapped and
+          reported with more informative messages.
+
+        • The matrix and numeric vector options for the ‘data’ argument
+          to ‘pomp’ are now deprecated and will be removed in a future
+          release.  In calls to ‘pomp’, ‘data’ should be either a data
+          frame or a ‘pomp’-class object.
+
+        • In ‘mif2’, it is now required that ‘Nmif>0’.
+
+        • Redundant ‘bootstrap’ argument to ‘nlf’ has been removed.
+
+        • Many improvements to the test suite to obtain better code
+          coverage.
+
+        • Fixed bugs that might arise in rare circumstances in
+          ‘simulate’ and ‘eulermultinom’ functions.
+
+        • Fixed a bug in ‘pompExample’.
+
+        • Fixed several small, rare bugs found as a result of improved
+          testing.
+
+        • Fixed bug in specification of skeleton in pompExamples.
+
+        • ‘pomp’ is no longer an S4 method.  Its new status as an
+          ordinary function abbreviates and consolidates the code and
+          simplifies the documentation.
+
+        • A bug restricting access in C code to ‘userdata’ has been
+          fixed.
+
+        • Fixed bug in ‘pompExample(...,show=TRUE)’.
+
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._5:
 
         • A better interface for specifying a model's deterministic
           skeleton is provided.  One specifies
@@ -41,7 +94,7 @@ _C_h_a_n_g_e_s _s_i_n_c_e '_p_o_m_p' _v_e_r_s_i_o_n _1._
         • The ‘method="mif2"’ option to ‘mif’ is now deprecated.  It
           will be removed in a future release.  Use ‘mif2’ instead.
 
-_C_h_a_n_g_e_s _s_i_n_c_e '_p_o_m_p' _v_e_r_s_i_o_n _1._3:
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._4:
 
         • Following the publication of the Journal of Statistical
           Software announcement paper, the ‘CITATION’ has been modified
@@ -62,7 +115,7 @@ _C_h_a_n_g_e_s _s_i_n_c_e '_p_o_m_p' _v_e_r_s_i_o_n _1._
           this by ensuring that ‘Csnippet’ codes are written and
           compiled in a process-specific directory.
 
-_C_h_a_n_g_e_s _s_i_n_c_e '_p_o_m_p' _v_e_r_s_i_o_n _1._2:
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._3:
 
      This release removes several long-deprecated features.
 
@@ -82,7 +135,7 @@ _C_h_a_n_g_e_s _s_i_n_c_e '_p_o_m_p' _v_e_r_s_i_o_n _1._
         • Some internal changes to ‘mif2’ by C. Breto, in support of
           panel methods under development.
 
-_C_h_a_n_g_e_s _s_i_n_c_e '_p_o_m_p' _v_e_r_s_i_o_n _1._1:
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._2:
 
         • Bug fix: for POMPs with a scalar state variable, the
           ‘filter.mean’, ‘pred.mean’, and ‘pred.var’ methods dropped

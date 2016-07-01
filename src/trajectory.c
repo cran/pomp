@@ -25,7 +25,7 @@ void iterate_map_native (double *X, double *time, double *p,
 	*xs = 0.0;
     nsteps = num_map_steps(t,*time,deltat);
     for (h = 0; h < nsteps; h++) {
-      table_lookup(covar_table,t,covars,0);
+      table_lookup(covar_table,t,covars);
       for (j = 0, Xs = X, xs = x, ps = p; j < nreps; j++, Xs += nvars, xs += nvars, ps += npars) {
 	(*ff)(Xs,xs,ps,sidx,pidx,cidx,ncovars,covars,t);
       }
@@ -61,7 +61,7 @@ void iterate_map_R (double *X, double *time, double *p,
       for (j = 0, xs = &x[zidx[i]]; j < nreps; j++, xs += nvars)
 	*xs = 0.0;
     for (h = 0; h < nsteps; h++) {
-      table_lookup(covar_table,t,cp,0);
+      table_lookup(covar_table,t,cp);
       for (j = 0, xs = x, ps = p; j < nreps; j++, xs += nvars, ps += npars) {
 	*tp = t;
 	memcpy(xp,xs,nvars*sizeof(double));
@@ -69,8 +69,7 @@ void iterate_map_R (double *X, double *time, double *p,
 	if (first) {
 	  PROTECT(ans = eval(fcall,rho)); nprotect++;
 	  if (LENGTH(ans)!=nvars)
-	    error("user 'skeleton' returns a vector of %d state variables but %d are expected",
-		  LENGTH(ans),nvars);
+	    errorcall(R_NilValue,"in 'trajectory': user 'skeleton' returns a vector of %d state variables but %d are expected",LENGTH(ans),nvars);
 	  // get name information to fix possible alignment problems
 	  PROTECT(nm = GET_NAMES(ans)); nprotect++;
 	  use_names = !isNull(nm);
@@ -121,7 +120,7 @@ SEXP iterate_map (SEXP object, SEXP times, SEXP t0, SEXP x0, SEXP params, SEXP g
   npars = dim[0];
 
   if (nreps != dim[1])
-    error("dimension mismatch in 'iterate_map' between 'x0' and 'params'");
+    errorcall(R_NilValue,"in 'trajectory': dimension mismatch between 'x0' and 'params'");
 
   PROTECT(times = AS_NUMERIC(times)); nprotect++;
   ntimes = LENGTH(times);
@@ -208,7 +207,7 @@ SEXP iterate_map (SEXP object, SEXP times, SEXP t0, SEXP x0, SEXP params, SEXP g
     }
     break;
   default:
-    error("unrecognized 'mode' in 'iterate_map'");
+    errorcall(R_NilValue,"in 'iterate_map': unrecognized 'mode'");
     break;
   }
 
@@ -351,7 +350,7 @@ SEXP pomp_desolve_setup (SEXP object, SEXP x0, SEXP params, SEXP gnsi) {
 
     break;
   default:
-    error("unrecognized 'mode' in 'pomp_desolve_setup'");
+    errorcall(R_NilValue,"in 'pomp_desolve_setup': unrecognized 'mode'");
     break;
   }
   UNPROTECT(nprotect);
@@ -377,7 +376,7 @@ void pomp_vf_eval (int *neq, double *t, double *y, double *ydot, double *yout, i
 			 &COMMON(covar_table),NAT(fun),NAT(args));
     break;
   default:
-    error("unrecognized 'mode' in 'pomp_vf_eval'");
+    errorcall(R_NilValue,"in 'pomp_vf_eval': unrecognized 'mode'");
     break;
   }
 }
@@ -420,7 +419,7 @@ void pomp_desolve_takedown (void) {
     NAT(cindex) = R_NilValue;
     break;
   default:
-    error("unrecognized 'mode' in 'pomp_desolve_takedown'");
+    errorcall(R_NilValue,"in 'pomp_desolve_takedown': unrecognized 'mode'");
     break;
   }
   COMMON(mode) = -1;
@@ -431,27 +430,26 @@ void pomp_desolve_takedown (void) {
 #undef NAT
 
 // copy t(x[-1,-1]) -> y[,rep,]
-SEXP traj_transp_and_copy (SEXP y, SEXP x, SEXP rep) {
-  int nprotect = 0;
-  SEXP ans = R_NilValue;
-  int nvars, nreps, ntimes;
-  int i, j, k, m, n;
-  double *xp, *yp;
+// SEXP traj_transp_and_copy (SEXP y, SEXP x, SEXP rep) {
+//   int nprotect = 0;
+//   SEXP ans = R_NilValue;
+//   int nvars, nreps, ntimes;
+//   int i, j, k, m, n;
+//   double *xp, *yp;
 
-  j = INTEGER(rep)[0]-1;
-  nvars = INTEGER(GET_DIM(y))[0];
-  nreps = INTEGER(GET_DIM(y))[1];
-  ntimes = INTEGER(GET_DIM(y))[2];
-  n = INTEGER(GET_DIM(x))[0];
-  m = nvars*nreps;
+//   j = INTEGER(rep)[0]-1;
+//   nvars = INTEGER(GET_DIM(y))[0];
+//   nreps = INTEGER(GET_DIM(y))[1];
+//   ntimes = INTEGER(GET_DIM(y))[2];
+//   n = INTEGER(GET_DIM(x))[0];
+//   m = nvars*nreps;
 
-  for (i = 0, xp = REAL(x)+n+1; i < nvars; i++, xp += n) {
-    for (k = 0, yp = REAL(y)+i+nvars*j; k < ntimes; k++, yp += m) {
-      *yp = xp[k];
-    }
-  }
+//   for (i = 0, xp = REAL(x)+n+1; i < nvars; i++, xp += n) {
+//     for (k = 0, yp = REAL(y)+i+nvars*j; k < ntimes; k++, yp += m) {
+//       *yp = xp[k];
+//     }
+//   }
 
-  UNPROTECT(nprotect);
-  return ans;
-}
-
+//   UNPROTECT(nprotect);
+//   return ans;
+// }

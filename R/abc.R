@@ -19,7 +19,8 @@ setClass(
         probes = list(),
         scale = numeric(0),
         epsilon = 1.0,
-        proposal = function (...) stop("proposal not specified"),
+        proposal = function (...)
+            stop("in ",sQuote("abc"),": proposal not specified",call.=FALSE),
         conv.rec=array(dim=c(0,0))
     )
 )
@@ -27,11 +28,13 @@ setClass(
 abc.internal <- function (object, Nabc,
                           start, proposal, probes,
                           epsilon, scale,
-                          verbose,
+                          verbose = FALSE,
                           .ndone = 0L,
                           .accepts = 0L,
                           .getnativesymbolinfo = TRUE,
                           ...) {
+
+    ep <- paste0("in ",sQuote("abc"),": ")
 
     object <- as(object,'pomp')
     gnsi <- as.logical(.getnativesymbolinfo)
@@ -40,45 +43,53 @@ abc.internal <- function (object, Nabc,
     .accepts <- as.integer(.accepts)
     epsilon <- as.numeric(epsilon)
     epssq <- epsilon*epsilon
+    verbose <- as.logical(verbose)
 
     pompLoad(object)
 
     if (length(start)==0)
-        stop(
-            "abc error: ",sQuote("start")," must be specified if ",
-            sQuote("coef(object)")," is NULL",
-            call.=FALSE
-        )
+        stop(ep,sQuote("start")," must be specified if ",
+             sQuote("coef(object)")," is NULL",
+             call.=FALSE)
 
     start.names <- names(start)
     if (is.null(start.names))
-        stop("abc error: ",sQuote("start")," must be a named vector",call.=FALSE)
+        stop(ep,sQuote("start")," must be a named vector",call.=FALSE)
 
     if (!is.function(proposal))
-        stop(sQuote("proposal")," must be a function")
+        stop(ep,sQuote("proposal")," must be a function",call.=FALSE)
 
     ## test proposal distribution
-    theta <- try(proposal(start,.n=0))
-    if (inherits(theta,"try-error"))
-        stop("abc error: error in proposal function",call.=FALSE)
-    if (is.null(names(theta)) || !is.numeric(theta))
-        stop("abc error: ",sQuote("proposal")," must return a named numeric vector",call.=FALSE)
+    theta <- tryCatch(
+        proposal(start,.n=0),
+        error = function (e) {
+            stop(ep,"in proposal function: ",
+                 conditionMessage(e),call.=FALSE)
+        }
+    )
+    if (is.null(names(theta)) || !is.numeric(theta) || any(names(theta)==""))
+        stop(ep,sQuote("proposal")," must return a named numeric vector",call.=FALSE)
 
     if (!is.list(probes)) probes <- list(probes)
     if (!all(sapply(probes,is.function)))
-        stop(sQuote("probes")," must be a function or a list of functions")
+        stop(ep,sQuote("probes")," must be a function or a list of functions",call.=FALSE)
     if (!all(sapply(probes,function(f)length(formals(f))==1)))
-        stop("each probe must be a function of a single argument")
+        stop(ep,"each probe must be a function of a single argument",call.=FALSE)
 
     if (verbose) {
         cat("performing",Nabc,"ABC iteration(s)\n")
     }
 
     theta <- start
-    log.prior <- dprior(object,params=theta,log=TRUE,.getnativesymbolinfo=gnsi)
+    log.prior <- tryCatch(
+        dprior(object,params=theta,log=TRUE,.getnativesymbolinfo=gnsi),
+        error = function (e) {
+            stop(ep,sQuote("dprior")," error: ",conditionMessage(e),call.=FALSE)
+        }
+    )
     if (!is.finite(log.prior))
-        stop("inadmissible value of ",sQuote("dprior"),
-             " at parameters ",sQuote("start"))
+        stop(ep,"inadmissible value of ",sQuote("dprior"),
+             " at parameters ",sQuote("start"),call.=FALSE)
     ## we suppose that theta is a "match",
     ## which does the right thing for continue() and
     ## should have negligible effect unless doing many short calls to continue()
@@ -94,9 +105,13 @@ abc.internal <- function (object, Nabc,
     )
 
     ## apply probes to data
-    datval <- try(.Call(apply_probe_data,object,probes),silent=FALSE)
-    if (inherits(datval,'try-error'))
-        stop("abc error: error in ",sQuote("apply_probe_data"),call.=FALSE)
+    datval <- tryCatch(
+        .Call(apply_probe_data,object,probes),
+        error = function (e) {
+            stop(ep,"in ",sQuote("apply_probe_data"),
+                 ": ",conditionMessage(e),call.=FALSE)
+        }
+    )
 
     conv.rec[1,names(theta)] <- theta
 
@@ -104,14 +119,19 @@ abc.internal <- function (object, Nabc,
 
         theta.prop <- proposal(theta,.n=n+.ndone,.accepts=.accepts,
                                verbose=verbose)
-        log.prior.prop <- dprior(object,params=theta.prop,log=TRUE)
+        log.prior.prop <- tryCatch(
+            dprior(object,params=theta.prop,log=TRUE),
+            error = function (e) {
+                stop(ep,sQuote("dprior")," error: ",conditionMessage(e),call.=FALSE)
+            }
+        )
 
         if (is.finite(log.prior.prop) &&
             runif(1) < exp(log.prior.prop-log.prior)) {
 
             ## compute the probes for the proposed new parameter values
 
-            simval <- try(
+            simval <- tryCatch(
                 .Call(
                     apply_probe_sim,
                     object=object,
@@ -121,11 +141,11 @@ abc.internal <- function (object, Nabc,
                     probes=probes,
                     datval=datval
                 ),
-                silent=FALSE
+                error = function (e) {
+                    stop(ep,"in ",sQuote("apply_probe_sim"),
+                         ": ",conditionMessage(e),call.=FALSE)
+                }
             )
-
-            if (inherits(simval,'try-error'))
-                stop("abc error: error in ",sQuote("apply_probe_sim"),call.=FALSE)
 
             ## ABC update rule
             distance <- sum(((datval-simval)/scale)^2)
@@ -175,24 +195,24 @@ setMethod(
                          verbose = getOption("verbose"),
                          ...) {
         
+        ep <- paste0("in ",sQuote("abc"),": ")
+
         if (missing(start))
             start <- coef(object)
 
         if (missing(proposal)) proposal <- NULL
 
         if (is.null(proposal))
-            stop("abc error: ",sQuote("proposal")," must be specified",call.=FALSE)
+            stop(ep,sQuote("proposal")," must be specified",call.=FALSE)
 
         if (missing(probes))
-            stop("abc error: ",sQuote("probes")," must be specified",
-                 call.=FALSE)
+            stop(ep,sQuote("probes")," must be specified",call.=FALSE)
 
         if (missing(scale))
-            stop("abc error: ",sQuote("scale")," must be specified",
-                 call.=FALSE)
+            stop(ep,sQuote("scale")," must be specified",call.=FALSE)
 
         if (missing(epsilon))
-            stop("abc error: abc match criterion, ",sQuote("epsilon"),
+            stop(ep,"abc match criterion, ",sQuote("epsilon"),
                  ", must be specified",call.=FALSE)
 
         abc.internal(

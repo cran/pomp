@@ -1,6 +1,6 @@
       subroutine driverSSA(fprob,nvar,nevent,npar,nreps,ntimes,kflag,&
            xstart,times,params,xout,e,v,d,nzero,izero,istate,ipar,ncovar,&
-           icovar,lcov,mcov,tcov,cov)
+           icovar,lcov,mcov,tcov,cov,iflag)
       implicit integer (i-n)
       implicit double precision (a-h,o-z)
       dimension xstart(nvar,nreps), times(ntimes)
@@ -16,14 +16,14 @@
          call SSA(fprob,irep,nvar,nevent,ntreeh,npar,nreps,&
               ntimes,kflag,xstart,times,params,xout,e,v,d,&
               nzero,izero,istate,ipar,ncovar,icovar,lcov,mcov,&
-              tcov,cov)
+              tcov,cov,iflag)
       enddo
       return
       end
 
       subroutine SSA(fprob,irep,nvar,nevent,ntreeh,npar,nreps,&
            ntimes,kflag,xstart,times,params,xout,e,v,d,nzero,&
-           izero,istate,ipar,ncovar,icovar,lcov,mcov,tcov,cov)
+           izero,istate,ipar,ncovar,icovar,lcov,mcov,tcov,cov,iflag)
       implicit integer (i-n)
       implicit double precision (a-h,o-z)
       dimension xstart(nvar,nreps), times(ntimes)
@@ -43,7 +43,6 @@
 !================
       t=times(1)
       tmax=times(ntimes)
-      iflag=0
       icount=2
       do i=1,npar
          par(i)=params(i,irep)
@@ -88,8 +87,7 @@
             call gillespie(fprob,t,f,y,v,d,par,n,m,ntreeh,npar,&
                  jevent,iflag,istate,ipar,ncovar,icovar,&
                  mcov,covars)
-            if(iflag.eq.1)goto 100
-         else                   !if(kflag.eq.1)then
+         else
 !=================
 ! Determine kappa (most accurate but slowest method)
 !=================
@@ -103,22 +101,13 @@
                call gillespie(fprob,t,f,y,v,d,par,n,m,ntreeh,npar,&
                     jevent,iflag,istate,ipar,ncovar,icovar,&
                     mcov,covars)
-               if(iflag.eq.1)goto 100
             else
                call kleap(fprob,kappa,t,f,y,v,d,par,n,m,ntreeh,npar,&
                     k,iflag,istate,ipar,ncovar,icovar,&
                     mcov,covars)
-               if(iflag.eq.1)goto 100
             endif
-!         else
-!===============
-! Determine tau (need to add code to avoid negative #s & determine tau)
-!===============
-!            tau=e(1)
-!            call tauleap(fprob,tau,t,f,y,v,d,par,n,m,ntreeh,npar,&
-!                         k,iflag)
-!            if(iflag.eq.1)goto 100
          endif
+         if(iflag.ne.0)goto 100
 !     
 ! Recording output at required time points
 !     
@@ -161,9 +150,12 @@
 ! Determine time interval and update time
 !=========================================
       fsum=f(1,ntreeh)
-      if(fsum.gt.0.0)then
+      if(fsum>0.0)then
          tstep=-log(p1)/fsum
          t=t+tstep
+      elseif(fsum<0.0)then
+         iflag=2
+         goto 500
       else
          iflag=1
          goto 500
@@ -232,9 +224,12 @@
 ! Determine time interval and update time
 !=========================================
       fsum=f(1,ntreeh)
-      if(fsum.gt.0.0d0)then
+      if(fsum>0.0d0)then
          tstep=gammarnd(kappa,fsum)
          t=t+tstep
+      elseif(fsum<0.0)then
+         iflag=2
+         goto 500
       else
          iflag=1
          goto 500
@@ -246,72 +241,6 @@
          p(j)=f(j,1)/fsum
       enddo
       call multinomrnd(kappa,p,m,k)
-!
-! some matrix-vector multiplication but only where necessary
-!
-      do i=1,n
-         ichangey(i)=0
-      enddo
-      do j=1,m
-         if(k(j).ne.0)then
-            temp=k(j)
-            do i = 1,n
-               if(v(i,j).ne.0)then
-                  y(i) = y(i) + temp*v(i,j)
-                  ichangey(i)=1
-               endif
-            enddo
-         endif
-      enddo
-!
-! only updating events & tree entries that have changed
-!
-      do j=1,m
-         do i=1,n
-            if(ichangey(i).ne.0.and.d(i,j).ne.0)then
-               fold=f(j,1)
-               f(j,1)=fprob(j,t,y,par,istate,ipar,icovar,mcov,cov)
-               diff=f(j,1)-fold
-               jdum=int((j+1)/2)
-               do itree=2,ntreeh
-                  f(jdum,itree)=f(jdum,itree)+diff
-                  jdum=int((jdum+1)/2)
-               enddo
-               goto 400
-            endif
-         enddo
- 400     continue
-      enddo
- 500  return
-      end
-
-      subroutine tauleap(fprob,tau,t,f,y,v,d,par,n,m,ntreeh,npar,k,&
-           iflag,istate,ipar,ncovar,icovar,mcov,cov)
-      implicit integer (i-n)
-      implicit double precision (a-h,o-z)
-      dimension y(n),f(m,ntreeh),k(m),v(n,m),d(n,m),par(npar)
-      dimension ichangey(n)
-      dimension istate(n),ipar(npar),icovar(ncovar),cov(mcov)
-      external poisrnd,fprob
-!======================================================================
-! Generate Poisson random variables (number of event firings in t+tau)
-!======================================================================
-      fsum=f(1,ntreeh)
-      if(fsum.gt.0.0d0)then
-         do j=1,m
-            k(j)=int(poisrnd(f(j,1)*tau))
-         enddo
-      else
-         iflag=1
-         goto 500
-      endif
-!==========
-! Update t
-!==========
-      t=t+tau
-!================================================
-! Compute changes in population numbers & events
-!================================================
 !
 ! some matrix-vector multiplication but only where necessary
 !

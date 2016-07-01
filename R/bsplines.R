@@ -1,5 +1,10 @@
 bspline.basis <- function (x, nbasis, degree = 3, names = NULL) {
-  y <- .Call(bspline_basis,x,nbasis,degree)
+  y <- tryCatch(
+      .Call(bspline_basis,x,nbasis,degree),
+      error = function (e) {
+          stop("in ",sQuote("bspline.basis"),": ",conditionMessage(e),call.=FALSE)
+      }
+  )
   if (!is.null(names)) {
     if (length(names)==1) {
       nm <- sprintf(names,seq_len(nbasis))
@@ -9,14 +14,19 @@ bspline.basis <- function (x, nbasis, degree = 3, names = NULL) {
     } else if (length(names)==nbasis) {
       colnames(y) <- names
     } else {
-      stop(sQuote("length(names)")," must be either 1 or ",nbasis)
+      stop("in ",sQuote("bspline.basis"),": length(",sQuote("names"),") must be either 1 or ",nbasis,call.=FALSE)
     }
   }
   y
 }
 
 periodic.bspline.basis <- function (x, nbasis, degree = 3, period = 1, names = NULL) {
-  y <- .Call(periodic_bspline_basis,x,nbasis,degree,period)
+  y <- tryCatch(
+      .Call(periodic_bspline_basis,x,nbasis,degree,period),
+      error = function (e) {
+          stop("in ",sQuote("periodic.bspline.basis"),": ",conditionMessage(e),call.=FALSE)
+      }
+  )
   if (!is.null(names)) {
     if (length(names)==1) {
       nm <- sprintf(names,seq_len(nbasis))
@@ -26,7 +36,8 @@ periodic.bspline.basis <- function (x, nbasis, degree = 3, period = 1, names = N
     } else if (length(names)==nbasis) {
       colnames(y) <- names
     } else {
-      stop(sQuote("length(names)")," must be either 1 or ",nbasis)
+      stop("in ",sQuote("periodic.bspline.basis"),": length(",
+           sQuote("names"),") must be either 1 or ",nbasis,call.=FALSE)
     }
   }
   y

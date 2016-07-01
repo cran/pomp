@@ -89,7 +89,7 @@ SEXP euler_model_simulator (SEXP func,
     break;
 
   default:
-    error("unrecognized 'mode' %d in 'euler_simulator'",mode);
+    errorcall(R_NilValue,"unrecognized 'mode' %d",mode);
     break;
   }
 
@@ -128,7 +128,7 @@ SEXP euler_model_simulator (SEXP func,
       R_CheckUserInterrupt();
 	
       if (t > time[step]) {
-	error("'times' is not an increasing sequence");
+	errorcall(R_NilValue,"'times' is not an increasing sequence");
       }
 
       memcpy(xt,xs,nreps*nvars*sizeof(double));
@@ -152,14 +152,14 @@ SEXP euler_model_simulator (SEXP func,
 	nstep = num_map_steps(t,time[step],dt);
 	break;
       default:
-	error("unrecognized 'method' in 'euler_model_simulator'");
+	errorcall(R_NilValue,"unrecognized 'method'");
 	break;
       }
 
       for (k = 0; k < nstep; k++) { // loop over Euler steps
 
 	// interpolate the covar functions for the covariates
-	table_lookup(&covariate_table,t,cp,0);
+	table_lookup(&covariate_table,t,cp);
 
 	for (j = 0, pm = ps, xm = xt; j < nreps; j++, pm += npars, xm += nvars) { // loop over replicates
 	  
@@ -183,7 +183,7 @@ SEXP euler_model_simulator (SEXP func,
 
 	      	PROTECT(ans = eval(fcall,rho));	nprotect++; // evaluate the call
 	      	if (LENGTH(ans) != nvars) {
-	      	  error("user 'step.fun' returns a vector of %d state variables but %d are expected: compare initial conditions?",
+	      	  errorcall(R_NilValue,"user 'step.fun' returns a vector of %d state variables but %d are expected: compare initial conditions?",
 	      		LENGTH(ans),nvars);
 	      	}
 		
@@ -219,7 +219,7 @@ SEXP euler_model_simulator (SEXP func,
 	    break;
 
 	  default:
-	    error("unrecognized 'mode' %d in 'euler_simulator'",mode);
+	    errorcall(R_NilValue,"unrecognized 'mode' %d",mode);
 	    break;
 	  }
 
@@ -329,7 +329,7 @@ SEXP euler_model_density (SEXP func,
     break;
 
   default:
-    error("unrecognized 'mode' %d in 'euler_model_density'",mode);
+    errorcall(R_NilValue,"unrecognized 'mode' %d",mode);
     break;
   }
 
@@ -365,7 +365,7 @@ SEXP euler_model_density (SEXP func,
 	*t1p = *t1s; *t2p = *t2s;
 
 	// interpolate the covariates at time t1, store the results in cvec
-	table_lookup(&covariate_table,*t1p,cp,0);
+	table_lookup(&covariate_table,*t1p,cp);
     
 	for (j = 0, ps = REAL(params); j < nreps; j++, fs++, x1s += nvars, x2s += nvars, ps += npars) { // loop over replicates
       
@@ -402,7 +402,7 @@ SEXP euler_model_density (SEXP func,
 	R_CheckUserInterrupt();
 
 	// interpolate the covariates at time t1, store the results in cvec
-	table_lookup(&covariate_table,*t1s,cp,0);
+	table_lookup(&covariate_table,*t1s,cp);
     
 	for (j = 0, ps = REAL(params); j < nreps; j++, fs++, x1s += nvars, x2s += nvars, ps += npars) { // loop over replicates
       
@@ -419,7 +419,7 @@ SEXP euler_model_density (SEXP func,
     break;
 
   default:
-    error("unrecognized 'mode' %d in 'euler_model_density'",mode);
+    errorcall(R_NilValue,"unrecognized 'mode' %d",mode);
     break;
 
   }

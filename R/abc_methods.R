@@ -36,8 +36,8 @@ setMethod(
             p <- sapply(y,is,'abc')
             pl <- sapply(y,is,'abcList')
             if (!all(p||pl))
-                stop("cannot mix ",sQuote("abc"),
-                     " and non-",sQuote("abc")," objects")
+                stop("in ",sQuote("c"),": cannot mix ",sQuote("abc"),
+                     " and non-",sQuote("abc")," objects",call.=FALSE)
             y[p] <- lapply(y[p],list)
             y[pl] <- lapply(y[pl],as,"list")
             new("abcList",c(list(x),y,recursive=TRUE))
@@ -56,8 +56,8 @@ setMethod(
             p <- sapply(y,is,'abc')
             pl <- sapply(y,is,'abcList')
             if (!all(p||pl))
-                stop("cannot mix ",sQuote("abc"),
-                     " and non-",sQuote("abc")," objects")
+                stop("in ",sQuote("c"),": cannot mix ",sQuote("abc"),
+                     " and non-",sQuote("abc")," objects",call.=FALSE)
             y[p] <- lapply(y[p],list)
             y[pl] <- lapply(y[pl],as,"list")
             new("abcList",c(as(x,"list"),y,recursive=TRUE))
@@ -99,8 +99,8 @@ setMethod(
     signature=signature(x="abc"),
     definition=function (x, y, pars, scatter = FALSE, ...) {
         if (!missing(y)) {
-            y <- substitute(y)
-            warning(sQuote(y)," is ignored")
+            warning("in ",sQuote("plot-abc"),": ",
+                    sQuote("y")," is ignored",call.=FALSE)
         }
         abc.diagnostics(c(x),pars=pars,scatter=scatter,...)
     }
@@ -111,30 +111,30 @@ setMethod(
     signature=signature(x='abcList'),
     definition=function (x, y, ...) {
         if (!missing(y)) {
-            y <- substitute(y)
-            warning(sQuote(y)," is ignored")
+            warning("in ",sQuote("plot-abc"),": ",
+                    sQuote("y")," is ignored",call.=FALSE)
         }
         abc.diagnostics(x,...)
     }
 )
 
 abc.diagnostics <- function (z, pars, scatter = FALSE, ...) {
-    if (missing(pars))
-        pars <- unique(do.call(c,lapply(z,slot,'pars')))
-
+    if (missing(pars)) {
+        pars <- unique(do.call(c,lapply(z,slot,"pars")))
+        if (length(pars)<1)
+            pars <- unique(do.call(c,lapply(z,function(x)names(x@params))))
+    }
     if (scatter) {
-
         x <- lapply(z,function(x)as.matrix(conv.rec(x,pars)))
         x <- lapply(seq_along(x),function(n)cbind(x[[n]],.num=n))
         x <- do.call(rbind,x)
         if (ncol(x)<3) {
-            stop("can't make a scatterplot with only one variable")
+            stop("in ",sQuote("plot-abc"),
+                 ": can't make a scatterplot with only one variable",call.=FALSE)
         } else {
             pairs(x[,pars],col=x[,'.num'],...)
         }
-
     } else {
-
         mar.multi <- c(0,5.1,0,2.1)
         oma.multi <- c(6,0,5,0)
         xx <- z[[1]]
@@ -175,7 +175,6 @@ abc.diagnostics <- function (z, pars, scatter = FALSE, ...) {
             low <- hi+1
             mtext("ABC convergence diagnostics",3,line=2,outer=TRUE)
         }
-
     }
     invisible(NULL)
 }

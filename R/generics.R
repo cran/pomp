@@ -1,6 +1,4 @@
-## basic constructor
-setGeneric("pomp",function(data,...)standardGeneric("pomp"))
-
+## basic methods
 setGeneric("print",function(x,...)standardGeneric("print"))
 setGeneric("plot",function(x,y,...)standardGeneric("plot"))
 setGeneric("summary",function(object,...)standardGeneric("summary"))
@@ -18,7 +16,6 @@ setGeneric("skeleton",function(object,...)standardGeneric("skeleton"))
 
 ## functions to extract or call the components of a "pomp" object
 setGeneric("obs",function(object,...)standardGeneric("obs"))
-setGeneric("data.array",function(object,...)standardGeneric("data.array"))
 setGeneric("time",function(x,...)standardGeneric("time"))
 setGeneric("time<-",function(object,...,value)standardGeneric("time<-"))  
 setGeneric("coef",function(object,...)standardGeneric("coef"))
@@ -60,6 +57,10 @@ setGeneric("traj.match",function(object,...)standardGeneric("traj.match"))
 
 ## ABC algorithm functions
 setGeneric('abc',function(object,...)standardGeneric("abc"))
+
+## Kalman filter methods
+setGeneric("enkf",function(object,...)standardGeneric("enkf"))
+setGeneric("eakf",function(object,...)standardGeneric("eakf"))
 
 ## Bayesian SMC (Liu & West)
 setGeneric("bsmc",function(object,...)standardGeneric("bsmc"))

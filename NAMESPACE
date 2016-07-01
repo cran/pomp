@@ -2,7 +2,6 @@ useDynLib(
     pomp,
     bspline_basis,
     periodic_bspline_basis,
-    bspline_basis_function,
     systematic_resampling,
     euler_model_simulator,
     euler_model_density,
@@ -14,7 +13,7 @@ useDynLib(
     pfilter_computations,
     randwalk_perturbation,
     simulation_computations,
-    iterate_map,traj_transp_and_copy,
+    iterate_map,
     apply_probe_data,apply_probe_sim,
     probe_marginal_setup,probe_marginal_solve,
     probe_acf,probe_ccf,
@@ -52,6 +51,7 @@ importFrom(coda,mcmc,mcmc.list)
 exportClasses(
     pomp,
     pfilterd.pomp,
+    kalmand.pomp,
     mif,mifList,
     mif2d.pomp,mif2List,
     pmcmc,pmcmcList,
@@ -64,7 +64,6 @@ exportClasses(
 )
 
 exportMethods(
-    pomp,
     plot,show,print,coerce,summary,logLik,window,"$",
     pompLoad,pompUnload,
     dprocess,rprocess,rmeasure,dmeasure,init.state,skeleton,
@@ -72,6 +71,7 @@ exportMethods(
     obs,partrans,coef,"coef<-",
     time,"time<-",timezero,"timezero<-",
     simulate,pfilter,
+    enkf,eakf,
     eff.sample.size,cond.logLik,
     states,trajectory,
     mif,mif2,continue,
@@ -88,8 +88,10 @@ exportMethods(
 S3method(as.data.frame,pomp)
 S3method(as.data.frame,pfilterd.pomp)
 S3method(as.data.frame,probed.pomp)
+S3method(as.data.frame,kalmand.pomp)
 
 export(
+    pomp,
     bake,stew,freeze,
     Csnippet,
     reulermultinom,
@@ -100,6 +102,7 @@ export(
     onestep.sim,
     onestep.dens,
     gillespie.sim,
+    kleap.sim,
     mvn.diag.rw,mvn.rw,
     mvn.rw.adaptive,
     rw.sd,

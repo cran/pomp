@@ -86,13 +86,17 @@ pompCBuilder <- function (name = NULL, dir = NULL,
     ## rmeasure function
     if (!missing(rmeasure)) {
         registry <- c(registry,"rmeasure")
-        cat(file=out,render(header$rmeasure),rmeasure,footer$rmeasure)
+        cat(file=out,render(header$rmeasure))
+        cat(file=out,callable.decl(rmeasure))
+        cat(file=out,rmeasure,footer$rmeasure)
     }
 
     ## dmeasure function
     if (!missing(dmeasure)) {
         registry <- c(registry,"dmeasure")
-        cat(file=out,render(header$dmeasure),dmeasure,footer$dmeasure)
+        cat(file=out,render(header$dmeasure))
+        cat(file=out,callable.decl(dmeasure))
+        cat(file=out,dmeasure,footer$dmeasure)
     }
 
     ## Euler step function
@@ -114,13 +118,17 @@ pompCBuilder <- function (name = NULL, dir = NULL,
     ## rprior function
     if (!missing(rprior)) {
         registry <- c(registry,"rprior")
-        cat(file=out,render(header$rprior),rprior,footer$rprior)
+        cat(file=out,render(header$rprior))
+        cat(file=out,callable.decl(rprior))
+        cat(file=out,rprior,footer$rprior)
     }
 
     ## dprior function
     if (!missing(dprior)) {
         registry <- c(registry,"dprior")
-        cat(file=out,render(header$dprior),dprior,footer$dprior)
+        cat(file=out,render(header$dprior))
+        cat(file=out,callable.decl(dprior))
+        cat(file=out,dprior,footer$dprior)
     }
 
     ## undefine variables
@@ -160,7 +168,13 @@ pompCBuilder <- function (name = NULL, dir = NULL,
 
     csrc <- render(csrc,name=name)
 
-    pompCompile(fname=name,direc=pompSrcDir(dir),src=csrc,verbose=verbose)
+    tryCatch(
+        pompCompile(fname=name,direc=pompSrcDir(dir),src=csrc,verbose=verbose),
+        error = function (e) {
+            stop("in ",sQuote("pompCBuilder"),": compilation error: ",
+                 conditionMessage(e),call.=FALSE)
+        }
+    )
     
     invisible(list(name=name,dir=dir,src=csrc))
 }
@@ -170,12 +184,13 @@ pompSrcDir <- function (dir) {
         pid <- Sys.getpid()
         dir <- file.path(tempdir(),pid)
     }
-    try(
-        rv <- dir.create(dir,recursive=TRUE,showWarnings=FALSE,mode="0700"),
-        silent=TRUE
+    tryCatch(
+        dir.create(dir,recursive=TRUE,showWarnings=FALSE,mode="0700"),
+        error = function (e) {
+            stop("cannot create cache directory ",sQuote(dir),": ",
+                 conditionMessage(e),call.=FALSE)
+        }
     )
-    if (inherits(rv,"try-error"))
-        stop("cannot create cache directory ",sQuote(dir),call.=TRUE)
     dir
 }
 
@@ -204,7 +219,7 @@ pompCompile <- function (fname, direc, src, verbose) {
         stdout=if (verbose | .Platform$OS.type=="windows") "" else NULL
     )
     if (rv!=0)
-        stop("cannot compile shared-object library ",sQuote(solib))
+        stop("cannot compile shared-object library ",sQuote(solib),call.=FALSE)
     else if (verbose)
         cat("link to shared-object library",sQuote(solib),"\n")
     
@@ -246,7 +261,8 @@ render <- function (template, ...) {
     if (length(vars)==0) return(template)
     n <- sapply(vars,length)
     if (!all((n==max(n))|(n==1)))
-        stop("incommensurate lengths of replacements")
+        stop("in ",sQuote("render"),
+             "incommensurate lengths of replacements",call.=FALSE)
     short <- which(n==1)
     n <- max(n)
     for (i in short) vars[[i]] <- rep(vars[[i]],n)

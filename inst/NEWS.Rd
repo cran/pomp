@@ -1,6 +1,31 @@
 \name{NEWS}
 \title{News for package `pomp'}
-\section{Changes since \pkg{pomp} version 1.4}{
+\section{Changes in \pkg{pomp} version 1.6}{
+  \itemize{
+    \item Major revisions to the package help pages and manual.
+    The separate documentation on C snippets and process-model plugins has been merged into the main \code{pomp} help page, which now has comprehensive instructions on building a \code{pomp} object.
+    \item Update to the package help page.
+    \item New methods for the Ensemble Kalman Filter (\code{enkf}) and Ensemble Adjustment Kalman Filter (\code{eakf}) have been added to the package.
+    \item There is a new plugin for \code{rprocess} called \code{kleap.sim}.
+    This implements the so-called \dQuote{K-leap method} of Cai & Xu (2007).
+    \item Major overhaul of error handling system and to error and warning messages.
+    Many more errors are now trapped and reported with more informative messages.
+    \item The matrix and numeric vector options for the \code{data} argument to \code{pomp} are now deprecated and will be removed in a future release.
+    In calls to \code{pomp}, \code{data} should be either a data frame or a \code{pomp}-class object.
+    \item In \code{mif2}, it is now required that \code{Nmif>0}.
+    \item Redundant \code{bootstrap} argument to \code{nlf} has been removed.
+    \item Many improvements to the test suite to obtain better code coverage.
+    \item Fixed bugs that might arise in rare circumstances in \code{simulate} and \code{eulermultinom} functions.
+    \item Fixed a bug in \code{pompExample}.
+    \item Fixed several small, rare bugs found as a result of improved testing.
+    \item Fixed bug in specification of skeleton in pompExamples.
+    \item \code{pomp} is no longer an S4 method.
+    Its new status as an ordinary function abbreviates and consolidates the code and simplifies the documentation.
+    \item A bug restricting access in C code to \code{userdata} has been fixed.
+    \item Fixed bug in \code{pompExample(...,show=TRUE)}.
+  }
+}
+\section{Changes in \pkg{pomp} version 1.5}{
   \itemize{
     \item A better interface for specifying a model's deterministic skeleton is provided.
     One specifies \code{skeleton=map(f,delta.t)} for a discrete-time skeleton (a map) and \code{skeleton=vectorfield(f)} for a continuous-time skeleton (a vectorfield).
@@ -23,7 +48,7 @@
     Use \code{mif2} instead.
   }
 }
-\section{Changes since \pkg{pomp} version 1.3}{
+\section{Changes in \pkg{pomp} version 1.4}{
   \itemize{
     \item Following the publication of the Journal of Statistical Software announcement paper, the \file{CITATION} has been modified to include the appropriate citation.
     Please use \code{citation("pomp")} to learn about how to cite \pkg{pomp} correctly.
@@ -34,7 +59,7 @@
     This release fixes this by ensuring that \code{Csnippet} codes are written and compiled in a process-specific directory.
   }
 }
-\section{Changes since \pkg{pomp} version 1.2}{
+\section{Changes in \pkg{pomp} version 1.3}{
   This release removes several long-deprecated features.
   \itemize{
     \item The \code{seed} argument to \code{pfilter} has been removed.
@@ -47,7 +72,7 @@
     \item Some internal changes to \code{mif2} by C. Breto, in support of panel methods under development.
   }
 }
-\section{Changes since \pkg{pomp} version 1.1}{
+\section{Changes in \pkg{pomp} version 1.2}{
   \itemize{
     \item Bug fix: for POMPs with a scalar state variable, the \code{filter.mean}, \code{pred.mean}, and \code{pred.var} methods dropped the singleton dimension of the respective arrays, in conflict with the assumptions of certain \code{plot} methods.
     This resolves issue #3.

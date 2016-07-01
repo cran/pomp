@@ -49,6 +49,8 @@ pfilter.internal <- function (object, params, Np,
                               save.params = FALSE,
                               .getnativesymbolinfo = TRUE) {
 
+    ep <- paste0("in ",sQuote("pfilter"),": ")
+    
     object <- as(object,"pomp")
     pompLoad(object)
 
@@ -62,10 +64,10 @@ pfilter.internal <- function (object, params, Np,
     save.params <- as.logical(save.params)
     
     if (length(params)==0)
-        stop(sQuote("pfilter")," error: ",sQuote("params")," must be specified",call.=FALSE)
+        stop(ep,sQuote("params")," must be specified",call.=FALSE)
 
     if (missing(tol))
-        stop(sQuote("pfilter")," error: ",sQuote("tol")," must be specified",call.=FALSE)
+        stop(ep,sQuote("tol")," must be specified",call.=FALSE)
 
     one.par <- FALSE
     times <- time(object,t0=TRUE)
@@ -74,21 +76,22 @@ pfilter.internal <- function (object, params, Np,
     if (missing(Np))
         Np <- NCOL(params)
     if (is.function(Np)) {
-        Np <- try(
+        Np <- tryCatch(
             vapply(seq.int(from=0,to=ntimes,by=1),Np,numeric(1)),
-            silent=FALSE
+            error = function (e) {
+                stop(ep,"if ",sQuote("Np")," is a function, ",
+                     "it must return a single positive integer",call.=FALSE)
+            }
         )
-        if (inherits(Np,"try-error"))
-            stop("if ",sQuote("Np")," is a function, it must return a single positive integer",call.=FALSE)
     }
     if (length(Np)==1)
         Np <- rep(Np,times=ntimes+1)
     else if (length(Np)!=(ntimes+1))
-        stop(sQuote("Np")," must have length 1 or length ",ntimes+1,call.=FALSE)
+        stop(ep,sQuote("Np")," must have length 1 or length ",ntimes+1,call.=FALSE)
     if (any(Np<=0))
-        stop("number of particles, ",sQuote("Np"),", must always be positive",call.=FALSE)
+        stop(ep,"number of particles, ",sQuote("Np"),", must always be positive",call.=FALSE)
     if (!is.numeric(Np))
-        stop(sQuote("Np")," must be a number, a vector of numbers, or a function",call.=FALSE)
+        stop(ep,sQuote("Np")," must be a number, a vector of numbers, or a function",call.=FALSE)
     Np <- as.integer(Np)
 
     if (NCOL(params)==1) {        # there is only one parameter vector
@@ -99,7 +102,7 @@ pfilter.internal <- function (object, params, Np,
 
     paramnames <- rownames(params)
     if (is.null(paramnames))
-        stop(sQuote("pfilter")," error: ",sQuote("params")," must have rownames",call.=FALSE)
+        stop(ep,sQuote("params")," must have rownames",call.=FALSE)
 
     init.x <- init.state(object,params=params,nsim=Np[1L])
     statenames <- rownames(init.x)
@@ -179,7 +182,7 @@ pfilter.internal <- function (object, params, Np,
     for (nt in seq_len(ntimes)) { ## main loop
 
         ## advance the state variables according to the process model
-        X <- try(
+        X <- tryCatch(
             rprocess(
                 object,
                 xstart=x,
@@ -188,17 +191,18 @@ pfilter.internal <- function (object, params, Np,
                 offset=1,
                 .getnativesymbolinfo=gnsi.rproc
             ),
-            silent=FALSE
+            error = function (e) {
+                stop(ep,"process simulation error: ",
+                     conditionMessage(e),call.=FALSE)
+            }
         )
-        if (inherits(X,'try-error'))
-            stop(sQuote("pfilter")," error: process simulation error",call.=FALSE)
         gnsi.rproc <- FALSE
 
         if (pred.var) { ## check for nonfinite state variables and parameters
             problem.indices <- unique(which(!is.finite(X),arr.ind=TRUE)[,1L])
             if (length(problem.indices)>0) {  # state variables
                 stop(
-                    sQuote("pfilter")," error: non-finite state variable(s): ",
+                    ep,"non-finite state variable(s): ",
                     paste(rownames(X)[problem.indices],collapse=', '),
                     call.=FALSE
                 )
@@ -206,7 +210,7 @@ pfilter.internal <- function (object, params, Np,
         }
 
         ## determine the weights
-        weights <- try(
+        weights <- tryCatch(
             dmeasure(
                 object,
                 y=object@data[,nt,drop=FALSE],
@@ -216,18 +220,28 @@ pfilter.internal <- function (object, params, Np,
                 log=FALSE,
                 .getnativesymbolinfo=gnsi.dmeas
             ),
-            silent=FALSE
+            error = function (e) {
+                stop(ep,"error in calculation of weights: ",
+                     conditionMessage(e),call.=FALSE)
+            }
         )
-        if (inherits(weights,'try-error'))
-            stop("in ",sQuote("pfilter"),": error in calculation of weights.",call.=FALSE)
-        if (!all(is.finite(weights)))
-            stop("in ",sQuote("pfilter"),": ",sQuote("dmeasure")," returns non-finite value.",call.=FALSE)
+        if (!all(is.finite(weights))) {
+            first <- which(!is.finite(weights))[1L]
+            datvals <- object@data[,nt]
+            weight <- weights[first]
+            states <- X[,first,1L]
+            params <- if (one.par) params[,1L] else params[,first]
+            cat("Non-finite likelihood computed:\n")
+            cat("likelihood, data, states, and parameters are:\n")
+            print(c(lik=weight,datvals,states,params))
+            stop(ep,sQuote("dmeasure")," returns non-finite value.",call.=FALSE)
+        }
         gnsi.dmeas <- FALSE
 
         ## compute prediction mean, prediction variance, filtering mean,
         ## effective sample size, log-likelihood
         ## also do resampling if filtering has not failed
-        xx <- try(
+        xx <- tryCatch(
             .Call(
                 pfilter_computations,
                 x=X,
@@ -242,11 +256,10 @@ pfilter.internal <- function (object, params, Np,
                 weights=weights,
                 tol=tol
             ),
-            silent=FALSE
+            error = function (e) {
+                stop(ep,conditionMessage(e),call.=FALSE)
+            }
         )
-        if (inherits(xx,'try-error')) {
-            stop(sQuote("pfilter")," error",call.=FALSE)
-        }
         all.fail <- xx$fail
         loglik[nt] <- xx$loglik
         eff.sample.size[nt] <- xx$ess
@@ -268,7 +281,7 @@ pfilter.internal <- function (object, params, Np,
             if (verbose)
                 message("filtering failure at time t = ",times[nt+1])
             if (nfail>max.fail)
-                stop(sQuote("pfilter")," error: too many filtering failures",call.=FALSE)
+                stop(ep,"too many filtering failures",call.=FALSE)
         }
 
         if (save.states | filter.traj) {
@@ -310,10 +323,16 @@ pfilter.internal <- function (object, params, Np,
     if (!save.states) xparticles <- list()
 
     if (nfail>0)
-        warning(sprintf(ngettext(nfail,msg1="%d filtering failure occurred in ",
-                                 msg2="%d filtering failures occurred in "),nfail),
-                sQuote("pfilter"),call.=FALSE)
-
+        warning(
+            ep,nfail,
+            ngettext(
+                nfail,
+                msg1=" filtering failure occurred.",
+                msg2=" filtering failures occurred."
+            ),
+            call.=FALSE
+        )
+    
     pompUnload(object)
 
     new(

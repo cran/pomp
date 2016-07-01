@@ -1,21 +1,22 @@
-## basic constructor of the pomp class
-pomp.constructor <- function (data, times, t0, rprocess, dprocess,
-                              rmeasure, dmeasure, measurement.model,
-                              skeleton, skeleton.type, skelmap.delta.t,
-                              initializer, rprior, dprior,
-                              params, covar, tcovar,
-                              obsnames, statenames, paramnames, covarnames,
-                              zeronames, PACKAGE,
-                              fromEstimationScale, toEstimationScale,
-                              globals, cdir, cfile, userdata,
-                              ...,
-                              .solibs = list(),
-                              verbose = getOption("verbose",FALSE)) {
+## This file defines 'pomp', the basic constructor of the pomp class
+pomp.internal <- function (data, times, t0, rprocess, dprocess,
+                           rmeasure, dmeasure, 
+                           skeleton, skeleton.type, skelmap.delta.t,
+                           initializer, rprior, dprior,
+                           params, covar, tcovar,
+                           obsnames, statenames, paramnames, covarnames,
+                           zeronames, PACKAGE,
+                           fromEstimationScale, toEstimationScale,
+                           globals, cdir, cfile, userdata,
+                           ...,
+                           .solibs = list(),
+                           verbose = getOption("verbose",FALSE)) {
+
+    ep <- paste0("in ",sQuote("pomp"),": ")
 
     ## preliminary error checking
-    if (missing(data)) stop(sQuote("data")," is a required argument")
-    if (missing(times)) stop(sQuote("times")," is a required argument")
-    if (missing(t0)) stop(sQuote("t0")," is a required argument")
+    if (missing(times)) stop(sQuote("times")," is a required argument",call.=FALSE)
+    if (missing(t0)) stop(sQuote("t0")," is a required argument",call.=FALSE)
     if (missing(params)) params <- numeric(0)
 
     if (missing(cdir)) cdir <- NULL
@@ -55,25 +56,26 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
     ## check the parameters and force them to be double-precision
     if (length(params)>0) {
         if (is.null(names(params)) || !is.numeric(params))
-            stop("pomp error: ",sQuote("params")," must be a named numeric vector")
+            stop(sQuote("params")," must be a named numeric vector",
+                 call.=FALSE)
     }
     storage.mode(params) <- 'double'
 
     ## check the data and store it as double-precision matrix
     if (!is.numeric(data))
-        stop("pomp error: ",sQuote("data")," must be numeric")
+        stop(sQuote("data")," must be numeric",call.=FALSE)
     storage.mode(data) <- 'double'
     if (missing(obsnames) || length(obsnames)==0) obsnames <- rownames(data)
     obsnames <- as.character(obsnames)
 
     ## check times
-    if (!is.numeric(times) || !all(diff(times)>0))
-        stop("pomp error: ",sQuote("times")," must be an increasing numeric vector")
+    if (!is.numeric(times) || any(is.na(times)) || !all(diff(times)>0))
+        stop(sQuote("times")," must be an increasing numeric vector",call.=FALSE)
     storage.mode(times) <- 'double'
 
     ## check t0
     if (!is.numeric(t0) || length(t0) > 1)
-        stop("pomp error: the zero-time ",sQuote("t0")," must be a single number")
+        stop("the zero-time ",sQuote("t0")," must be a single number",call.=FALSE)
     storage.mode(t0) <- 'double'
 
     ## check and arrange covariates
@@ -81,14 +83,14 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
         covar <- matrix(data=0,nrow=0,ncol=0)
         tcovar <- numeric(0)
     } else if (missing(tcovar)) {
-        stop("pomp error: if ",sQuote("covar")," is supplied, ",
-             sQuote("tcovar")," must also be supplied")
+        stop("if ",sQuote("covar")," is supplied, ",
+             sQuote("tcovar")," must also be supplied",call.=FALSE)
     } else if (is.data.frame(covar)) {
         if ((is.numeric(tcovar) && (tcovar<1 || tcovar>length(covar))) ||
             (is.character(tcovar) && (!(tcovar%in%names(covar)))) ||
             (!is.numeric(tcovar) && !is.character(tcovar))) {
-            stop("pomp error: if ",sQuote("covar")," is a data frame, ",
-                 sQuote("tcovar")," should indicate the time variable")
+            stop("if ",sQuote("covar")," is a data frame, ",
+                 sQuote("tcovar")," should indicate the time variable",call.=FALSE)
         } else if (is.numeric(tcovar)) {
             tpos <- tcovar
             tcovar <- covar[[tpos]]
@@ -104,8 +106,9 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
     if (missing(covarnames) || length(covarnames)==0) covarnames <- as.character(colnames(covar))
     if (!all(covarnames%in%colnames(covar))) {
         missing <- covarnames[!(covarnames%in%colnames(covar))]
-        stop("pomp error: covariate(s) ",paste(missing,collapse=","),
-             " are not among the columns of ",sQuote("covar"))
+        stop("covariate(s) ",
+             paste(sapply(missing,sQuote),collapse=","),
+             " are not among the columns of ",sQuote("covar"),call.=FALSE)
     }
     storage.mode(tcovar) <- "double"
     storage.mode(covar) <- "double"
@@ -116,9 +119,9 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
 
     ## default rprocess & dprocess
     if (missing(rprocess))
-        rprocess <- function (xstart,times,params,...) stop(sQuote("rprocess")," not specified")
+        rprocess <- function (xstart,times,params,...) stop(sQuote("rprocess")," not specified",call.=FALSE)
     if (missing(dprocess))
-        dprocess <- function (x,times,params,log=FALSE,...) stop(sQuote("dprocess")," not specified")
+        dprocess <- function (x,times,params,log=FALSE,...) stop(sQuote("dprocess")," not specified",call.=FALSE)
 
     ## handle C snippets
     snips <- list()
@@ -143,7 +146,7 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
     if (is(initializer,"Csnippet"))
         snips <- c(snips,initializer=initializer@text)
     if (length(snips)>0) {
-        libname <- try(
+        libname <- tryCatch(
             do.call(
                 pompCBuilder,
                 c(
@@ -160,15 +163,13 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
                     snips
                 )
             ),
-            silent=FALSE
+            error = function (e) {
+                stop("error in building shared-object library from Csnippets: ",
+                     conditionMessage(e),call.=FALSE)
+            }
         )
-        if (inherits(libname,"try-error")) {
-            stop("in ",sQuote("pomp"),": error in building shared-object library from Csnippets:\n",
-                 libname,call.=FALSE)
-        } else {
-            .solibs <- c(.solibs,list(libname))
-            libname <- libname$name
-        }
+        .solibs <- c(.solibs,list(libname))
+        libname <- libname$name
     } else {
         libname <- ''
     }
@@ -200,7 +201,7 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
         )
     }
     if (!is.function(rprocess))
-        stop("pomp error: ",sQuote("rprocess")," must be a function")
+        stop(sQuote("rprocess")," must be a function",call.=FALSE)
 
     ## handle dprocess
     if (is(dprocess,"pompPlugin")) {
@@ -214,7 +215,7 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
         )
     }
     if (!is.function(dprocess))
-        stop("pomp error: ",sQuote("dprocess")," must be a function")
+        stop(sQuote("dprocess")," must be a function",call.=FALSE)
 
     ## handle skeleton
     skeleton <- pomp.fun(
@@ -231,30 +232,10 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
 
     ## type of skeleton (map or vectorfield)
     ## skelmap.delta.t has no meaning in the latter case
-    skeleton.type <- try(
-        match.arg(skeleton.type,c("map","vectorfield")),
-        silent=TRUE)
-    if (inherits(skeleton.type,"try-error")) {
-        stop("the deterministic skeleton must be either a map or a vectorfield: see ",sQuote("?pomp"),call.=FALSE)
-    }
+    skeleton.type <- match.arg(skeleton.type,c("map","vectorfield","undef"))
     skelmap.delta.t <- as.numeric(skelmap.delta.t)
     if (skelmap.delta.t <= 0)
         stop("skeleton ",sQuote("delta.t")," must be positive",call.=FALSE)
-
-    ## if 'measurement model' is specified as a formula, this overrides
-    ## specification of 'rmeasure' or 'dmeasure'
-    if (!missing(measurement.model)) {
-        if (!(is.null(dmeasure)&&is.null(rmeasure))) {
-            warning(
-                "specifying ",sQuote("measurement.model"),
-                " overrides specification of ",
-                sQuote("rmeasure")," and ",sQuote("dmeasure")
-            )
-        }
-        mm <- measform2pomp(measurement.model)
-        rmeasure <- mm$rmeasure
-        dmeasure <- mm$dmeasure
-    }
 
     ## handle rmeasure
     rmeasure <- pomp.fun(
@@ -317,9 +298,9 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
     mpt <- is.null(fromEstimationScale)
     mpit <- is.null(toEstimationScale)
     if (xor(mpt,mpit)) {
-        stop("if one of ",sQuote("fromEstimationScale"),", ",
-             sQuote("toEstimationScale"),
-             " is supplied, then so must the other")
+        stop("if one of ",
+             sQuote("fromEstimationScale"),", ",sQuote("toEstimationScale"),
+             " is supplied, then so must the other",call.=FALSE)
     }
     has.trans <- !mpt
     if (has.trans) {
@@ -359,7 +340,7 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
         (skeleton@mode==pompfunmode$Rfun)
         &&!("covars"%in%names(formals(skeleton@R.fun)))
         )
-            warning("a covariate table has been given, yet the ",
+            warning(ep,"a covariate table has been given, yet the ",
                     sQuote("skeleton")," function does not have ",
                     sQuote("covars")," as a formal argument: see ",
                     sQuote("?pomp"),call.=FALSE)
@@ -367,7 +348,7 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
         (rmeasure@mode==pompfunmode$Rfun)
         &&!("covars"%in%names(formals(rmeasure@R.fun)))
         )
-            warning("a covariate table has been given, yet the ",
+            warning(ep,"a covariate table has been given, yet the ",
                     sQuote("rmeasure")," function does not have ",
                     sQuote("covars")," as a formal argument: see ",
                     sQuote("?pomp"),call.=FALSE)
@@ -375,16 +356,16 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
         (dmeasure@mode==pompfunmode$Rfun)
         &&!("covars"%in%names(formals(dmeasure@R.fun)))
         )
-            warning("a covariate table has been given, yet the ",
+            warning(ep,"a covariate table has been given, yet the ",
                     sQuote("dmeasure")," function does not have ",
                     sQuote("covars")," as a formal argument: see ",
                     sQuote("?pomp"),call.=FALSE)
     }
 
     if ((length(tcovar)>0)&&((min(tcovar)>t0)||(max(tcovar)<max(times))))
-        warning(
-            "the supplied covariate covariate times ",sQuote("tcovar"),
-            " do not embrace the data times: covariates may be extrapolated"
+        warning(ep,"the supplied covariate covariate times ",sQuote("tcovar"),
+                " do not embrace the data times: covariates may be extrapolated",
+                call.=FALSE
         )
 
     new(
@@ -416,32 +397,34 @@ pomp.constructor <- function (data, times, t0, rprocess, dprocess,
 }
 
 measform2pomp <- function (formulae) {
+
+    ep <- paste0("in ",sQuote("pomp"),": ")
+
     if (!is.list(formulae))
         formulae <- list(formulae)
     nobs <- length(formulae)
     if (nobs < 1)
-        stop("pomp error: to use ",sQuote("measurement.model")," you must provide at least one formula",call.=FALSE)
+        stop(ep,"to use ",sQuote("measurement.model"),
+             " you must provide at least one formula",call.=FALSE)
     for (k in seq_len(nobs)) {
         if (!inherits(formulae[[k]],"formula"))
-            stop("pomp error: ",sQuote("measurement.model")," takes formulae as arguments",call.=FALSE)
+            stop(ep,sQuote("measurement.model")," takes formulae as arguments",call.=FALSE)
     }
     obsnames <- unlist(lapply(formulae,function(x)x[[2L]]))
     distrib <- lapply(formulae,function(x)as.character(x[[3L]][[1L]]))
     ddistrib <- lapply(distrib,function(x)paste0("d",x))
     rdistrib <- lapply(distrib,function(x)paste0("r",x))
     for (k in seq_len(nobs)) {
-        res <- try(
+        tryCatch(
             match.fun(ddistrib[[k]]),
-            silent=TRUE
+            error = function (e)
+                stop(ep,"distribution function ",ddistrib[[k]]," not found",call.=FALSE)
         )
-        if (inherits(res,'try-error'))
-            stop("pomp error: distribution function ",ddistrib[[k]]," not found")
-        res <- try(
+        tryCatch(
             match.fun(rdistrib[[k]]),
-            silent=TRUE
+            error = function (e)
+                stop(ep,"random deviate function ",rdistrib[[k]]," not found",call.=FALSE)
         )
-        if (inherits(res,'try-error'))
-            stop("pomp error: random deviate function ",rdistrib[[k]]," not found")
     }
     pred.args <- lapply(formulae,function(x)as.list(x[[3L]][-1L]))
     dcalls <- vector(mode='list',length=nobs)
@@ -494,311 +477,37 @@ measform2pomp <- function (formulae) {
     )
 }
 
-setMethod(
-    "pomp",
-    signature=signature(data="data.frame"),
-    definition=function (data, times, t0, ..., rprocess, dprocess,
-                         rmeasure, dmeasure, measurement.model,
-                         skeleton, skeleton.type, skelmap.delta.t,
-                         initializer, rprior, dprior,
-                         params, covar, tcovar,
-                         obsnames, statenames, paramnames, covarnames, zeronames,
-                         PACKAGE, fromEstimationScale, toEstimationScale,
-                         globals, cdir, cfile) {
+pomp <- function (data, times, t0, ..., rprocess, dprocess,
+                  rmeasure, dmeasure, measurement.model,
+                  skeleton, skeleton.type, skelmap.delta.t,
+                  initializer, rprior, dprior, params, covar, tcovar,
+                  obsnames, statenames, paramnames, covarnames, zeronames,
+                  PACKAGE, fromEstimationScale, toEstimationScale,
+                  globals, cdir, cfile) {
 
-        data <- t(sapply(data,as.numeric))
-        if ((is.numeric(times) && (times<1 || times>nrow(data))) ||
-            (is.character(times) && (!(times%in%rownames(data)))) ||
-            (!is.numeric(times) && !is.character(times)) ||
-            length(times)!=1)
-            stop("pomp error: ",sQuote("times"),
-                 " must identify a single column of ",sQuote("data"))
-        if (is.numeric(times)) {
-            tpos <- times
-        } else if (is.character(times)) {
-            tpos <- match(times,rownames(data))
-        }
-        times <- data[tpos,,drop=TRUE]
-        data <- data[-tpos,,drop=FALSE]
+    ep <- paste0("in ",sQuote("pomp"),": ")
 
-        if (missing(skeleton.type)) {
-            skeleton.type <- "undef"
-        } else {
-            warning("The ",sQuote("skeleton.type"),
-                    " argument is deprecated and will be removed in a future release.\n",
-                    "See ",sQuote("?pomp")," for an explanation of the new syntax.",
-                    call.=FALSE)
-        }
-        if (missing(skelmap.delta.t)) {
-            skelmap.delta.t <- 1
-        } else {
-            warning("The ",sQuote("skelmap.delta.t"),
-                    " argument is deprecated and will be removed in a future release.\n",
-                    "See ",sQuote("?pomp")," for an explanation of the new syntax.",
-                    call.=FALSE)
-        }
-        if (!missing(skeleton)) {
-            skeleton <- substitute(skeleton)
-            map <- function (f, delta.t = 1) {
-                skeleton.type <<- "map"
-                if (delta.t <= 0)
-                    stop("in ",sQuote("map"),", ",sQuote("delta.t"),
-                         " must be positive",call.=FALSE)
-                skelmap.delta.t <<- as.numeric(delta.t)
-                f
-            }
-            vectorfield <- function (f) {
-                skeleton.type <<- "vectorfield"
-                f
-            }
-            assign("map",map)
-            assign("vectorfield",vectorfield)
-            skeleton <- eval(skeleton)
-            if (skeleton.type=="undef") {
-                warning("In ",sQuote("pomp"),", the default ",sQuote("skeleton.type=\"map\""),
-                        " is deprecated and will be removed in a future release.\n",
-                        "See ",sQuote("?pomp")," for an explanation of the new syntax.",
-                        call.=FALSE)
-                skeleton.type <- "map"
-            }
-        }
-        if (skeleton.type=="undef") skeleton.type <- "map"
+    if (missing(data))
+        stop(ep,sQuote("data")," is a required argument",call.=FALSE)
 
-        pomp.constructor(
-            data=data,
-            times=times,
-            t0=t0,
-            rprocess=rprocess,
-            dprocess=dprocess,
-            rmeasure=rmeasure,
-            dmeasure=dmeasure,
-            measurement.model=measurement.model,
-            dprior=dprior,
-            rprior=rprior,
-            skeleton=skeleton,
-            skeleton.type=skeleton.type,
-            skelmap.delta.t=skelmap.delta.t,
-            initializer=initializer,
-            params=params,
-            covar=covar,
-            tcovar=tcovar,
-            obsnames=obsnames,
-            statenames=statenames,
-            paramnames=paramnames,
-            covarnames=covarnames,
-            zeronames=zeronames,
-            PACKAGE=PACKAGE,
-            fromEstimationScale=fromEstimationScale,
-            toEstimationScale=toEstimationScale,
-            globals=globals,
-            cdir=cdir,
-            cfile=cfile,
-            ...
-        )
-    }
-)
+    if (is(data,"pomp")) {
+        ## 'data' is a pomp object:
+        ## extract missing arguments from it
 
-setMethod(
-    "pomp",
-    signature=signature(data="matrix"),
-    definition=function (data, times, t0, ..., rprocess, dprocess,
-                         rmeasure, dmeasure, measurement.model,
-                         skeleton, skeleton.type, skelmap.delta.t,
-                         initializer, rprior, dprior, params, covar, tcovar,
-                         obsnames, statenames, paramnames, covarnames, zeronames,
-                         PACKAGE, fromEstimationScale, toEstimationScale,
-                         globals, cdir, cfile) {
-
-        if (missing(skeleton.type)) {
-            skeleton.type <- "undef"
-        } else {
-            warning("The ",sQuote("skeleton.type"),
-                    " argument is deprecated and will be removed in a future release.\n",
-                    "See ",sQuote("?pomp")," for an explanation of the new syntax.",
-                    call.=FALSE)
-        }
-        if (missing(skelmap.delta.t)) {
-            skelmap.delta.t <- 1
-        } else {
-            warning("The ",sQuote("skelmap.delta.t"),
-                    " argument is deprecated and will be removed in a future release.\n",
-                    "See ",sQuote("?pomp")," for an explanation of the new syntax.",
-                    call.=FALSE)
-        }
-        if (!missing(skeleton)) {
-            skeleton <- substitute(skeleton)
-            map <- function (f, delta.t = 1) {
-                skeleton.type <<- "map"
-                if (delta.t <= 0)
-                    stop("in ",sQuote("map"),", ",sQuote("delta.t"),
-                         " must be positive",call.=FALSE)
-                skelmap.delta.t <<- as.numeric(delta.t)
-                f
-            }
-            vectorfield <- function (f) {
-                skeleton.type <<- "vectorfield"
-                f
-            }
-            assign("map",map)
-            assign("vectorfield",vectorfield)
-            skeleton <- eval(skeleton)
-            if (skeleton.type=="undef") {
-                warning("In ",sQuote("pomp"),", the default ",sQuote("skeleton.type=\"map\""),
-                        " is deprecated and will be removed in a future release.\n",
-                        "See ",sQuote("?pomp")," for an explanation of the new syntax.",
-                        call.=FALSE)
-                skeleton.type <- "map"
-            }
-        }
-        if (skeleton.type=="undef") skeleton.type <- "map"
-
-        pomp.constructor(
-            data=data,
-            times=times,
-            t0=t0,
-            rprocess=rprocess,
-            dprocess=dprocess,
-            rmeasure=rmeasure,
-            dmeasure=dmeasure,
-            measurement.model=measurement.model,
-            dprior=dprior,
-            rprior=rprior,
-            skeleton=skeleton,
-            skeleton.type=skeleton.type,
-            skelmap.delta.t=skelmap.delta.t,
-            initializer=initializer,
-            params=params,
-            covar=covar,
-            tcovar=tcovar,
-            obsnames=obsnames,
-            statenames=statenames,
-            paramnames=paramnames,
-            covarnames=covarnames,
-            zeronames=zeronames,
-            PACKAGE=PACKAGE,
-            fromEstimationScale=fromEstimationScale,
-            toEstimationScale=toEstimationScale,
-            globals=globals,
-            cdir=cdir,
-            cfile=cfile,
-            ...
-        )
-    }
-)
-
-
-setMethod(
-    "pomp",
-    signature=signature(data="numeric"),
-    definition=function (data, times, t0, ..., rprocess, dprocess,
-                         rmeasure, dmeasure, measurement.model,
-                         skeleton, skeleton.type, skelmap.delta.t,
-                         initializer, rprior, dprior, params, covar, tcovar,
-                         obsnames, statenames, paramnames, covarnames, zeronames,
-                         PACKAGE, fromEstimationScale, toEstimationScale,
-                         globals, cdir, cfile) {
-
-        if (missing(skeleton.type)) {
-            skeleton.type <- "undef"
-        } else {
-            warning("The ",sQuote("skeleton.type"),
-                    " argument is deprecated and will be removed in a future release.\n",
-                    "See ",sQuote("?pomp")," for an explanation of the new syntax.",
-                    call.=FALSE)
-        }
-        if (missing(skelmap.delta.t)) {
-            skelmap.delta.t <- 1
-        } else {
-            warning("The ",sQuote("skelmap.delta.t"),
-                    " argument is deprecated and will be removed in a future release.\n",
-                    "See ",sQuote("?pomp")," for an explanation of the new syntax.",
-                    call.=FALSE)
-        }
-        if (!missing(skeleton)) {
-            skeleton <- substitute(skeleton)
-            map <- function (f, delta.t = 1) {
-                skeleton.type <<- "map"
-                if (delta.t <= 0)
-                    stop("in ",sQuote("map"),", ",sQuote("delta.t"),
-                         " must be positive",call.=FALSE)
-                skelmap.delta.t <<- as.numeric(delta.t)
-                f
-            }
-            vectorfield <- function (f) {
-                skeleton.type <<- "vectorfield"
-                f
-            }
-            assign("map",map)
-            assign("vectorfield",vectorfield)
-            skeleton <- eval(skeleton)
-            if (skeleton.type=="undef") {
-                warning("In ",sQuote("pomp"),", the default ",sQuote("skeleton.type=\"map\""),
-                        " is deprecated and will be removed in a future release.\n",
-                        "See ",sQuote("?pomp")," for an explanation of the new syntax.",
-                        call.=FALSE)
-                skeleton.type <- "map"
-            }
-        }
-        if (skeleton.type=="undef") skeleton.type <- "map"
-
-        pomp.constructor(
-            data=matrix(data,nrow=1,ncol=length(data)),
-            times=times,
-            t0=t0,
-            rprocess=rprocess,
-            dprocess=dprocess,
-            rmeasure=rmeasure,
-            dmeasure=dmeasure,
-            measurement.model=measurement.model,
-            dprior=dprior,
-            rprior=rprior,
-            skeleton=skeleton,
-            skeleton.type=skeleton.type,
-            skelmap.delta.t=skelmap.delta.t,
-            initializer=initializer,
-            params=params,
-            covar=covar,
-            tcovar=tcovar,
-            obsnames=obsnames,
-            statenames=statenames,
-            paramnames=paramnames,
-            covarnames=covarnames,
-            zeronames=zeronames,
-            PACKAGE=PACKAGE,
-            fromEstimationScale=fromEstimationScale,
-            toEstimationScale=toEstimationScale,
-            globals=globals,
-            cdir=cdir,
-            cfile=cfile,
-            ...
-        )
-    }
-)
-
-setMethod(
-    "pomp",
-    signature=signature(data="pomp"),
-    definition=function (data, times, t0, ..., rprocess, dprocess,
-                         rmeasure, dmeasure, measurement.model,
-                         skeleton, skeleton.type, skelmap.delta.t,
-                         initializer, rprior, dprior, params, covar, tcovar,
-                         obsnames, statenames, paramnames, covarnames, zeronames,
-                         PACKAGE, fromEstimationScale, toEstimationScale,
-                         globals, cdir, cfile) {
+        if (nargs()==1) return(data)
 
         if (missing(times)) times <- data@times
         if (missing(t0)) t0 <- data@t0
-
+        
         mmg <- !missing(measurement.model)
         dmg <- !missing(dmeasure)
         rmg <- !missing(rmeasure)
         if (mmg) {
             if (dmg||rmg)
-                warning(
-                    "specifying ",sQuote("measurement.model"),
-                    " overrides specification of ",
-                    sQuote("rmeasure")," and ",sQuote("dmeasure")
-                )
+                warning(ep,"specifying ",sQuote("measurement.model"),
+                        " overrides specification of ",
+                        sQuote("rmeasure")," and ",sQuote("dmeasure"),
+                        call.=FALSE)
             mm <- measform2pomp(measurement.model)
             rmeasure <- mm$rmeasure
             dmeasure <- mm$dmeasure
@@ -819,14 +528,15 @@ setMethod(
         if (missing(skeleton.type)) {
             skeleton.type <- data@skeleton.type
         } else {
-            warning("The ",sQuote("skeleton.type")," argument is deprecated and will be removed in a future release.\n",
+            warning(ep,"the ",sQuote("skeleton.type"),
+                    " argument is deprecated and will be removed in a future release.\n",
                     "See ",sQuote("?pomp")," for an explanation of the new syntax.",
                     call.=FALSE)
         }
         if (missing(skelmap.delta.t)) {
             skelmap.delta.t <- data@skelmap.delta.t
         } else {
-            warning("The ",sQuote("skelmap.delta.t"),
+            warning(ep,"the ",sQuote("skelmap.delta.t"),
                     " argument is deprecated and will be removed in a future release.\n",
                     "See ",sQuote("?pomp")," for an explanation of the new syntax.",
                     call.=FALSE)
@@ -836,23 +546,23 @@ setMethod(
         } else {
             skeleton <- substitute(skeleton)
             skeleton.type <- "undef"
-            map <- function (f, delta.t = 1) {
-                skeleton.type <<- "map"
-                if (delta.t <= 0)
-                    stop("in ",sQuote("map"),", ",sQuote("delta.t"),
-                         " must be positive",call.=FALSE)
-                skelmap.delta.t <<- as.numeric(delta.t)
-                f
-            }
-            vectorfield <- function (f) {
-                skeleton.type <<- "vectorfield"
-                f
-            }
-            assign("map",map)
-            assign("vectorfield",vectorfield)
-            skeleton <- eval(skeleton)
+            flist <- list(
+                map=function (f, delta.t = 1) {
+                    skeleton.type <<- "map"
+                    if (delta.t <= 0)
+                        stop("in ",sQuote("map"),", ",sQuote("delta.t"),
+                             " must be positive",call.=FALSE)
+                    skelmap.delta.t <<- as.numeric(delta.t)
+                    f
+                },
+                vectorfield=function (f) {
+                    skeleton.type <<- "vectorfield"
+                    f
+                }
+            )
+            skeleton <- eval(skeleton,envir=flist,enclos=parent.frame())
             if (skeleton.type=="undef") {
-                warning("In ",sQuote("pomp"),", the default ",sQuote("skeleton.type=\"map\""),
+                warning(ep,"the default ",sQuote("skeleton.type=\"map\""),
                         " is deprecated and will be removed in a future release.\n",
                         "See ",sQuote("?pomp")," for an explanation of the new syntax.",
                         call.=FALSE)
@@ -864,15 +574,17 @@ setMethod(
                 from.trans <- data@from.trans
                 to.trans <- data@to.trans
             } else {
-                stop("pomp error: if ",sQuote("toEstimationScale"),
+                stop(ep,"if ",sQuote("toEstimationScale"),
                      " is supplied, then " ,
-                     sQuote("fromEstimationScale")," must also be supplied")
+                     sQuote("fromEstimationScale")," must also be supplied",
+                     call.=FALSE)
             }
         } else {
             if (missing(toEstimationScale)) {
-                stop("pomp error: if ",sQuote("fromEstimationScale"),
+                stop(ep,"if ",sQuote("fromEstimationScale"),
                      " is supplied, then " ,
-                     sQuote("toEstimationScale")," must also be supplied")
+                     sQuote("toEstimationScale")," must also be supplied",
+                     call.=FALSE)
             } else {
                 from.trans <- fromEstimationScale
                 to.trans <- toEstimationScale
@@ -885,37 +597,181 @@ setMethod(
         if (missing(covarnames)) covarnames <- character(0)
         if (missing(PACKAGE)) PACKAGE <- character(0)
 
-        pomp.constructor(
-            data=data@data,
-            times=times,
-            t0=t0,
-            rprocess=rprocess,
-            dprocess=dprocess,
-            rmeasure=rmeasure,
-            dmeasure=dmeasure,
-            dprior=dprior,
-            rprior=rprior,
-            skeleton=skeleton,
-            skeleton.type=skeleton.type,
-            skelmap.delta.t=skelmap.delta.t,
-            initializer=initializer,
-            covar=covar,
-            tcovar=tcovar,
-            obsnames=obsnames,
-            statenames=statenames,
-            paramnames=paramnames,
-            covarnames=covarnames,
-            zeronames=zeronames,
-            PACKAGE=PACKAGE,
-            fromEstimationScale=from.trans,
-            toEstimationScale=to.trans,
-            params=params,
-            globals=globals,
-            cdir=cdir,
-            cfile=cfile,
-            .solibs=data@solibs,
-            userdata=data@userdata,
-            ...
+        tryCatch(
+            pomp.internal(
+                data=data@data,
+                times=times,
+                t0=t0,
+                rprocess=rprocess,
+                dprocess=dprocess,
+                rmeasure=rmeasure,
+                dmeasure=dmeasure,
+                dprior=dprior,
+                rprior=rprior,
+                skeleton=skeleton,
+                skeleton.type=skeleton.type,
+                skelmap.delta.t=skelmap.delta.t,
+                initializer=initializer,
+                covar=covar,
+                tcovar=tcovar,
+                obsnames=obsnames,
+                statenames=statenames,
+                paramnames=paramnames,
+                covarnames=covarnames,
+                zeronames=zeronames,
+                PACKAGE=PACKAGE,
+                fromEstimationScale=from.trans,
+                toEstimationScale=to.trans,
+                params=params,
+                globals=globals,
+                cdir=cdir,
+                cfile=cfile,
+                .solibs=data@solibs,
+                userdata=data@userdata,
+                ...
+            ),
+            error = function (e) {
+                stop(ep,conditionMessage(e),call.=FALSE)
+            }
         )
+    } else {
+        ## construct a pomp object de novo
+        
+        if (is.data.frame(data)) {
+            ## 'data' is a data frame
+            data <- t(sapply(data,as.numeric))
+            if ((is.numeric(times) && (times<1 || times>nrow(data))) ||
+                (is.character(times) && (!(times%in%rownames(data)))) ||
+                (!is.numeric(times) && !is.character(times)) ||
+                length(times)!=1)
+                stop(ep,"when ",sQuote("data"),
+                     " is a data frame, ",sQuote("times"),
+                     " must identify a single column of ",sQuote("data"),
+                     call.=FALSE)
+            if (is.numeric(times)) {
+                tpos <- times
+            } else if (is.character(times)) {
+                tpos <- match(times,rownames(data))
+            }
+            times <- data[tpos,,drop=TRUE]
+            data <- data[-tpos,,drop=FALSE]
+        } else if (is.array(data) && !is.matrix(data)) {
+            ## 'data' is a non-matrix array
+            stop(ep,sQuote("data"),
+                 "must be a data frame or an object of class ",
+                 sQuote("pomp"),call.=FALSE)
+        } else if (is.numeric(data) && !is.matrix(data)) {
+            ## 'data' is a numeric vector
+            warning(ep,sQuote("data")," should be a data frame or an object of class ",sQuote("pomp"),
+                    ". The option to provide a numeric vector for the ",sQuote("data"),
+                    " argument is deprecated and will be removed in a future release.",
+                    call.=FALSE)
+            data=matrix(data,nrow=1,ncol=length(data),
+                        dimnames=list("data",NULL))
+        } else if (is.matrix(data)) {
+            ## 'data' is a matrix
+            warning(ep,sQuote("data")," should be a data frame or an object of class ",sQuote("pomp"),
+                    ". The option to provide a matrix for the ",sQuote("data"),
+                    " argument is deprecated and will be removed in a future release.",
+                    call.=FALSE)
+        } else {
+            stop(ep,sQuote("data"),
+                 "must be a data frame or an object of class ",
+                 sQuote("pomp"),call.=FALSE)
+        }
+        
+        if (missing(skeleton.type)) {
+            skeleton.type <- "undef"
+        } else {
+            warning(ep,"the ",sQuote("skeleton.type"),
+                    " argument is deprecated and will be removed in a future release.\n",
+                    "See ",sQuote("?pomp")," for an explanation of the new syntax.",
+                    call.=FALSE)
+        }
+        if (missing(skelmap.delta.t)) {
+            skelmap.delta.t <- 1
+        } else {
+            warning(ep,"the ",sQuote("skelmap.delta.t"),
+                    " argument is deprecated and will be removed in a future release.\n",
+                    "See ",sQuote("?pomp")," for an explanation of the new syntax.",
+                    call.=FALSE)
+        }
+        if (!missing(skeleton)) {
+            skeleton <- substitute(skeleton)
+            flist <- list(
+                map=function (f, delta.t = 1) {
+                    skeleton.type <<- "map"
+                    if (delta.t <= 0)
+                        stop("in ",sQuote("map"),", ",sQuote("delta.t"),
+                             " must be positive",call.=FALSE)
+                    skelmap.delta.t <<- as.numeric(delta.t)
+                    f
+                },
+                vectorfield=function (f) {
+                    skeleton.type <<- "vectorfield"
+                    f
+                }
+            )
+            skeleton <- eval(skeleton,envir=flist,enclos=parent.frame())
+            if (skeleton.type=="undef") {
+                warning(ep,"the default ",sQuote("skeleton.type=\"map\""),
+                        " is deprecated and will be removed in a future release.\n",
+                        "See ",sQuote("?pomp")," for an explanation of the new syntax.",
+                        call.=FALSE)
+                skeleton.type <- "map"
+            }
+        }
+        if (skeleton.type=="undef") skeleton.type <- "map"
+
+        ## if 'measurement model' is specified as a formula, this overrides
+        ## specification of 'rmeasure' or 'dmeasure'
+        if (!missing(measurement.model)) {
+            if (!(missing(dmeasure) && missing(rmeasure))) {
+                warning(ep,"specifying ",sQuote("measurement.model"),
+                        " overrides specification of ",
+                        sQuote("rmeasure")," and ",sQuote("dmeasure"),
+                        call.=FALSE
+                        )
+            }
+            mm <- measform2pomp(measurement.model)
+            rmeasure <- mm$rmeasure
+            dmeasure <- mm$dmeasure
+        }
+
+        tryCatch(
+            pomp.internal(
+                data=data,
+                times=times,
+                t0=t0,
+                rprocess=rprocess,
+                dprocess=dprocess,
+                rmeasure=rmeasure,
+                dmeasure=dmeasure,
+                dprior=dprior,
+                rprior=rprior,
+                skeleton=skeleton,
+                skeleton.type=skeleton.type,
+                skelmap.delta.t=skelmap.delta.t,
+                initializer=initializer,
+                params=params,
+                covar=covar,
+                tcovar=tcovar,
+                obsnames=obsnames,
+                statenames=statenames,
+                paramnames=paramnames,
+                covarnames=covarnames,
+                zeronames=zeronames,
+                PACKAGE=PACKAGE,
+                fromEstimationScale=fromEstimationScale,
+                toEstimationScale=toEstimationScale,
+                globals=globals,
+                cdir=cdir,
+                cfile=cfile,
+                ...
+            ),
+            error = function (e) {
+                stop(ep,conditionMessage(e),call.=FALSE)
+            }
+        )            
     }
-)
+}

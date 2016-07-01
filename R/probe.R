@@ -12,35 +12,47 @@ setClass(
     )
 )
 
-probe.internal <- function (object, probes, params, nsim = 1, seed = NULL, ...) {
+probe.internal <- function (object, probes, params, nsim = 1L, seed = NULL, ...) {
+
+    ep <- paste0("in ",sQuote("probe"),": ")
 
     pompLoad(object)
 
     if (!is.list(probes)) probes <- list(probes)
     if (!all(sapply(probes,is.function)))
-        stop(sQuote("probes")," must be a function or a list of functions")
+        stop(ep,sQuote("probes")," must be a function or a list of functions",call.=FALSE)
     if (!all(sapply(probes,function(f)length(formals(f))==1)))
-        stop("each probe must be a function of a single argument")
+        stop(ep,"each probe must be a function of a single argument",call.=FALSE)
 
     seed <- as.integer(seed)
     
     if (missing(params)) params <- coef(object)
 
     ## apply probes to data
-    datval <- .Call(apply_probe_data,object,probes)
+    datval <- tryCatch(
+        .Call(apply_probe_data,object,probes),
+        error = function (e) {
+            stop(ep,"applying probes to actual data: ",
+                 conditionMessage(e),call.=FALSE)
+        }
+    )
     nprobes <- length(datval)
-    if (nprobes > nsim)
-        stop(sQuote("nsim"),"(=",nsim,") should be (much) larger than the number of probes (=",nprobes,")")
 
     ## apply probes to model simulations
-    simval <- .Call(
-        apply_probe_sim,
-        object=object,
-        nsim=nsim,
-        params=params,
-        seed=seed,
-        probes=probes,
-        datval=datval
+    simval <- tryCatch(
+        .Call(
+            apply_probe_sim,
+            object=object,
+            nsim=nsim,
+            params=params,
+            seed=seed,
+            probes=probes,
+            datval=datval
+        ),
+        error = function (e) {
+            stop(ep,"applying probes to simulated data: ",
+                 conditionMessage(e),call.=FALSE)
+        }
     )
     
     pvals <- numeric(nprobes)
@@ -178,7 +190,8 @@ setMethod("plot",
           signature=signature(x="probed.pomp"), 
           definition=function (x, y, ...) {
               if (!missing(y))
-                  warning(sQuote("y")," is ignored")
+                  warning("in ",sQuote("plot-probed.pomp"),": ",
+                          sQuote("y")," is ignored",call.=FALSE)
               probeplot.internal(x=x,...)
           }
           )
