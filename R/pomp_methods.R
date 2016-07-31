@@ -266,8 +266,7 @@ setMethod(
     "print",
     signature=signature(x="pomp"),
     definition=function (x, ...) {
-        cat("data, states, and covariates:\n")
-        print(as(x,"data.frame"))
+        cat("<object of class ",sQuote("pomp"),">\n",sep="")
         invisible(x)
     }
 )
@@ -291,27 +290,29 @@ setMethod(
             cat("summary of covariates:\n")
             print(summary(as.data.frame(object@covar)))
         }
-        cat("process model simulator, rprocess = \n")
+        cat("process model simulator, rprocess = ")
         show(object@rprocess)
-        cat("process model density, dprocess = \n")
+        cat("process model density, dprocess = ")
         show(object@dprocess)
-        cat("measurement model simulator, rmeasure = \n")
+        cat("measurement model simulator, rmeasure = ")
         show(object@rmeasure)
-        cat("measurement model density, dmeasure = \n")
+        cat("measurement model density, dmeasure = ")
         show(object@dmeasure)
-        cat("prior simulator, rprior = \n")
+        cat("prior simulator, rprior = ")
         show(object@rprior)
-        cat("prior density, dprior = \n")
+        cat("prior density, dprior = ")
         show(object@dprior)
-        if (!is.na(object@skeleton.type)) {
-            cat("skeleton (",object@skeleton.type,") = \n",sep="")
-            show(object@skeleton)
-        }
-        cat("initializer = \n")
+        cat("skeleton ",
+            if (object@skeleton.type!="undef")
+                paste0("(",object@skeleton.type,") ")
+            else "",
+            "= ",sep="")
+        show(object@skeleton)
+        cat("initializer = ")
         show(object@initializer)
-        cat("parameter transformation (to estimation scale) = \n")
+        cat("parameter transformation (to estimation scale) = ")
         show(object@to.trans)
-        cat("parameter transformation (from estimation scale) = \n")
+        cat("parameter transformation (from estimation scale) = ")
         show(object@from.trans)
         if (length(coef(object))>0) {
             cat("parameter(s):\n")
@@ -320,8 +321,9 @@ setMethod(
             cat ("parameter(s) unspecified\n");
         }
         if (length(object@userdata)>0) {
-            cat("userdata = \n")
-            show(object@userdata)
+            cat("extra user-defined variables: ",
+                paste(sapply(names(object@userdata),sQuote),collapse=", "),
+                "\n")
         }
         invisible(NULL)
     }

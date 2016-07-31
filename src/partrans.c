@@ -35,7 +35,7 @@ SEXP do_partrans (SEXP object, SEXP params, SEXP dir, SEXP gnsi)
     PROTECT(fn = pomp_fun_handler(pompfun,gnsi,&mode)); nprotect++;
     break;
   default:
-    errorcall(R_NilValue,"impossible error");
+    errorcall(R_NilValue,"impossible error"); // # nocov
     break;
   }
   
@@ -117,9 +117,9 @@ SEXP do_partrans (SEXP object, SEXP params, SEXP dir, SEXP gnsi)
     ff = (pomp_transform_fn *) R_ExternalPtrAddr(fn);
     
     if (qmat) {
-      idx = INTEGER(PROTECT(name_index(GET_ROWNAMES(GET_DIMNAMES(params)),pompfun,"paramnames"))); nprotect++;
+      idx = INTEGER(PROTECT(name_index(GET_ROWNAMES(GET_DIMNAMES(params)),pompfun,"paramnames","parameters"))); nprotect++;
     } else {
-      idx = INTEGER(PROTECT(name_index(GET_NAMES(params),pompfun,"paramnames"))); nprotect++;
+      idx = INTEGER(PROTECT(name_index(GET_NAMES(params),pompfun,"paramnames","parameters"))); nprotect++;
     }
 
     set_pomp_userdata(fcall);
@@ -136,7 +136,11 @@ SEXP do_partrans (SEXP object, SEXP params, SEXP dir, SEXP gnsi)
     break;
 
   default:
-    errorcall(R_NilValue,"in 'partrans': unrecognized 'mode'");
+
+    errorcall(R_NilValue,"in 'partrans': unrecognized 'mode'"); // # nocov
+
+    break;
+
   }
 
   UNPROTECT(nprotect);

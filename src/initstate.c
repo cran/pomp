@@ -15,7 +15,8 @@ typedef double pomp_initializer(double *x, const double *p, double t,
 SEXP do_init_state (SEXP object, SEXP params, SEXP t0, SEXP nsim, SEXP gnsi)
 {
   int nprotect = 0;
-  SEXP Pnames, Snames, x;
+  SEXP Pnames, Snames;
+  SEXP x = R_NilValue;
   int *dim;
   int npar, nrep, nvar, ns;
   int definit;
@@ -58,7 +59,7 @@ SEXP do_init_state (SEXP object, SEXP params, SEXP t0, SEXP nsim, SEXP gnsi)
     
     nvar = LENGTH(ivpnames);
     if (nvar < 1) {
-      errorcall(R_NilValue,"in 'init.state': how shall I initialize the state process? See '?pomp'.");
+      errorcall(R_NilValue,"in default 'initializer': there are no parameters with suffix '.0'. See '?pomp'.");
     }
     pidx = INTEGER(PROTECT(match(Pnames,ivpnames,0))); nprotect++;
     for (k = 0; k < nvar; k++) pidx[k]--;
@@ -191,9 +192,9 @@ SEXP do_init_state (SEXP object, SEXP params, SEXP t0, SEXP nsim, SEXP gnsi)
 	PROTECT(Cnames = GET_COLNAMES(GET_DIMNAMES(GET_SLOT(object,install("covar"))))); nprotect++;
 	
 	// construct state, parameter, covariate, observable indices
-	sidx = INTEGER(PROTECT(name_index(Snames,pompfun,"statenames"))); nprotect++;
-	pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames"))); nprotect++;
-	cidx = INTEGER(PROTECT(name_index(Cnames,pompfun,"covarnames"))); nprotect++;
+	sidx = INTEGER(PROTECT(name_index(Snames,pompfun,"statenames","state variables"))); nprotect++;
+	pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames","parameters"))); nprotect++;
+	cidx = INTEGER(PROTECT(name_index(Cnames,pompfun,"covarnames","covariates"))); nprotect++;
 	
 	// address of native routine
 	ff = (pomp_initializer *) R_ExternalPtrAddr(fn);
@@ -222,7 +223,8 @@ SEXP do_init_state (SEXP object, SEXP params, SEXP t0, SEXP nsim, SEXP gnsi)
       
     default:
       
-      errorcall(R_NilValue,"in 'init.state': unrecognized 'mode'");
+      errorcall(R_NilValue,"in 'init.state': unrecognized 'mode'"); // # nocov
+
       break;
 
     }

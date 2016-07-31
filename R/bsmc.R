@@ -69,8 +69,7 @@ bsmc.internal <- function (object, params, Np, est,
         params <- tryCatch(
             rprior(object,params=parmat(params,Np)),
             error = function (e) {
-                stop(ep,sQuote("rprior")," error: ",
-                     conditionMessage(e),call.=FALSE)
+                stop(ep,sQuote("rprior")," error: ",conditionMessage(e),call.=FALSE)
             }
         )
     }
@@ -202,14 +201,12 @@ bsmc.internal <- function (object, params, Np, est,
                 .getnativesymbolinfo=gnsi.dmeas
             ),
             error = function (e) {
-                stop(ep,sQuote("dmeasure")," error: ",conditionMessage(e),
-                     call.=FALSE)
+                stop(ep,sQuote("dmeasure")," error: ",conditionMessage(e),call.=FALSE)
             }
         )
         gnsi.dmeas <- FALSE
         storeForEvidence1 <- log(sum(g))
         ## sample indices -- From L&W AGM (2)
-        ##              k <- .Call(systematic_resampling,g)
         k <- sample.int(n=Np,size=Np,replace=TRUE,prob=g)
         params <- params[,k]
         m <- m[,k]
@@ -224,8 +221,7 @@ bsmc.internal <- function (object, params, Np, est,
                 method="svd"
             ),
             error = function (e) {
-                stop(ep,sQuote("rmvnorm"),"error: ",
-                     conditionMessage(e),call.=FALSE)
+                stop(ep,sQuote("rmvnorm"),"error: ",conditionMessage(e),call.=FALSE)
             }
         )
         if (!all(is.finite(pvec)))
@@ -265,8 +261,7 @@ bsmc.internal <- function (object, params, Np, est,
                 .getnativesymbolinfo=gnsi.dmeas
             ),
             error = function (e) {
-                stop(ep,sQuote("dmeasure")," error: ",conditionMessage(e),
-                     call.=FALSE)
+                stop(ep,sQuote("dmeasure")," error: ",conditionMessage(e),call.=FALSE)
             }
         )
 
@@ -331,7 +326,6 @@ bsmc.internal <- function (object, params, Np, est,
 
         ## Matrix with samples (columns) from filtering distribution theta.t | Y.t
         if (!all.fail) {
-            ## smp <- .Call(systematic_resampling,weights)
             smp <- sample.int(n=Np,size=Np,replace=TRUE,prob=weights)
             x <- x[,smp,drop=FALSE]
             params[estind,] <- params[estind,smp,drop=FALSE]

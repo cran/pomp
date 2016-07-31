@@ -63,14 +63,9 @@ pmof.internal <- function (object, params, est, probes,
     datval <- tryCatch(
         .Call(apply_probe_data,object,probes),
         error = function (e) {
-            stop(ep,"applying probes to actual data: ",
-                 conditionMessage(e),call.=FALSE)
+            stop(ep,"applying probes to actual data: ",conditionMessage(e),call.=FALSE)
         }
     )
-    nprobes <- length(datval)
-    if (nprobes > nsim)
-        stop(ep,sQuote("nsim"),"(=",nsim,
-             ") should be (much) larger than the number of probes (=",nprobes,")",call.=FALSE)
     
     function (par) {
         
@@ -93,12 +88,16 @@ pmof.internal <- function (object, params, est, probes,
                 datval=datval
             ),
             error = function (e) {
-                stop(ep,"applying probes to simulated data: ",
-                     conditionMessage(e),call.=FALSE)
+                stop(ep,"applying probes to simulated data: ",conditionMessage(e),call.=FALSE)
             }
         )
         
-        ll <- .Call(synth_loglik,simval,datval)
+        ll <- tryCatch(
+            .Call(synth_loglik,simval,datval),
+            error = function (e) {
+                stop(ep,"in synthetic likelihood computation: ",conditionMessage(e),call.=FALSE)
+            }
+        )
         pompUnload(object)
         if (is.finite(ll)||is.na(fail.value)) -ll else fail.value
     }

@@ -157,8 +157,8 @@ setMethod(
 setMethod(
     "plugin.handler",
     signature=signature(object='ANY'),
-    definition=function (object, ...) {
-        stop("plugin has an invalid form.",call.=FALSE)
+    definition=function (object, purpose = "\b", ...) {
+        stop(purpose," plugin has an invalid form.",call.=FALSE)
     }
 )
 
@@ -190,7 +190,7 @@ setMethod(
                     xstart=xstart,
                     times=times,
                     params=params,
-                    dt=0,
+                    deltat=1,
                     method=1L,
                     zeronames=zeronames,
                     tcovar=tcovar,
@@ -234,7 +234,7 @@ setMethod(
                     xstart=xstart,
                     times=times,
                     params=params,
-                    dt=object@delta.t,
+                    deltat=object@delta.t,
                     method=0L,
                     zeronames=zeronames,
                     tcovar=tcovar,
@@ -278,7 +278,7 @@ setMethod(
                     xstart=xstart,
                     times=times,
                     params=params,
-                    dt=object@delta.t,
+                    deltat=object@delta.t,
                     method=2L,
                     zeronames=zeronames,
                     tcovar=tcovar,

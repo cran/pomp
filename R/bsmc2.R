@@ -44,8 +44,7 @@ bsmc2.internal <- function (object, params, Np, est,
         params <- tryCatch(
             rprior(object,params=parmat(params,Np)),
             error = function (e) {
-                stop(ep,sQuote("rprior")," error: ",
-                     conditionMessage(e),call.=FALSE)
+                stop(ep,sQuote("rprior")," error: ",conditionMessage(e),call.=FALSE)
             }
         )
     }
@@ -172,8 +171,7 @@ bsmc2.internal <- function (object, params, Np, est,
                 .getnativesymbolinfo=gnsi.dmeas
             ),
             error = function (e) {
-                stop(ep,sQuote("dmeasure")," error: ",conditionMessage(e),
-                     call.=FALSE)
+                stop(ep,sQuote("dmeasure")," error: ",conditionMessage(e),call.=FALSE)
             }
         )
             
@@ -213,12 +211,7 @@ bsmc2.internal <- function (object, params, Np, est,
 
         ## Matrix with samples (columns) from filtering distribution theta.t | Y.t
         if (!all.fail) {
-            smp <- tryCatch(
-                .Call(systematic_resampling,weights),
-                error = function (e) {
-                    stop(ep,conditionMessage(e),call.=FALSE)
-                }
-            )
+            smp <- .Call(systematic_resampling,weights)
             x <- x[,smp,drop=FALSE]
             params[estind,] <- params[estind,smp,drop=FALSE]
         }

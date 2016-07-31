@@ -3,6 +3,10 @@
 \alias{ensembe Kalman filter}
 \alias{ensemble adjustment Kalman filter}
 \alias{enkf}
+\alias{enkf,ANY-method}
+\alias{eakf,ANY-method}
+\alias{enkf,missing-method}
+\alias{eakf,missing-method}
 \alias{enkf,pomp-method}
 \alias{enkf-pomp}
 \alias{eakf}
@@ -91,6 +95,19 @@
 \seealso{
   \code{\link{pomp}}, \code{\link{pfilter}},
   and the tutorials on the \href{http://kingaa.github.io/pomp}{package website}.
+}
+\references{
+  Evensen, G. (1994)
+  Sequential data assimilation with a nonlinear quasi-geostrophic model using Monte Carlo methods to forecast error statistics
+  Journal of Geophysical Research: Oceans 99:10143--10162
+
+  Evensen, G. (2009)
+  Data assimilation: the ensemble Kalman filter
+  Springer-Verlag.
+
+  Anderson, J. L. (2001)
+  An Ensemble Adjustment Kalman Filter for Data Assimilation
+  Monthly Weather Review 129:2884--2903
 }
 \keyword{ts}
 \keyword{internals}

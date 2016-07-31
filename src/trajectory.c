@@ -120,7 +120,7 @@ SEXP iterate_map (SEXP object, SEXP times, SEXP t0, SEXP x0, SEXP params, SEXP g
   npars = dim[0];
 
   if (nreps != dim[1])
-    errorcall(R_NilValue,"in 'trajectory': dimension mismatch between 'x0' and 'params'");
+    errorcall(R_NilValue,"in 'trajectory': dimension mismatch between 'x0' and 'params'"); // # nocov
 
   PROTECT(times = AS_NUMERIC(times)); nprotect++;
   ntimes = LENGTH(times);
@@ -155,6 +155,7 @@ SEXP iterate_map (SEXP object, SEXP times, SEXP t0, SEXP x0, SEXP params, SEXP g
 
   // set up the computations
   switch (mode) {
+
   case Rfun:                       // R function
     {
       int nprotect = 0;
@@ -188,16 +189,18 @@ SEXP iterate_map (SEXP object, SEXP times, SEXP t0, SEXP x0, SEXP params, SEXP g
 
       UNPROTECT(nprotect);
     }
+
     break;
+
   case native:                       // native skeleton
     {
       int nprotect = 0;
       int *sidx, *pidx, *cidx;
       pomp_skeleton *ff = (pomp_skeleton *) R_ExternalPtrAddr(fn);
       // construct state, parameter, covariate indices
-      sidx = INTEGER(PROTECT(name_index(Snames,pompfun,"statenames"))); nprotect++;
-      pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames"))); nprotect++;
-      cidx = INTEGER(PROTECT(name_index(Cnames,pompfun,"covarnames"))); nprotect++;
+      sidx = INTEGER(PROTECT(name_index(Snames,pompfun,"statenames","state variables"))); nprotect++;
+      pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames","parameters"))); nprotect++;
+      cidx = INTEGER(PROTECT(name_index(Cnames,pompfun,"covarnames","covariates"))); nprotect++;
 
       iterate_map_native(REAL(X),REAL(times),REAL(params),deltat,t,REAL(x0),
 			 ntimes,nvars,npars,ncovars,nzeros,nreps,
@@ -205,10 +208,15 @@ SEXP iterate_map (SEXP object, SEXP times, SEXP t0, SEXP x0, SEXP params, SEXP g
 
       UNPROTECT(nprotect);
     }
+
     break;
+
   default:
-    errorcall(R_NilValue,"in 'iterate_map': unrecognized 'mode'");
+
+    errorcall(R_NilValue,"in 'iterate_map': unrecognized 'mode'"); // # nocov
+
     break;
+
   }
 
   UNPROTECT(nprotect);
@@ -289,6 +297,7 @@ SEXP pomp_desolve_setup (SEXP object, SEXP x0, SEXP params, SEXP gnsi) {
   PROTECT(Cnames = GET_COLNAMES(GET_DIMNAMES(GET_SLOT(object,install("covar"))))); nprotect++;
 
   switch (COMMON(mode)) {
+
   case Rfun:			// R function
     // arguments of the R function
     PROTECT(RFUN(tvec) = NEW_NUMERIC(1)); nprotect++;
@@ -329,13 +338,14 @@ SEXP pomp_desolve_setup (SEXP object, SEXP x0, SEXP params, SEXP gnsi) {
     R_PreserveObject(RFUN(cvec));
 
     break;
+
   case native:			// native code
     // set aside userdata
     NAT(args) = args;
     // construct index vectors
-    PROTECT(NAT(sindex) = name_index(Snames,pompfun,"statenames")); nprotect++;
-    PROTECT(NAT(pindex) = name_index(Pnames,pompfun,"paramnames")); nprotect++;
-    PROTECT(NAT(cindex) = name_index(Cnames,pompfun,"covarnames")); nprotect++;
+    PROTECT(NAT(sindex) = name_index(Snames,pompfun,"statenames","state variables")); nprotect++;
+    PROTECT(NAT(pindex) = name_index(Pnames,pompfun,"paramnames","parameters")); nprotect++;
+    PROTECT(NAT(cindex) = name_index(Cnames,pompfun,"covarnames","covariates")); nprotect++;
     // extract pointer to user-defined function
     NAT(fun) = (pomp_skeleton *) R_ExternalPtrAddr(fn);
 
@@ -349,10 +359,15 @@ SEXP pomp_desolve_setup (SEXP object, SEXP x0, SEXP params, SEXP gnsi) {
     R_PreserveObject(NAT(cindex));
 
     break;
+
   default:
-    errorcall(R_NilValue,"in 'pomp_desolve_setup': unrecognized 'mode'");
+
+    errorcall(R_NilValue,"in 'pomp_desolve_setup': unrecognized 'mode'"); // # nocov
+
     break;
+
   }
+
   UNPROTECT(nprotect);
   //  return retval;
   return R_NilValue;
@@ -361,23 +376,31 @@ SEXP pomp_desolve_setup (SEXP object, SEXP x0, SEXP params, SEXP gnsi) {
 void pomp_vf_eval (int *neq, double *t, double *y, double *ydot, double *yout, int *ip) 
 {
   switch (COMMON(mode)) {
+
   case Rfun:			// R function
     eval_skeleton_R(ydot,t,y,REAL(COMMON(params)),
 		    RFUN(fcall),RFUN(rho),RFUN(Snames),
 		    REAL(RFUN(tvec)),REAL(RFUN(xvec)),REAL(RFUN(pvec)),REAL(RFUN(cvec)),
 		    COMMON(nvars),COMMON(npars),1,COMMON(nreps),COMMON(nreps),COMMON(nreps),
 		    &COMMON(covar_table));
+
     break;
+
   case native:			// native code
     eval_skeleton_native(ydot,t,y,REAL(COMMON(params)),
 			 COMMON(nvars),COMMON(npars),COMMON(ncovars),1,
 			 COMMON(nreps),COMMON(nreps),COMMON(nreps),
 			 INTEGER(NAT(sindex)),INTEGER(NAT(pindex)),INTEGER(NAT(cindex)),
 			 &COMMON(covar_table),NAT(fun),NAT(args));
+
     break;
+
   default:
-    errorcall(R_NilValue,"in 'pomp_vf_eval': unrecognized 'mode'");
+
+    errorcall(R_NilValue,"in 'pomp_vf_eval': unrecognized 'mode'"); // # nocov
+
     break;
+
   }
 }
 
@@ -390,7 +413,9 @@ void pomp_desolve_takedown (void) {
   COMMON(npars) = 0;
   COMMON(ncovars) = 0;
   COMMON(nreps) = 0;
+
   switch (COMMON(mode)) {
+
   case Rfun:			// R function
     R_ReleaseObject(RFUN(fcall));
     R_ReleaseObject(RFUN(rho));
@@ -406,7 +431,9 @@ void pomp_desolve_takedown (void) {
     RFUN(xvec) = R_NilValue;
     RFUN(pvec) = R_NilValue;
     RFUN(cvec) = R_NilValue;
+
     break;
+
   case native:			// native code
     NAT(fun) = 0;
     R_ReleaseObject(NAT(args));
@@ -417,12 +444,19 @@ void pomp_desolve_takedown (void) {
     NAT(sindex) = R_NilValue;
     NAT(pindex) = R_NilValue;
     NAT(cindex) = R_NilValue;
+
     break;
+
   default:
-    errorcall(R_NilValue,"in 'pomp_desolve_takedown': unrecognized 'mode'");
+
+    errorcall(R_NilValue,"in 'pomp_desolve_takedown': unrecognized 'mode'"); // # nocov
+
     break;
+
   }
+
   COMMON(mode) = -1;
+
 }
 
 #undef COMMON

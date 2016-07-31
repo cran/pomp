@@ -139,6 +139,7 @@ SEXP do_skeleton (SEXP object, SEXP x, SEXP t, SEXP params, SEXP gnsi)
 
   // first do setup
   switch (mode) {
+
   case Rfun: 			// R skeleton
     {
       int nprotect = 0;
@@ -172,16 +173,18 @@ SEXP do_skeleton (SEXP object, SEXP x, SEXP t, SEXP params, SEXP gnsi)
       
       UNPROTECT(nprotect);
     }
+
     break;
+
   case native:			// native skeleton
     {
       int nprotect = 0;
       int *sidx, *pidx, *cidx;
       pomp_skeleton *ff = NULL;
       // construct state, parameter, covariate, observable indices
-      sidx = INTEGER(PROTECT(name_index(Snames,pompfun,"statenames"))); nprotect++;
-      pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames"))); nprotect++;
-      cidx = INTEGER(PROTECT(name_index(Cnames,pompfun,"covarnames"))); nprotect++;
+      sidx = INTEGER(PROTECT(name_index(Snames,pompfun,"statenames","state variables"))); nprotect++;
+      pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames","parameters"))); nprotect++;
+      cidx = INTEGER(PROTECT(name_index(Cnames,pompfun,"covarnames","covariates"))); nprotect++;
       // extract the address of the user function
       ff = (pomp_skeleton *) R_ExternalPtrAddr(fn);
       // make userdata 
@@ -192,10 +195,15 @@ SEXP do_skeleton (SEXP object, SEXP x, SEXP t, SEXP params, SEXP gnsi)
 			   );
       UNPROTECT(nprotect);
     }
+
     break;
+
   default:
-    errorcall(R_NilValue,"in 'skeleton': unrecognized 'mode'");
+
+    errorcall(R_NilValue,"in 'skeleton': unrecognized 'mode'"); // # nocov
+
     break;
+
   }
 
   UNPROTECT(nprotect);

@@ -10,7 +10,9 @@ SEXP euler_model_simulator (SEXP func,
 {
   int nprotect = 0;
   pompfunmode mode = undef;
-  int nstep, nvars, npars, nreps, ntimes, nzeros, ncovars, covlen;
+  int nvars, npars, nreps, ntimes, nzeros, ncovars, covlen;
+  int nstep = 0; 
+  double dt, dtt;
   SEXP X;
   SEXP ans, nm, fn, fcall = R_NilValue, rho = R_NilValue;
   SEXP Snames, Pnames, Cnames;
@@ -18,8 +20,12 @@ SEXP euler_model_simulator (SEXP func,
   SEXP xvec = R_NilValue, pvec = R_NilValue, dtvec = R_NilValue;
   int *pidx = 0, *sidx = 0, *cidx = 0, *zidx = 0;
   pomp_onestep_sim *ff = NULL;
-  int meth = *(INTEGER(AS_INTEGER(method))); 
+  int meth = INTEGER_VALUE(method);
   // meth: 0 = Euler, 1 = one-step, 2 = fixed step
+
+  dtt = NUMERIC_VALUE(deltat);
+  if (dtt <= 0) 
+    errorcall(R_NilValue,"'delta.t' should be a positive number");
 
   {
     int *dim;
@@ -89,8 +95,11 @@ SEXP euler_model_simulator (SEXP func,
     break;
 
   default:
-    errorcall(R_NilValue,"unrecognized 'mode' %d",mode);
+
+    errorcall(R_NilValue,"unrecognized 'mode' %d",mode); // # nocov
+
     break;
+
   }
 
   // create array to hold results
@@ -119,7 +128,6 @@ SEXP euler_model_simulator (SEXP func,
     double *cp = REAL(cvec);
     double *ps = REAL(params);
     double t = time[0];
-    double dt;
     double *pm, *xm;
     int i, j, k, step;
 
@@ -140,7 +148,7 @@ SEXP euler_model_simulator (SEXP func,
 
       switch (meth) {
       case 0:			// Euler method
-	dt = *(REAL(deltat));
+	dt = dtt;
 	nstep = num_euler_steps(t,time[step],&dt);
 	break;
       case 1:			// one step 
@@ -148,11 +156,11 @@ SEXP euler_model_simulator (SEXP func,
 	nstep = (dt > 0) ? 1 : 0;
 	break;
       case 2:			// fixed step
-	dt = *(REAL(deltat));
+	dt = dtt;
 	nstep = num_map_steps(t,time[step],dt);
 	break;
       default:
-	errorcall(R_NilValue,"unrecognized 'method'");
+	errorcall(R_NilValue,"unrecognized 'method'"); // # nocov
 	break;
       }
 
@@ -216,18 +224,22 @@ SEXP euler_model_simulator (SEXP func,
 	  case native: 		// native code
 
 	    (*ff)(xm,pm,sidx,pidx,cidx,ncovars,cp,t,dt);
+
 	    break;
 
 	  default:
-	    errorcall(R_NilValue,"unrecognized 'mode' %d",mode);
+
+	    errorcall(R_NilValue,"unrecognized 'mode' %d",mode); // # nocov
+
 	    break;
+
 	  }
 
 	}
 
 	t += dt;
 	
-	if ((method == 0) && (k == nstep-2)) { // penultimate step
+	if ((meth == 0) && (k == nstep-2)) { // penultimate step
 	  dt = time[step]-t;
 	  t = time[step]-dt;
 	}
@@ -329,8 +341,11 @@ SEXP euler_model_density (SEXP func,
     break;
 
   default:
-    errorcall(R_NilValue,"unrecognized 'mode' %d",mode);
+
+    errorcall(R_NilValue,"unrecognized 'mode' %d",mode); // # nocov
+
     break;
+
   }
 
   // create array to hold results
@@ -419,7 +434,9 @@ SEXP euler_model_density (SEXP func,
     break;
 
   default:
-    errorcall(R_NilValue,"unrecognized 'mode' %d",mode);
+
+    errorcall(R_NilValue,"unrecognized 'mode' %d",mode); // # nocov
+
     break;
 
   }
