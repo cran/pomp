@@ -7,8 +7,8 @@ pomp.internal <- function (data, times, t0, rprocess, dprocess,
                            obsnames, statenames, paramnames, covarnames,
                            zeronames, PACKAGE,
                            fromEstimationScale, toEstimationScale,
-                           globals, cdir, cfile, userdata,
-                           ...,
+                           globals, cdir, cfile, shlib.args,
+                           userdata, ...,
                            .solibs = list(),
                            verbose = getOption("verbose",FALSE)) {
 
@@ -21,6 +21,7 @@ pomp.internal <- function (data, times, t0, rprocess, dprocess,
 
     if (missing(cdir)) cdir <- NULL
     if (missing(cfile)) cfile <- NULL
+    if (missing(shlib.args)) shlib.args <- NULL
     if (missing(userdata)) userdata <- list()
     added.userdata <- list(...)
     if (length(added.userdata)>0) {
@@ -52,7 +53,10 @@ pomp.internal <- function (data, times, t0, rprocess, dprocess,
     if (missing(statenames)) statenames <- character(0)
     if (missing(paramnames)) paramnames <- character(0)
     if (missing(zeronames)) zeronames <- character(0)
-
+    statenames <- as.character(statenames)
+    paramnames <- as.character(paramnames)
+    zeronames <- as.character(zeronames)
+    
     ## check the parameters and force them to be double-precision
     if (length(params)>0) {
         if (is.null(names(params)) || !is.numeric(params))
@@ -162,6 +166,7 @@ pomp.internal <- function (data, times, t0, rprocess, dprocess,
                         paramnames=paramnames,
                         covarnames=covarnames,
                         globals=globals,
+                        shlib.args=shlib.args,
                         verbose=verbose
                     ),
                     snips
@@ -471,7 +476,7 @@ pomp <- function (data, times, t0, ..., rprocess, dprocess,
                   initializer, rprior, dprior, params, covar, tcovar,
                   obsnames, statenames, paramnames, covarnames, zeronames,
                   PACKAGE, fromEstimationScale, toEstimationScale,
-                  globals, cdir, cfile) {
+                  globals, cdir, cfile, shlib.args) {
 
     ep <- paste0("in ",sQuote("pomp"),": ")
 
@@ -615,6 +620,7 @@ pomp <- function (data, times, t0, ..., rprocess, dprocess,
                 globals=globals,
                 cdir=cdir,
                 cfile=cfile,
+                shlib.args=shlib.args,
                 .solibs=data@solibs,
                 userdata=data@userdata,
                 ...
@@ -756,6 +762,7 @@ pomp <- function (data, times, t0, ..., rprocess, dprocess,
                 globals=globals,
                 cdir=cdir,
                 cfile=cfile,
+                shlib.args=shlib.args,
                 ...
             ),
             error = function (e) {

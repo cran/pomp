@@ -1,5 +1,42 @@
 _N_e_w_s _f_o_r _p_a_c_k_a_g_e '_p_o_m_p'
 
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._8:
+
+        • There is a new option, ‘shlib.args’, to ‘pomp’.  This allows
+          arbitrary options to be passed to the compiler when C
+          snippets are used.  In particular, one can link a library of
+          C snippets against a precompiled static library.
+
+        • In Sobol' sequence generation (‘sobolDesign’,
+          ‘profileDesign’), we now use the suggestion of Joe & Kuo
+          (2003) to choose a better sequence start point.
+
+        • The generation of Sobol' sequences (‘sobolDesign’,
+          ‘profileDesign’) is now performed using the ‘NLopt’ routines
+          written in C instead of the original TOMS 659 FORTRAN codes.
+          The copyright notices are located in the source code.
+
+        • The stochastic simulation algorithms underlying the Gillespie
+          and K-leap methods (‘gillespie.sim’, ‘kleap.sim’) have been
+          refactored in C.  In addition, errors due to accumulation of
+          round-off error have been repaired.  The result will be more
+          accurate, but somewhat slower when there are a very large
+          number of reactions.
+
+        • Fixed a bug in ‘plot’ on ‘pomp’ objects with more than 10
+          variables to plot.
+
+        • Refactored ‘rw.sd’ for greater stability.
+
+        • Modified the “dacca” example to use C snippets.
+
+        • Made Sobol' codes more robust.
+
+        • Modified the demos to use best practices.
+
+        • Further improvements to the test suite.  Code coverage is now
+          100%.
+
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._7:
 
         • Improvement of the test suite and of error messages.

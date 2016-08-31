@@ -1,5 +1,25 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 1.8}{
+  \itemize{
+    \item There is a new option, \code{shlib.args}, to \code{pomp}.
+    This allows arbitrary options to be passed to the compiler when C snippets are used.
+    In particular, one can link a library of C snippets against a precompiled static library.
+    \item In Sobol' sequence generation (\code{sobolDesign}, \code{profileDesign}), we now use the suggestion of Joe & Kuo (2003) to choose a better sequence start point.
+    \item The generation of Sobol' sequences (\code{sobolDesign}, \code{profileDesign}) is now performed using the \pkg{NLopt} routines written in C instead of the original \acronym{TOMS} 659 FORTRAN codes.
+    The copyright notices are located in the source code.
+    \item The stochastic simulation algorithms underlying the Gillespie and K-leap methods (\code{gillespie.sim}, \code{kleap.sim}) have been refactored in C.
+    In addition, errors due to accumulation of round-off error have been repaired.
+    The result will be more accurate, but somewhat slower when there are a very large number of reactions.
+    \item Fixed a bug in \code{plot} on \code{pomp} objects with more than 10 variables to plot.
+    \item Refactored \code{rw.sd} for greater stability.
+    \item Modified the \dQuote{dacca} example to use C snippets.
+    \item Made Sobol' codes more robust.
+    \item Modified the demos to use best practices.
+    \item Further improvements to the test suite.
+    Code coverage is now 100\%.
+  }
+}  
 \section{Changes in \pkg{pomp} version 1.7}{
   \itemize{
     \item Improvement of the test suite and of error messages.
