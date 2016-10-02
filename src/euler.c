@@ -90,7 +90,7 @@ SEXP euler_model_simulator (SEXP func,
     pidx = INTEGER(PROTECT(matchnames(Pnames,GET_SLOT(func,install("paramnames")),"parameters"))); nprotect++;
     cidx = INTEGER(PROTECT(matchnames(Cnames,GET_SLOT(func,install("covarnames")),"covariates"))); nprotect++;
 
-    ff = (pomp_onestep_sim *) R_ExternalPtrAddr(fn);
+    *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
     break;
 
@@ -336,7 +336,7 @@ SEXP euler_model_density (SEXP func,
     pidx = INTEGER(PROTECT(matchnames(Pnames,GET_SLOT(func,install("paramnames")),"parameters"))); nprotect++;
     cidx = INTEGER(PROTECT(matchnames(Cnames,GET_SLOT(func,install("covarnames")),"covariates"))); nprotect++;
 
-    ff = (pomp_onestep_pdf *) R_ExternalPtrAddr(fn);
+    *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
     break;
 

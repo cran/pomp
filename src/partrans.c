@@ -114,7 +114,7 @@ SEXP do_partrans (SEXP object, SEXP params, SEXP dir, SEXP gnsi)
 
   case native:			// use native routine
 
-    ff = (pomp_transform_fn *) R_ExternalPtrAddr(fn);
+    *((void **) (&ff)) = R_ExternalPtrAddr(fn);
     
     if (qmat) {
       idx = INTEGER(PROTECT(name_index(GET_ROWNAMES(GET_DIMNAMES(params)),pompfun,"paramnames","parameters"))); nprotect++;

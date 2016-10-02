@@ -186,7 +186,7 @@ SEXP do_skeleton (SEXP object, SEXP x, SEXP t, SEXP params, SEXP gnsi)
       pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames","parameters"))); nprotect++;
       cidx = INTEGER(PROTECT(name_index(Cnames,pompfun,"covarnames","covariates"))); nprotect++;
       // extract the address of the user function
-      ff = (pomp_skeleton *) R_ExternalPtrAddr(fn);
+      *((void **) (&ff)) = R_ExternalPtrAddr(fn);
       // make userdata 
       eval_skeleton_native(
 			   REAL(F),REAL(t),REAL(x),REAL(params),

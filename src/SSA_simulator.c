@@ -113,7 +113,7 @@ SEXP SSA_simulator (SEXP func, SEXP mflag, SEXP xstart, SEXP times, SEXP params,
   PROTECT(fn = pomp_fun_handler(func,gnsi,&use_native)); nprotect++;
 
   if (use_native) {
-    RXR = (pomp_ssa_rate_fn *) R_ExternalPtrAddr(fn);
+    *((void **) (&(RXR))) = R_ExternalPtrAddr(fn);
   } else {
     RXR = (pomp_ssa_rate_fn *) default_ssa_rate_fn;
     PROTECT(RHO = (CLOENV(fn))); nprotect++;

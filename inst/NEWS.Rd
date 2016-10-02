@@ -1,5 +1,16 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 1.9}{
+  \itemize{
+    \item During particle filtering, when non-finite \code{dmeasure} values are generated, an error is generated and the offending parameters, states, data, and time are reported.
+    In methods that use parameter transformations (\code{transform=TRUE}), the reported parameters were on the transformed (estimation) scale, which can be confusing.
+    The error message now gives the parameters on the natural (model) scale.
+    \item A bug in \code{mif2} arising when filtering fails in the final timestep has been fixed.
+    In this case, when all particles are deemed inconsistent with the data, we use an unweighted mean (with a warning) in place of the default weighted mean.
+    \item C codes have been modified to take advantage of changes to the \pkg{R} API (R SVN REVISION 71180).
+    \item Modified \file{src/ssa.c} to fix UBSAN errors.
+  }
+}
 \section{Changes in \pkg{pomp} version 1.8}{
   \itemize{
     \item There is a new option, \code{shlib.args}, to \code{pomp}.

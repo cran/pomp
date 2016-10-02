@@ -196,7 +196,8 @@ SEXP iterate_map (SEXP object, SEXP times, SEXP t0, SEXP x0, SEXP params, SEXP g
     {
       int nprotect = 0;
       int *sidx, *pidx, *cidx;
-      pomp_skeleton *ff = (pomp_skeleton *) R_ExternalPtrAddr(fn);
+      pomp_skeleton *ff;
+      *((void **) (&ff)) = R_ExternalPtrAddr(fn);
       // construct state, parameter, covariate indices
       sidx = INTEGER(PROTECT(name_index(Snames,pompfun,"statenames","state variables"))); nprotect++;
       pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames","parameters"))); nprotect++;
@@ -347,7 +348,7 @@ SEXP pomp_desolve_setup (SEXP object, SEXP x0, SEXP params, SEXP gnsi) {
     PROTECT(NAT(pindex) = name_index(Pnames,pompfun,"paramnames","parameters")); nprotect++;
     PROTECT(NAT(cindex) = name_index(Cnames,pompfun,"covarnames","covariates")); nprotect++;
     // extract pointer to user-defined function
-    NAT(fun) = (pomp_skeleton *) R_ExternalPtrAddr(fn);
+    *((void **) (&(NAT(fun)))) = R_ExternalPtrAddr(fn);
 
     if (!isNull(NAT(args))) R_ReleaseObject(NAT(args));
     if (!isNull(NAT(sindex))) R_ReleaseObject(NAT(sindex));

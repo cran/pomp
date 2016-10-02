@@ -122,7 +122,7 @@ SEXP do_rprior (SEXP object, SEXP params, SEXP gnsi)
       pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames","parameters"))); nprotect++;
       
       // address of native routine
-      ff = (pomp_rprior *) R_ExternalPtrAddr(fn);
+      *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
       R_CheckUserInterrupt();	// check for user interrupt
 

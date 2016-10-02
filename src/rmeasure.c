@@ -109,7 +109,7 @@ SEXP do_rmeasure (SEXP object, SEXP x, SEXP times, SEXP params, SEXP gnsi)
     cidx = INTEGER(PROTECT(name_index(Cnames,pompfun,"covarnames","covariates"))); nprotect++;
 
     // address of native routine
-    ff = (pomp_measure_model_simulator *) R_ExternalPtrAddr(fn);
+    *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
     break;
 

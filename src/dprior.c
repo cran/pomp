@@ -85,7 +85,7 @@ SEXP do_dprior (SEXP object, SEXP params, SEXP log, SEXP gnsi)
       pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames","parameters"))); nprotect++;
       
       // address of native routine
-      ff = (pomp_dprior *) R_ExternalPtrAddr(fn);
+      *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
       give_log = *(INTEGER(AS_INTEGER(log)));
 
