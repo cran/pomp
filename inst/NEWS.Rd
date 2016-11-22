@@ -1,5 +1,19 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 1.10}{
+  \itemize{
+    \item New \code{logLik} method for \code{pmcmcList} objects.
+    \item The deprecated option to supply a matrix or numeric vector as the \code{data} argument to \code{pomp} have been removed and an error is now generated.
+    \code{data} must be provided as either a data frame or an object of class \code{pomp}.
+    See \code{?pomp} for details.
+    \item The deprecated \code{skeleton.type} and \code{skelmap.delta.t} arguments to \code{pomp} have been removed.
+    Using these arguments will now generate an error message.
+    The correct method of specifiying the deterministic skeleton is now explained in the help pages (\code{?pomp}).
+    \item Source code fixes to eliminate warnings during compilation.
+    \item Improved test suite.
+    \item Minor documentation correction.
+  }
+}
 \section{Changes in \pkg{pomp} version 1.9}{
   \itemize{
     \item During particle filtering, when non-finite \code{dmeasure} values are generated, an error is generated and the offending parameters, states, data, and time are reported.

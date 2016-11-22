@@ -47,13 +47,13 @@ SEXP pomp_fun_handler (SEXP pfun, SEXP gnsi, pompfunmode *mode)
 
       case regNative:
 	{
-	  // Before svn version 71180, R_MakeExternalPtrFn is not part of the R API.
+	  // Before version 3.4.0, R_MakeExternalPtrFn is not part of the R API.
 	  // Therefore, we must use some trickery to avoid the ISO C proscription of
 	  //     (void *) <-> (function *) conversion.
 	  const char *fname, *pkg;
 	  fname = (const char *) CHARACTER_DATA(STRING_ELT(nf,0));
 	  pkg = (const char *) CHARACTER_DATA(STRING_ELT(pack,0));
-#if (R_SVN_REVISION < 71180)
+#if (R_VERSION < 197632) // before 3.4.0
 	  // This is cadged from 'R_MakeExternalPtrFn'.
 	  union {void *p; DL_FUNC fn;} trick;
 	  trick.fn = R_GetCCallable(pkg,fname);

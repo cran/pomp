@@ -121,7 +121,7 @@ SEXP euler_model_simulator (SEXP func,
   {
     int first = 1;
     int use_names = 0;
-    int *posn;
+    int *posn = 0;
     double *time = REAL(times);
     double *xs = REAL(X);
     double *xt = REAL(X)+nvars*nreps;
@@ -262,7 +262,7 @@ SEXP euler_model_density (SEXP func,
 			  SEXP tcovar, SEXP covar, SEXP log, SEXP args, SEXP gnsi) 
 {
   int nprotect = 0;
-  int mode;
+  pompfunmode mode = undef;
   int give_log;
   int nvars, npars, nreps, ntimes, ncovars, covlen;
   pomp_onestep_pdf *ff = NULL;
