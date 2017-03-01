@@ -9,7 +9,7 @@ pompCBuilder <- function (name = NULL, dir = NULL,
 
     if (!is.null(name)) name <- cleanForC(name)
     id <- randomName(4)
-    
+
     if (missing(globals)) globals <- character(0)
     if (is(globals,"Csnippet")) globals <- globals@text
 
@@ -163,35 +163,39 @@ pompCBuilder <- function (name = NULL, dir = NULL,
 
     csrc <- paste(csrc,collapse="\n")
 
-    if (is.null(name)) 
+    if (is.null(name))
         name <- paste0("pomp_",digest(csrc,serialize=FALSE))
 
     csrc <- render(csrc,name=name)
 
     tryCatch(
-        pompCompile(fname=name,direc=pompSrcDir(dir),src=csrc,shlib.args=shlib.args,verbose=verbose),
+        pompCompile(fname=name,direc=pompSrcDir(dir,verbose=verbose),
+                    src=csrc,shlib.args=shlib.args,verbose=verbose),
         error = function (e) {
             stop("in ",sQuote("pompCBuilder"),": compilation error: ",conditionMessage(e),call.=FALSE)
         }
     )
-    
+
     invisible(list(name=name,dir=dir,src=csrc))
 }
 
-pompSrcDir <- function (dir) {
+pompSrcDir <- function (dir, verbose) {
     if (is.null(dir)) {
         pid <- Sys.getpid()
         dir <- file.path(tempdir(),pid)
     }
-    tryCatch(
-    {
-        dir.create(dir,recursive=TRUE,showWarnings=FALSE,mode="0700")
-        stopifnot(dir.exists(dir))
-    },
-    error = function (e) {
-        stop("cannot create cache directory ",sQuote(dir),call.=FALSE)
+    if (!dir.exists(dir)) {
+      if (verbose) cat("creating Csnippet directory ",sQuote(dir),"\n")
+      tryCatch(
+        {
+          dir.create(dir,recursive=TRUE,showWarnings=FALSE,mode="0700")
+          stopifnot(dir.exists(dir))
+        },
+        error = function (e) {
+          stop("cannot create cache directory ",sQuote(dir),call.=FALSE)
+        }
+      )
     }
-    )
     dir
 }
 
@@ -203,8 +207,13 @@ pompCompile <- function (fname, direc, src, shlib.args = NULL, verbose) {
 
     modelfile <- paste0(stem,".c")
 
-    cat(src,file=modelfile)
-    if (verbose) cat("model codes written to",sQuote(modelfile))
+    tryCatch(
+      cat(src,file=modelfile),
+      error = function (e) {
+        stop("cannot write file ",sQuote(modelfile),call.=FALSE)   #nocov
+      }
+    )
+    if (verbose) cat("model codes written to",sQuote(modelfile),"\n")
 
     cflags <- paste0("PKG_CFLAGS=\"",
                      Sys.getenv("PKG_CFLAGS"),
@@ -214,17 +223,24 @@ pompCompile <- function (fname, direc, src, shlib.args = NULL, verbose) {
 
     solib <- paste0(stem,.Platform$dynlib.ext)
     if (verbose) cat("compiling",sQuote(solib),"\n")
-    rv <- system2(
-        command=R.home("bin/R"),
-        args=c("CMD","SHLIB","-o",solib,modelfile,shlib.args),
-        env=cflags,
-        stdout=if (verbose | .Platform$OS.type=="windows") "" else NULL
+    tryCatch(
+      {
+        rv <- system2(
+          command=R.home("bin/R"),
+          args=c("CMD","SHLIB","-c","-o",solib,modelfile,shlib.args),
+          env=cflags,
+          stdout=if (verbose | .Platform$OS.type=="windows") "" else NULL
+        )
+      },
+      error = function (e) {
+        stop("error compiling Csnippets: ",conditionMessage(e),call.=FALSE) #nocov
+      }
     )
     if (rv!=0)
-        stop("cannot compile shared-object library ",sQuote(solib),call.=FALSE)
+        stop("cannot compile shared-object library ",sQuote(solib),": status = ",rv,call.=FALSE)
     else if (verbose)
         cat("link to shared-object library",sQuote(solib),"\n")
-    
+
     invisible(solib)
 }
 

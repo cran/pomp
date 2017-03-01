@@ -1,5 +1,16 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 1.11}{
+  \itemize{
+    \item Callable routines are now registered.
+    \item The functions \code{bake}, \code{stew}, and \code{freeze} now preserve information about the system time used in computation as an attribute of the returned object.
+    In addition, these functions store information about the RNG settings.
+    \item Some documentation improvements, courtesy of Sebastian Funk.
+    \item Various documentation improvements.
+    \item More verbosity is provided with \code{verbose=TRUE}.
+    \item Better handling of \code{pomp}'s \code{times} argument.
+  }
+}
 \section{Changes in \pkg{pomp} version 1.10}{
   \itemize{
     \item New \code{logLik} method for \code{pmcmcList} objects.

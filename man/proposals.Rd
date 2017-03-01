@@ -26,14 +26,22 @@
   \item{scale.start, scale.cooling, shape.start, target, max.scaling}{
     parameters to control the proposal adaptation algorithm.
     Beginning with MCMC iteration \code{scale.start}, the scale of the proposal covariance matrix will be adjusted in an effort to match the \code{target} acceptance ratio.
-    The parameters \code{scale.cooling} and \code{max.scaling} adjust the scale adaptation.
-    Beginning with iteration \code{shape.start}, a scaled empirical covariance matrix will be used for the proposals.
+    This initial scale adjustment is \dQuote{cooled}, i.e., the adjustment diminishes as the chain moves along.
+    The parameter \code{scale.cooling} specifies the cooling schedule:
+    at n iterations after \code{scale.start}, the current scaling factor is multiplied with \code{scale.cooling^n}.
+    The maximum scaling factor allowed at any one iteration is \code{max.scaling}.
+    After \code{shape.start} accepted proposals have accumulated, a scaled empirical covariance matrix will be used for the proposals, following Roberts and Rosenthal (2009).
   }
 }
 \value{
-  Each of these constructs a function suitable for use as the \code{proposal} argument of \code{pmcmc} or \code{abc}.
+  Each of these calls constructs a function suitable for use as the \code{proposal} argument of \code{pmcmc} or \code{abc}.
   Given a parameter vector, each such function returns a single draw from the corresponding proposal distribution.
 }
 \seealso{\code{\link{pmcmc}}, \code{\link{abc}}}
-\author{Aaron A. King}
+\references{
+  Gareth O. Roberts and Jeffrey S. Rosenthal.
+  Examples of Adaptive MCMC.
+  J. Comput. Graph. Stat., 18:349--367, 2009.
+}
+\author{Aaron A. King, Sebastian Funk}
 \keyword{programming}

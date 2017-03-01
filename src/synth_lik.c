@@ -10,7 +10,7 @@
 // with additional pre-conditioning for numerical stability
 // translated into C from R code by Simon N. Wood
 
-void robust_synth_loglik (double *y, int *dim, double *ydat, double *loglik) {
+static void robust_synth_loglik (double *y, int *dim, double *ydat, double *loglik) {
   // 'ydat' is destroyed
   // 'y' is preserved
   int nrow = dim[0];
@@ -103,7 +103,6 @@ void robust_synth_loglik (double *y, int *dim, double *ydat, double *loglik) {
   *loglik = -0.5*rss-half_log_det;
 }
 
-
 SEXP synth_loglik (SEXP ysim, SEXP ydat) {
   int nprotect = 0;
   SEXP loglik, dim, y;
@@ -118,4 +117,3 @@ SEXP synth_loglik (SEXP ysim, SEXP ydat) {
   UNPROTECT(nprotect);
   return loglik;
 }
-
