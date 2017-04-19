@@ -3,8 +3,6 @@
 #include "pomp_internal.h"
 #include <Rdefines.h>
 
-// NB: this function modifies 'params' in-place, violating R's injunction
-// against call by reference.  Beware!!
 SEXP randwalk_perturbation (SEXP params, SEXP rw_sd)
 {
   int nprotect = 0;
@@ -33,7 +31,7 @@ SEXP randwalk_perturbation (SEXP params, SEXP rw_sd)
 
   for (j = 0, xrw = rw; j < nrw; j++, pidx++, xrw++) {
     for (k = 0, xs = xp+(*pidx); k < nreps; k++, xs += npars) {
-      *xs += rnorm(0,*xrw); 
+      *xs += *xrw * norm_rand();
     }
   }
 
