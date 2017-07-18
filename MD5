@@ -1,4 +1,4 @@
-e9d66753e0623f0b97a98c65489fd894 *DESCRIPTION
+a66342850ff44dff3f8a7cd24ba16766 *DESCRIPTION
 98614b0babce145a947e8eacf1f12c8f *NAMESPACE
 7d8ac54ea547777f454ffca21189460f *R/aaa.R
 2fceb481c417204856b09a144e55ed17 *R/abc.R
@@ -36,7 +36,7 @@ f6a4731c9922c175f79d3302b6a47aaa *R/parmat.R
 7742b4a3ab5e6201fabfb91c23d8d939 *R/pfilter.R
 2c425b2f48f1ada0c84b6a8e950486e2 *R/pfilter_methods.R
 6c712ed7042728a65168784802e1bd5c *R/plot_pomp.R
-8fd8d2516522b81d26a71d772d369a7f *R/plugins.R
+e64989174ebe99b7ab45981790e2a6c0 *R/plugins.R
 38f29206850e352df040770bcb9376d0 *R/pmcmc.R
 388ec16e3ffc336aab6e23301e76ee17 *R/pmcmc_methods.R
 4b2837486b73263044618586ca97e8f0 *R/pomp.R
@@ -52,7 +52,7 @@ d6fc5ce9a73ca8b23f4e9b1d334a90a5 *R/rmeasure_pomp.R
 de09d8d6782aaba95383c82ff3169ccb *R/rprocess_pomp.R
 8adbdd40cd86249185e56fcb9eb8315e *R/safecall.R
 51eaa9030cdbb0ac4de30c24d15ee1fe *R/sannbox.R
-c0a866aa1156f87e248dec46279a167a *R/simulate_pomp.R
+ccde546ca26b111881bace554677077b *R/simulate_pomp.R
 6705920fb9d53657ec787de781f6a831 *R/skeleton_pomp.R
 7fee39340bacf0e24bdd06708021c68b *R/slice_design.R
 ecfbde8b6612a55b5b737d7cc2a8b4c6 *R/sobol.R
@@ -60,7 +60,7 @@ a2cb06b5dd5fddfdcdf8a2599b5a6234 *R/spect.R
 7971a5ebe6b462f1c6137380e61df03d *R/spect_match.R
 457d5e1faefbb247673ba42f041fc8fc *R/traj_match.R
 a93c082cf90b62a173fcd2ee4963ebed *R/trajectory_pomp.R
-672825d8b4ade244367b433635c250b2 *build/partial.rdb
+8b328350a70f6730bcda2fb6198b242b *build/partial.rdb
 0148f1ceeac6c5f72081a468a6b0b8ee *data/LondonYorke.rda
 4c7553c4de024f8a73a9940b186cd99b *data/ewcitmeas.rda
 5fe453ab7eb7f45aaec826450b85c751 *data/ewmeas.rda
@@ -71,8 +71,8 @@ c63ec645a0dc5f8712fbfe01084ad1cb *demo/logistic.R
 806e8c68983d666a2aa362a1fd7fcf14 *demo/sir.R
 5ec126ec45c5a54a67b79da638297833 *inst/CITATION
 37483d9025577e53130dc59df034c53f *inst/GPL
-e4230feaf6780a7d06759b4b213da86a *inst/NEWS
-1b86e78cc122fa3d26f0a66c1dd707ab *inst/NEWS.Rd
+c97d8df72993a7156ce4642cfc738e50 *inst/NEWS
+053acb33c9f91282465278177a53ebb0 *inst/NEWS.Rd
 c87f669c0fac7551905fd03bc1c970ae *inst/doc/index.html
 59b1a54297507f9008263ae0cb418be3 *inst/examples/bbs.R
 255a7347df38adfcf9951a7f6cc8005f *inst/examples/blowflies.R
@@ -81,7 +81,7 @@ c9828f208fad49ab9acb9d462800adab *inst/examples/dacca.R
 af4618c037aed2e2f3243b32880f227e *inst/examples/gillespie.sir.R
 60ba9c1360df1a63eedb823a242444b1 *inst/examples/gompertz.R
 9d094cf0628e565ea9d058e66ad63063 *inst/examples/ou2.R
-df6fe9211af8c215ebc06e64dbb1ca8e *inst/examples/ricker.R
+c2acefabf9309393be2586608a04bae6 *inst/examples/ricker.R
 ca878dff891985f6ca8061bcf7fb3656 *inst/examples/rw2.R
 6e6390029e73253865c25fd82b75bc5d *inst/include/pomp.h
 25cefbb8255be8592270fbcaa2565e61 *man/abc.Rd
@@ -97,7 +97,7 @@ e3516487ef181d65e676894929a9821f *man/example.Rd
 1298eb3b371d77d573dfd432bacb2594 *man/gompertz.Rd
 1556730d056ee7e8d6fee07599591622 *man/kalman.Rd
 7e38911fb09ebace7717655e249bce04 *man/logmeanexp.Rd
-213ab08edc1c320c5f947e87a02a4dc3 *man/lowlevel.Rd
+152c4baacd1dd48c2357ca68412f3e79 *man/lowlevel.Rd
 8ff8d2d3925b81703849382d24e5c07f *man/measles.Rd
 2af9d769dfd18b592ba5e9f1b26ffb67 *man/mif.Rd
 799c84b5397f766ad8dc3c7fdc101a1d *man/mif2.Rd
@@ -112,7 +112,7 @@ f8d9c4ff79173054b75d76b6a40973e7 *man/pomp.Rd
 90efd8c0edc28279e0027e3a742c50f5 *man/pomp_methods.Rd
 3e429b3a946fde7871023b96cc8ac608 *man/probe.Rd
 beecb5088cafe2d4c318216830950aa2 *man/proposals.Rd
-86cbcec2aa304fb33148947e5c3f13c4 *man/ricker.Rd
+3dd5f9036e036af5aaedfc98fc3b7da1 *man/ricker.Rd
 1539d1bc4226a799a83217aa581cb676 *man/rw2.Rd
 20d1d3d87216b1678a5ce9c034ad8fd9 *man/sannbox.Rd
 74abc53264d3b2154d1f3325ad354b1e *man/simulate_pomp.Rd
@@ -145,7 +145,7 @@ d2e622810aaf84471587c20ccb9c88f8 *src/probe.c
 f3377bab720bc66992de0ff54a589ba9 *src/probe_marginal.c
 2f3fa99c841f11417e87dbf1e7ba223f *src/probe_nlar.c
 dd7f0593307f02d22a2bb3b8c5c1bf91 *src/resample.c
-a6b43a7525e326e1a5117e4cdd8c0e23 *src/ricker.c
+7a1e6773f46a349186cfc7143e6d0642 *src/ricker.c
 c63e86a9c33cc5a3e978fe4c1dd6703b *src/rmeasure.c
 ac9386dcca4fca8f7af4c87270bb9914 *src/rprior.c
 9e39e2fb17c49892d25acb64ff645c23 *src/rprocess.c
@@ -154,7 +154,7 @@ ac9386dcca4fca8f7af4c87270bb9914 *src/rprior.c
 0b8022297ce055de483c1c4c6fc55002 *src/skeleton.c
 f59dd0059cdd443a58c43bf2755f66e5 *src/soboldata.h
 d2ed11484e058e34104d3214d0980c7e *src/sobolseq.c
-844de5592b1744f50c781bf67045b784 *src/ssa.c
+ff1c809b6dc82ba18165498a3eb63af4 *src/ssa.c
 b95c4c15a17fe2ac8228c2442de5a6c9 *src/synth_lik.c
 0007460b4e48779fa810a98c9b59eec3 *src/trajectory.c
 c94527b269480b16ecf1516c8b684839 *src/userdata.c

@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 1.12
-Date: 2017-04-19
+Version: 1.13
+Date: 2017-07-17
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -43,7 +43,7 @@ Collate: aaa.R authors.R bake.R generics.R eulermultinom.R csnippet.R
         nlf_objfun.R nlf.R probe.R probe_match.R basic_probes.R spect.R
         spect_match.R abc.R abc_methods.R covmat.R example.R
 NeedsCompilation: yes
-Packaged: 2017-04-19 12:56:21 UTC; kingaa
+Packaged: 2017-07-18 10:57:25 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -59,4 +59,4 @@ Author: Aaron A. King [aut, cre],
   Steven G. Johnson [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2017-04-19 13:46:40 UTC
+Date/Publication: 2017-07-18 11:46:46 UTC

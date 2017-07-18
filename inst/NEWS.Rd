@@ -1,5 +1,14 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 1.13}{
+  \itemize{
+    \item Fix bug found by Eamon O'Dea in \code{gillespie.sim}.
+    \item Fix bug in \code{onestep.sim}.
+    \item The Ricker example has a new parameter, \eqn{c}, which scales the (unobserved) population size.
+    By default, \eqn{c=1}, so that the behavior is as before.
+    \item Improved error trapping.
+  }
+}
 \section{Changes in \pkg{pomp} version 1.12}{
   \itemize{
     \item Some changes have been made to the use of random numbers in some codes (the stochastic simulations in \code{gillespie.sim} and the resampling in the particle-filtering codes).
