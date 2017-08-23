@@ -1,5 +1,37 @@
 _N_e_w_s _f_o_r _p_a_c_k_a_g_e '_p_o_m_p'
 
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._1_4:
+
+        • Eamon O'Dea pointed out that the bug in ‘gillespie.sim’,
+          addressed by version 1.12.3, was not completely fixed.  This
+          problem has now been resolved.  In addition, covariates are
+          now guaranteed to be evaluated at least once per observation
+          interval.
+
+        • The new argument ‘hmax’ to ‘gillespie.sim’ allows the user to
+          specify the maximum step size that will be taken before
+          covariates are evaluated.
+
+        • The K-leap method has been removed.  Its accuracy is low on
+          test problems and it is difficult to make it compatible with
+          the pomp paradigm.  In particular, it does not readily
+          accomodate time-varying covariates in a sensible way, nor
+          does it lend itself to simulations at pre-specified times.
+
+        • ‘bspline.basis’ and ‘periodic.bspline.basis’ now take an
+          optional non-negative integer argument ‘deriv’.  When ‘deriv
+          > 0’, the order-‘deriv’ derivative of each basis function is
+          returned.
+
+        • A new function, ‘periodic_bspline_basis_eval_deriv’, has been
+          added to the C API.  This function gives access, at the C
+          level, to evaluation of the derivatives of periodic
+          B-splines.
+
+        • Upgrade license to GPL version 3.
+
+        • Fix buffer-flow problem identified by ‘valgrind’.
+
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._1_3:
 
         • Fix bug found by Eamon O'Dea in ‘gillespie.sim’.

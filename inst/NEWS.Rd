@@ -1,5 +1,22 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 1.14}{
+  \itemize{
+    \item Eamon O'Dea pointed out that the bug in \code{gillespie.sim}, addressed by version 1.12.3, was not completely fixed.
+    This problem has now been resolved.
+    In addition, covariates are now guaranteed to be evaluated at least once per observation interval.
+    \item The new argument \code{hmax} to \code{gillespie.sim} allows the user to specify the maximum step size that will be taken before covariates are evaluated.
+    \item The K-leap method has been removed.
+    Its accuracy is low on test problems and it is difficult to make it compatible with the pomp paradigm.
+    In particular, it does not readily accomodate time-varying covariates in a sensible way, nor does it lend itself to simulations at pre-specified times.
+    \item \code{bspline.basis} and \code{periodic.bspline.basis} now take an optional non-negative integer argument \code{deriv}.
+    When \code{deriv > 0}, the order-\code{deriv} derivative of each basis function is returned.
+    \item A new function, \code{periodic_bspline_basis_eval_deriv}, has been added to the C API.
+    This function gives access, at the C level, to evaluation of the derivatives of periodic B-splines.
+    \item Upgrade license to GPL version 3.
+    \item Fix buffer-flow problem identified by \code{valgrind}.
+  }
+}
 \section{Changes in \pkg{pomp} version 1.13}{
   \itemize{
     \item Fix bug found by Eamon O'Dea in \code{gillespie.sim}.

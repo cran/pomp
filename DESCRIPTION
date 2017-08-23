@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 1.13
-Date: 2017-07-17
+Version: 1.14
+Date: 2017-08-25
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -26,7 +26,7 @@ Imports: stats, graphics, digest, mvtnorm, deSolve, coda, subplex,
 Suggests: magrittr, plyr, reshape2, ggplot2, knitr
 SystemRequirements: For Windows users, Rtools (see
         http://cran.r-project.org/bin/windows/Rtools/).
-License: GPL (>= 2)
+License: GPL-3
 LazyData: true
 Contact: kingaa at umich dot edu
 BugReports: http://github.com/kingaa/pomp/issues
@@ -43,7 +43,7 @@ Collate: aaa.R authors.R bake.R generics.R eulermultinom.R csnippet.R
         nlf_objfun.R nlf.R probe.R probe_match.R basic_probes.R spect.R
         spect_match.R abc.R abc_methods.R covmat.R example.R
 NeedsCompilation: yes
-Packaged: 2017-07-18 10:57:25 UTC; kingaa
+Packaged: 2017-08-23 12:18:09 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -59,4 +59,4 @@ Author: Aaron A. King [aut, cre],
   Steven G. Johnson [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2017-07-18 11:46:46 UTC
+Date/Publication: 2017-08-23 12:31:16 UTC
