@@ -1,5 +1,13 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 1.15}{
+  \itemize{
+    \item A new \code{dmultinom} function is provided in \sQuote{pomp.h}.
+    This provides the probability distribution function for the multinomial distribution.
+    \item Improved tests.
+    \item Fixed bugs emerging in R-devel due to refactoring of underlying \R source code.
+  }
+}
 \section{Changes in \pkg{pomp} version 1.14}{
   \itemize{
     \item Eamon O'Dea pointed out that the bug in \code{gillespie.sim}, addressed by version 1.12.3, was not completely fixed.
