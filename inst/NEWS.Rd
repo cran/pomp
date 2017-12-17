@@ -1,5 +1,21 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 1.16}{
+  \itemize{
+    \item The bug reported in issue #57 has been fixed.
+    \item A bug arising when building pomp objects with Csnippets in certain Windows configurations has been fixed.
+    \item Issue #56, in which covariate names are discarded when coercing a pomp object to a data frame, has been fixed.
+    Thanks to Eamon O'Dea for reporting this bug.
+    \item More informative error messages are given when \code{bake} or \code{freeze} return \code{NULL}.
+    In such a case, these functions now generate a warning and return a character-string message, with attributes.
+    \item Improve documentation of \code{traj.match}, in response to Issue #57.
+    \item A new facility, \code{gillespie.hl.sim}, allows implementation of Gillespie's algorithm for exact stochastic simulation of continuous-time Markov processes via a streamlined C snippet interface.
+    \item The old facility for Gillespie simulations, \code{gillespie.sim}, now accepts C snippets for faster calculation of event rates.
+    \item The old \code{skeleton.type} and \code{skelmap.delta.t} arguments of the \code{pomp} constructor, which have generated error messages since version 1.9.2, have been done away with completely.
+    \item Eamon O'Dea identified a bug (Issue #54) occurring when \code{pomp} is called with a single-row data frame.
+    This has been fixed using his contributed patch.
+  }
+}
 \section{Changes in \pkg{pomp} version 1.15}{
   \itemize{
     \item A new \code{dmultinom} function is provided in \sQuote{pomp.h}.

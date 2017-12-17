@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 1.15
-Date: 2017-09-19
+Version: 1.16
+Date: 2017-12-17
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -16,20 +16,21 @@ Authors@R: c(person(given=c("Aaron","A."),family="King",
 	  person(given=c("Helen"),family="Wearing",role=c("ctb")),
 	  person(given=c("Simon","N."),family="Wood",role=c("ctb")),
 	  person(given="Sebastian",family="Funk",role=c("ctb")),
-	  person(given=c("Steven","G."),family="Johnson",role=c("ctb"))
+	  person(given=c("Steven","G."),family="Johnson",role=c("ctb")),
+	  person(given=c("Eamon"),family="O'Dea",role=c("ctb"))
 	  )
-URL: http://kingaa.github.io/pomp
+URL: https://kingaa.github.io/pomp/
 Description: Tools for working with partially observed Markov process (POMP) models (also known as stochastic dynamical systems, hidden Markov models, and nonlinear, non-Gaussian, state-space models).  The package provides facilities for implementing POMP models, simulating them, and fitting them to time series data by a variety of frequentist and Bayesian methods.  It is also a versatile platform for implementation of inference methods for general POMP models.
 Depends: R(>= 3.1.2), methods
 Imports: stats, graphics, digest, mvtnorm, deSolve, coda, subplex,
         nloptr
 Suggests: magrittr, plyr, reshape2, ggplot2, knitr
 SystemRequirements: For Windows users, Rtools (see
-        http://cran.r-project.org/bin/windows/Rtools/).
+        https://cran.r-project.org/bin/windows/Rtools/).
 License: GPL-3
 LazyData: true
 Contact: kingaa at umich dot edu
-BugReports: http://github.com/kingaa/pomp/issues
+BugReports: https://github.com/kingaa/pomp/issues/
 Collate: aaa.R authors.R bake.R generics.R eulermultinom.R csnippet.R
         safecall.R pomp_fun.R plugins.R builder.R parmat.R logmeanexp.R
         slice_design.R profile_design.R sobol.R bsplines.R sannbox.R
@@ -43,7 +44,7 @@ Collate: aaa.R authors.R bake.R generics.R eulermultinom.R csnippet.R
         nlf_objfun.R nlf.R probe.R probe_match.R basic_probes.R spect.R
         spect_match.R abc.R abc_methods.R covmat.R example.R
 NeedsCompilation: yes
-Packaged: 2017-09-20 00:59:07 UTC; kingaa
+Packaged: 2017-12-17 14:37:40 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -56,7 +57,8 @@ Author: Aaron A. King [aut, cre],
   Helen Wearing [ctb],
   Simon N. Wood [ctb],
   Sebastian Funk [ctb],
-  Steven G. Johnson [ctb]
+  Steven G. Johnson [ctb],
+  Eamon O'Dea [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2017-09-20 03:24:11 UTC
+Date/Publication: 2017-12-17 14:53:10 UTC
