@@ -8,7 +8,8 @@ setClass(
     contains="pomp",
     slots=c(
         kernel.width="numeric",
-        transform="function",
+        transform.data="function",
+        vars="character",
         freq="numeric",
         datspec="array",
         simspec="array",
@@ -58,7 +59,7 @@ reuman.kernel <- function (kernel.width) {
     ker
 }
 
-compute.spect.data <- function (object, vars, transform, detrend, ker) {
+compute.spect.data <- function (object, vars, transform.data, detrend, ker) {
     ep <- paste0("in ",sQuote("spect"),": ")
     dat <- obs(object,vars)
     if (any(is.na(dat)))
@@ -71,7 +72,7 @@ compute.spect.data <- function (object, vars, transform, detrend, ker) {
     for (j in seq_along(vars)) {
         sp <- spec.pgram(
             pomp.detrend(
-                transform(dat[j,]),
+                transform.data(dat[j,]),
                 type=detrend
             ),
             spans=ker,
@@ -93,7 +94,7 @@ compute.spect.data <- function (object, vars, transform, detrend, ker) {
     list(freq=freq,spec=datspec)
 }
 
-compute.spect.sim <- function (object, params, vars, nsim, seed, transform, detrend, ker) {
+compute.spect.sim <- function (object, params, vars, nsim, seed, transform.data, detrend, ker) {
     ep <- paste0("in ",sQuote("spect"),": ")
     sims <- tryCatch(
         simulate(
@@ -117,7 +118,7 @@ compute.spect.sim <- function (object, params, vars, nsim, seed, transform, detr
         for (k in seq_len(nsim)) {
             sp <- spec.pgram(
                 pomp.detrend(
-                    transform(sims[j,k,]),
+                    transform.data(sims[j,k,]),
                     type=detrend
                 ),
                 spans=ker,
@@ -143,22 +144,19 @@ setMethod(
     "spect",
     signature(object="pomp"),
     function (object, params, vars, kernel.width, nsim, seed = NULL,
-              transform = identity,
+              transform.data = identity,
               detrend = c("none","mean","linear","quadratic"),
               ...) {
 
         ep <- paste0("in ",sQuote("spect"),": ")
-        
-        pompLoad(object)
-        
-        if (missing(params)) params <- coef(object)
 
-        if (missing(vars))
-            vars <- rownames(object@data)
-        
+        pompLoad(object)
+
+        if (missing(params)) params <- coef(object)
+        if (missing(vars)) vars <- rownames(object@data)
         if (missing(kernel.width))
             stop(ep,sQuote("kernel.width")," must be specified",call.=FALSE)
-        if (missing(nsim)||(nsim<1))
+        if (missing(nsim) || !is.finite(nsim) || (nsim<1))
             stop(ep,sQuote("nsim")," must be specified as a positive integer",call.=FALSE)
 
         detrend <- match.arg(detrend)
@@ -167,7 +165,7 @@ setMethod(
         ds <- compute.spect.data(
             object,
             vars=vars,
-            transform=transform,
+            transform.data=transform.data,
             detrend=detrend,
             ker=ker
         )
@@ -179,7 +177,7 @@ setMethod(
             vars=vars,
             nsim=nsim,
             seed=seed,
-            transform=transform,
+            transform.data=transform.data,
             detrend=detrend,
             ker=ker
         )
@@ -207,12 +205,13 @@ setMethod(
         coef(object) <- params
 
         pompUnload(object)
-        
+
         new(
             "spect.pomp",
             object,
             kernel.width=kernel.width,
-            transform=transform,
+            transform.data=transform.data,
+            vars=vars,
             detrend=detrend,
             freq=freq,
             datspec=datspec,
@@ -225,12 +224,12 @@ setMethod(
 setMethod(
     "spect",
     signature(object="spect.pomp"),
-    function (object, params, vars, kernel.width, nsim, seed = NULL, transform, detrend, ...) {
+    function (object, params, vars, kernel.width, nsim, seed = NULL, transform.data, detrend, ...) {
         if (missing(params)) params <- coef(object)
-        if (missing(vars)) vars <- rownames(object@datspec)
+        if (missing(vars)) vars <- colnames(object@datspec)
         if (missing(kernel.width)) kernel.width <- object@kernel.width
         if (missing(nsim)) nsim <- nrow(object@simspec)
-        if (missing(transform)) transform <- object@transform
+        if (missing(transform.data)) transform.data <- object@transform.data
         if (missing(detrend)) detrend <- object@detrend
         spect(
             as(object,"pomp"),
@@ -239,7 +238,7 @@ setMethod(
             kernel.width=kernel.width,
             nsim=nsim,
             seed=seed,
-            transform=transform,
+            transform.data=transform.data,
             detrend=detrend,
             ...
         )
@@ -258,7 +257,9 @@ setMethod(
         ep <- paste0("in ",sQuote("plot-spect.pomp"),": ")
         spomp <- x
         nquants <- length(quantiles)
-        
+
+        if (!missing(y)) warning(ep,sQuote("y")," is ignored",call.=FALSE)
+
         if (is.list(quantile.styles)) {
             for (i in c("lwd", "lty", "col")) {
                 if (is.null(quantile.styles[[i]]))
@@ -275,7 +276,7 @@ setMethod(
         } else {
             stop(ep,sQuote("quantile.styles")," must be a list",call.=FALSE)
         }
-        
+
         if (plot.data) {
             nreps <- ncol(spomp@datspec)
             if (is.list(data.styles)) {
@@ -340,7 +341,7 @@ setMethod(
                 lines(
                     x=spomp@freq,
                     y=spectraquants[,j],
-                    lwd=quantile.styles$lwd[j], 
+                    lwd=quantile.styles$lwd[j],
                     lty=quantile.styles$lty[j],
                     col=quantile.styles$col[j]
                 )
@@ -349,7 +350,7 @@ setMethod(
                 lines(
                     x=spomp@freq,
                     y=spomp@datspec[,i],
-                    lty=data.styles$lty[i], 
+                    lty=data.styles$lty[i],
                     lwd=data.styles$lwd[i],
                     col=data.styles$col[i]
                 )

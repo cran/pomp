@@ -10,7 +10,6 @@ pompCBuilder <- function (name = NULL, dir = NULL,
   if (!is.null(name)) name <- cleanForC(name)
   id <- randomName(4)
 
-  if (missing(globals)) globals <- character(0)
   if (is(globals,"Csnippet")) globals <- globals@text
 
   statenames <- cleanForC(statenames)
@@ -193,7 +192,7 @@ pompSrcDir <- function (dir, verbose) {
     dir <- file.path(tempdir(),pid)
   }
   if (!dir.exists(dir)) {
-    if (verbose) cat("creating Csnippet directory ",sQuote(dir),"\n")
+    if (verbose) cat("creating C snippet directory ",sQuote(dir),"\n")
     tryCatch(
       {
         dir.create(dir,recursive=TRUE,showWarnings=FALSE,mode="0700")
@@ -223,8 +222,8 @@ pompCompile <- function (fname, direc, src, shlib.args = NULL, verbose) {
   )
   if (verbose) cat("model codes written to",sQuote(modelfile),"\n")
 
-  cflags <- Sys.getenv("PKG_CFLAGS")
-  cflags <- paste0("PKG_CFLAGS=\"",
+  cflags <- Sys.getenv("PKG_CPPFLAGS")
+  cflags <- paste0("PKG_CPPFLAGS=\"",
     if (nchar(cflags)>0) paste0(cflags," ") else "",
     "-I",system.file("include",package="pomp"),"\"")
 
@@ -238,17 +237,22 @@ pompCompile <- function (fname, direc, src, shlib.args = NULL, verbose) {
         command=R.home("bin/R"),
         args=c("CMD","SHLIB","-c","-o",solib,modelfile,shlib.args),
         env=cflags,
-        stdout=if (verbose | .Platform$OS.type=="windows") "" else NULL
+        wait=TRUE,
+        stdout=TRUE,
+        stderr=TRUE
       )
     },
     error = function (e) {
-      stop("error compiling Csnippets: ",conditionMessage(e),call.=FALSE) #nocov
+      stop("error compiling C snippets: ",conditionMessage(e),call.=FALSE) #nocov
     }
   )
-  if (rv!=0)
-    stop("cannot compile shared-object library ",sQuote(solib),": status = ",rv,call.=FALSE)
-  else if (verbose)
-    cat("link to shared-object library",sQuote(solib),"\n")
+  stat <- as.integer(attr(rv,"status"))
+  if (length(stat) > 0 && stat != 0L) {
+    stop("cannot compile shared-object library ",sQuote(solib),": status = ",stat,
+      "\ncompiler messages:\n",paste(rv,collapse="\n"),call.=FALSE)
+  } else if (verbose) {
+    cat("compiler messages:",rv,sep="\n")
+  }
 
   invisible(solib)
 }
@@ -280,11 +284,11 @@ cleanForC <- function (text) {
 }
 
 render <- function (template, ...) {
-  vars=list(...)
+  vars <- list(...)
   if (length(vars)==0) return(template)
   n <- sapply(vars,length)
   if (!all((n==max(n))|(n==1)))
-    stop("in ",sQuote("render"),"incommensurate lengths of replacements",call.=FALSE)
+    stop("in ",sQuote("render")," incommensurate lengths of replacements",call.=FALSE)
   short <- which(n==1)
   n <- max(n)
   for (i in short) vars[[i]] <- rep(vars[[i]],n)
