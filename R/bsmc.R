@@ -28,16 +28,15 @@ setClass(
 )
 
 bsmc.internal <- function (object, params, Np, est,
-  smooth = 0.1,
-  ntries = 1,
-  tol = 1e-17,
-  lower = -Inf, upper = Inf,
-  seed = NULL,
-  verbose = getOption("verbose"),
-  max.fail = 0,
-  transform = FALSE,
-  .getnativesymbolinfo = TRUE,
-  ...) {
+                           smooth = 0.1,
+                           ntries = 1,
+                           tol = 1e-17,
+                           lower = -Inf, upper = Inf,
+                           verbose = getOption("verbose"),
+                           max.fail = 0,
+                           transform = FALSE,
+                           .getnativesymbolinfo = TRUE,
+                           ...) {
 
   ep <- paste0("in ",sQuote("bsmc"),": ")
 
@@ -47,23 +46,14 @@ bsmc.internal <- function (object, params, Np, est,
   ptsi.inv <- ptsi.for <- TRUE
   transform <- as.logical(transform)
 
-  if (!is.null(seed))
-    warning(ep,"argument ",sQuote("seed"),
-      " now has no effect.  Consider using ",
-      sQuote("freeze"),".",call.=FALSE)
-
-  if (missing(params)) {
-    if (length(coef(object))>0) {
-      params <- coef(object)
-    } else {
-      stop(ep,sQuote("params")," must be supplied",call.=FALSE)
-    }
-  }
+  if (missing(params)) params <- coef(object)
+  if (is.list(params)) params <- unlist(params)
+  if (length(params)==0) stop(ep,sQuote("params")," must be supplied",call.=FALSE)
 
   if (missing(Np)) Np <- NCOL(params)
   else if (is.matrix(params) && (Np != ncol(params))) {
     warning(ep,sQuote("Np")," is ignored when ",sQuote("params"),
-      " is a matrix",call.=FALSE)
+            " is a matrix",call.=FALSE)
     Np <- ncol(params)
   }
 
@@ -79,7 +69,7 @@ bsmc.internal <- function (object, params, Np, est,
 
   if (transform)
     params <- partrans(object,params,dir="toEstimationScale",
-      .getnativesymbolinfo=ptsi.inv)
+                       .getnativesymbolinfo=ptsi.inv)
   ptsi.inv <- FALSE
 
   ntimes <- length(time(object))
@@ -96,8 +86,8 @@ bsmc.internal <- function (object, params, Np, est,
   if (any(is.na(estind))) {
     ind <- which(is.na(estind))
     stop(ep,"parameter(s) ",
-      paste(sapply(est[ind],sQuote),collapse=","),
-      " not found.",call.=FALSE)
+         paste(sapply(est[ind],sQuote),collapse=","),
+         " not found.",call.=FALSE)
   }
 
   if (npars.est<1)
@@ -112,8 +102,8 @@ bsmc.internal <- function (object, params, Np, est,
   if (((length(lower)>1)&&(length(lower)!=npars.est))||
       ((length(upper)>1)&&(length(upper)!=npars.est))) {
     stop(ep,sQuote("lower")," and ",sQuote("upper"),
-      " must each have length 1 or length equal to that of ",
-      sQuote("est"),call.=FALSE
+         " must each have length 1 or length equal to that of ",
+         sQuote("est"),call.=FALSE
     )
   }
 
@@ -121,11 +111,11 @@ bsmc.internal <- function (object, params, Np, est,
     if (any((params[estind,j]<lower)|(params[estind,j]>upper))) {
       ind <- which((params[estind,j]<lower)|(params[estind,j]>upper))
       stop(ep,"parameter(s) ",
-        paste(sapply(paramnames[estind[ind]],sQuote),collapse=","),
-        " in column ",j," in ",sQuote("params"),
-        " is/are outside the box defined by ",
-        sQuote("lower")," and ",sQuote("upper"),
-        call.=FALSE
+           paste(sapply(paramnames[estind[ind]],sQuote),collapse=","),
+           " in column ",j," in ",sQuote("params"),
+           " is/are outside the box defined by ",
+           sQuote("lower")," and ",sQuote("upper"),
+           call.=FALSE
       )
     }
   }
@@ -134,7 +124,7 @@ bsmc.internal <- function (object, params, Np, est,
     object,
     params=if (transform) {
       partrans(object,params,dir="fromEstimationScale",
-        .getnativesymbolinfo=ptsi.for)
+               .getnativesymbolinfo=ptsi.for)
     } else {
       params
     }
@@ -179,7 +169,7 @@ bsmc.internal <- function (object, params, Np, est,
       times=times[c(nt,nt+1)],
       params=if (transform) {
         partrans(object,params,dir="fromEstimationScale",
-          .getnativesymbolinfo=ptsi.for)
+                 .getnativesymbolinfo=ptsi.for)
       } else {
         params
       },
@@ -202,7 +192,7 @@ bsmc.internal <- function (object, params, Np, est,
         times=times[nt+1],
         params=if (transform) {
           partrans(object,m,dir="fromEstimationScale",
-            .getnativesymbolinfo=ptsi.for)
+                   .getnativesymbolinfo=ptsi.for)
         } else {
           m
         },
@@ -238,7 +228,7 @@ bsmc.internal <- function (object, params, Np, est,
 
     if (transform)
       tparams <- partrans(object,params,dir="fromEstimationScale",
-        .getnativesymbolinfo=ptsi.for)
+                          .getnativesymbolinfo=ptsi.for)
 
     ## sample current state vector x^(g)_(t+1) as per L&W AGM (4)
     X <- rprocess(
@@ -378,14 +368,14 @@ setMethod(
   "bsmc",
   signature=signature(object="pomp"),
   definition = function (object, params, Np, est,
-    smooth = 0.1,
-    ntries = 1,
-    tol = 1e-17,
-    lower = -Inf, upper = Inf,
-    verbose = getOption("verbose"),
-    max.fail = 0,
-    transform = FALSE,
-    ...) {
+                         smooth = 0.1,
+                         ntries = 1,
+                         tol = 1e-17,
+                         lower = -Inf, upper = Inf,
+                         verbose = getOption("verbose"),
+                         max.fail = 0,
+                         transform = FALSE,
+                         ...) {
     bsmc.internal(
       object=object,
       params=params,
@@ -405,8 +395,8 @@ setMethod(
 )
 
 setMethod("$",
-  signature(x="bsmcd.pomp"),
-  definition = function (x, name) slot(x,name)
+          signature(x="bsmcd.pomp"),
+          definition = function (x, name) slot(x,name)
 )
 
 bsmc.plot <- function (prior, post, pars, thin, ...) {
@@ -415,7 +405,7 @@ bsmc.plot <- function (prior, post, pars, thin, ...) {
   if (!all(pars%in%rownames(prior))) {
     missing <- which(!(pars%in%rownames(prior)))
     stop("in ",sQuote("plot-bsmcd.pomp"),": unrecognized parameters: ",
-      paste(sQuote(pars[missing]),collapse=","),call.=FALSE)
+         paste(sQuote(pars[missing]),collapse=","),call.=FALSE)
 
   }
   prior <- t(prior[pars,])
@@ -451,7 +441,7 @@ setMethod(
   function (x, y, ..., pars, thin) {
     if (!missing(y))
       warning("in ",sQuote("plot-bsmcd.pomp"),": ",
-        sQuote("y")," is ignored",call.=FALSE)
+              sQuote("y")," is ignored",call.=FALSE)
     if (missing(pars)) pars <- x@est
     if (missing(thin)) thin <- Inf
     bsmc.plot(
