@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 1.18
-Date: 2018-07-09
+Version: 1.19
+Date: 2018-12-13
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -21,7 +21,7 @@ Authors@R: c(person(given=c("Aaron","A."),family="King",
 	  )
 URL: https://kingaa.github.io/pomp/
 Description: Tools for working with partially observed Markov process (POMP) models (also known as stochastic dynamical systems, hidden Markov models, and nonlinear, non-Gaussian, state-space models).  The package provides facilities for implementing POMP models, simulating them, and fitting them to time series data by a variety of frequentist and Bayesian methods.  It is also a versatile platform for implementation of inference methods for general POMP models.
-Depends: R(>= 3.1.2), methods
+Depends: R(>= 3.4.0), methods
 Imports: stats, graphics, digest, mvtnorm, deSolve, coda, subplex,
         nloptr
 Suggests: magrittr, plyr, reshape2, ggplot2, knitr
@@ -32,19 +32,21 @@ LazyData: true
 Contact: kingaa at umich dot edu
 BugReports: https://github.com/kingaa/pomp/issues/
 Collate: aaa.R authors.R bake.R generics.R eulermultinom.R csnippet.R
-        safecall.R pomp_fun.R plugins.R builder.R parmat.R logmeanexp.R
-        slice_design.R profile_design.R sobol.R bsplines.R sannbox.R
-        pomp_class.R load.R pomp.R pomp_methods.R rmeasure_pomp.R
-        rprocess_pomp.R initstate_pomp.R dmeasure_pomp.R
-        dprocess_pomp.R skeleton_pomp.R dprior_pomp.R rprior_pomp.R
-        simulate_pomp.R trajectory_pomp.R plot_pomp.R pfilter.R
-        pfilter_methods.R minim.R traj_match.R bsmc.R bsmc2.R kalman.R
-        kalman_methods.R mif.R mif_methods.R mif2.R mif2_methods.R
-        proposals.R pmcmc.R pmcmc_methods.R nlf_funcs.R nlf_guts.R
-        nlf_objfun.R nlf.R probe.R probe_match.R basic_probes.R spect.R
-        spect_match.R abc.R abc_methods.R covmat.R example.R
+        safecall.R pomp_fun.R plugins.R templates.R builder.R parmat.R
+        logmeanexp.R slice_design.R profile_design.R sobol.R bsplines.R
+        sannbox.R pomp_class.R load.R pomp.R pomp_methods.R
+        rmeasure_pomp.R rprocess_pomp.R initstate_pomp.R
+        dmeasure_pomp.R dprocess_pomp.R skeleton_pomp.R dprior_pomp.R
+        rprior_pomp.R simulate_pomp.R trajectory_pomp.R plot_pomp.R
+        pfilter.R pfilter_methods.R minim.R traj_match.R bsmc.R bsmc2.R
+        kalman.R kalman_methods.R mif.R mif_methods.R mif2.R
+        mif2_methods.R proposals.R pmcmc.R pmcmc_methods.R nlf_funcs.R
+        nlf_guts.R nlf_objfun.R nlf.R probe.R probe_match.R
+        basic_probes.R spect.R spect_match.R abc.R abc_methods.R
+        covmat.R example.R show.R
+RoxygenNote: 6.1.0
 NeedsCompilation: yes
-Packaged: 2018-07-09 14:56:52 UTC; kingaa
+Packaged: 2018-12-13 22:55:05 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -61,4 +63,4 @@ Author: Aaron A. King [aut, cre],
   Eamon O'Dea [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2018-07-09 18:20:03 UTC
+Date/Publication: 2018-12-13 23:10:13 UTC

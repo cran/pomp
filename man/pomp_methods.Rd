@@ -4,10 +4,6 @@
 \alias{pomp-methods}
 \alias{plot,pomp-method}
 \alias{plot-pomp}
-\alias{print,pomp-method}
-\alias{print-pomp}
-\alias{show,pomp-method}
-\alias{show-pomp}
 \alias{spy}
 \alias{spy,pomp-method}
 \alias{spy-pomp}
@@ -47,14 +43,12 @@
 \S4method{coef}{pomp}(object, pars, transform = FALSE, \dots)
 \S4method{coef}{pomp}(object, pars, transform = FALSE, \dots) <- value
 \S4method{obs}{pomp}(object, vars, \dots)
-\S4method{partrans}{pomp}(object, params, dir = c("fromEstimationScale",
-      "toEstimationScale","forward","inverse"), \dots)
+\S4method{partrans}{pomp}(object, params,
+      dir = c("fromEstimationScale", "toEstimationScale"), \dots)
 \S4method{plot}{pomp}(x, y, variables, panel = lines,
       nc = NULL, yax.flip = FALSE,
       mar = c(0, 5.1, 0, if (yax.flip) 5.1 else 2.1),
       oma = c(6, 0, 5, 0), axes = TRUE, \dots)
-\S4method{print}{pomp}(x, \dots)
-\S4method{show}{pomp}(object)
 \S4method{spy}{pomp}(object)
 \S4method{states}{pomp}(object, vars, \dots)
 \S4method{time}{pomp}(x, t0 = FALSE, \dots)
@@ -62,7 +56,6 @@
 \S4method{timezero}{pomp}(object, \dots)
 \S4method{timezero}{pomp}(object, \dots) <- value
 \S4method{window}{pomp}(x, start, end, \dots)
-\S4method{as}{pomp}(object, class)
 }
 \arguments{
   \item{object, x}{The \code{pomp} object.}
@@ -87,10 +80,8 @@
   }
   \item{dir}{
     direction of the transformation.
-    \code{dir="forward"} applies the transformation from the \dQuote{natural} scale to the \dQuote{internal} scale.
-    This is the transformation specified by the \code{parameter.transform} argument to \code{pomp};
-    it is stored in the \sQuote{par.trans} slot of \code{object}.
-    \code{dir="inverse"} applies the inverse transformation (stored in the \sQuote{par.untrans} slot).
+    \code{dir="toEstimationScale"} applies the transformation from the model (or \dQuote{natural}) scale to the \dQuote{estimation} scale.
+    \code{dir="fromEstimationScale"} applies the inverse transformation (from the estimation scale to the natural scale.
   }
   \item{t0}{
     logical;
@@ -99,10 +90,6 @@
   }
   \item{start, end}{
     start and end times of the window.
-  }
-  \item{class}{
-    character;
-    name of the class to which \code{object} should be coerced.
   }
   \item{y}{ignored.}
   \item{variables}{
@@ -152,6 +139,8 @@
       Here, \code{parameter.transform} is the parameter transformation function specified when \code{object} was created.
       \code{coef(object,pars,transform=TRUE) <- value} first, discards any names the \code{value} may have, sets \code{names(value) <- pars}, and then replaces the elements of \code{object}'s \code{params} slot \code{parameter.transform(value)}.
       In this case, if some of the names in \code{pars} do not already name parameters in \code{coef(object,transform=TRUE)}, then they are concatenated.
+
+      \code{coef(object) <- NULL} erases the parameters in \code{object}.
     }
     \item{obs}{
       \code{obs(object)} returns the array of observations.
@@ -181,9 +170,7 @@
       \code{window(x,start=t1,end=t2} returns a new \code{pomp} object, identical to \code{x} but with only the data in the window between times \code{t1} and \code{t2} (inclusive).
       By default, \code{start} is the time of the first observation and \code{end} is the time of the last.
     }
-    \item{show}{Displays the \code{pomp} object.}
-    \item{spy}{Displays any C snippet files associated with a \code{pomp} object.}
-    \item{print}{Print method.}
+    \item{spy}{Displays the structure of a \code{pomp} object.}
     \item{plot}{
       Plots the data and state trajectories (if the latter exist).
       Additional arguments are passed to the low-level plotting routine.

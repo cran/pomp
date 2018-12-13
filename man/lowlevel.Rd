@@ -35,6 +35,12 @@
 \alias{pompUnload}
 \alias{pompUnload-pomp}
 \alias{pompUnload,pomp-method}
+\alias{solibs<-}
+\alias{solibs<-,pomp-method}
+\alias{print,unshowable-method}
+\alias{print,listies-method}
+\alias{show,unshowable-method}
+\alias{show,listies-method}
 \description{
   A \code{pomp} object implements a partially observed Markov process (\acronym{POMP}) model.
   Basic operations on this model (with shorthand terms) include:
@@ -64,7 +70,8 @@
 \S4method{rprior}{pomp}(object, params, \dots)
 \S4method{init.state}{pomp}(object, params, t0, nsim, \dots)
 \S4method{skeleton}{pomp}(object, x, t, params, \dots)
-\S4method{trajectory}{pomp}(object, params, times, t0, as.data.frame = FALSE, \dots)
+\S4method{trajectory}{pomp}(object, params, times, t0, as.data.frame = FALSE, \dots,
+          verbose = getOption("verbose", FALSE))
 \S4method{pompLoad}{pomp}(object, \dots)
 \S4method{pompUnload}{pomp}(object, \dots)
 }
@@ -112,6 +119,9 @@
     See \code{\link[deSolve]{ode}} for a description of the additional arguments accepted.
 
     In all other cases, additional arguments are ignored.
+  }
+  \item{verbose}{
+    logical; if \code{TRUE}, more information will be displayed.
   }
 }
 \section{rprocess}{
@@ -187,7 +197,7 @@
 \examples{
 pompExample(ricker)
 
-p <- parmat(c(r=42,c=1,phi=10,sigma=0.3,N.0=7,e.0=0),10)
+p <- parmat(c(r=42,c=1,phi=10,sigma=0.3,N_0=7,e.0=0),10)
 t <- c(1:10,20,30)
 t0 <- 0
 x0 <- init.state(ricker,params=p,t0=t0)
@@ -199,7 +209,7 @@ f <- skeleton(ricker,x=x,t=t,params=p)
 z <- trajectory(ricker,params=p,times=t,t0=t0)
 
 ## short arguments are recycled:
-p <- c(r=42,phi=10,c=1,sigma=0.3,N.0=7,e.0=0)
+p <- c(r=42,phi=10,c=1,sigma=0.3,N_0=7,e.0=0)
 t <- c(1:10,20,30)
 t0 <- 0
 x0 <- init.state(ricker,params=p,t0=t0)

@@ -8,6 +8,12 @@
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 
+typedef void periodic_bspline_basis_eval_t (double x, double period, int degree, int nbasis, double *y);
+typedef void periodic_bspline_basis_eval_deriv_t (double x, double period, int degree, int nbasis, int deriv, double *y);
+typedef const SEXP get_pomp_userdata_t (const char *name);
+typedef const int *get_pomp_userdata_int_t (const char *name);
+typedef const double *get_pomp_userdata_double_t (const char *name);
+
 // UTILITY FOR GAMMA WHITENOISE
 // This function draws a random increment of a gamma whitenoise process.
 // This will have expectation=dt and variance=(sigma^2*dt)
@@ -176,7 +182,7 @@ static R_INLINE double dmultinom (int m, const double *prob, double *x, int give
       ff = (give_log) ? R_NegInf: 0.0;
       return ff;
     }
-    
+
     p += prob[k]; // sum of probabilities
     n += x[k]; // total number of events
   }
@@ -265,15 +271,6 @@ static R_INLINE double dbetanbinom (double x, double mu, double size,
   return (give_log) ? f : exp(f);
 }
 
-// FACILITY FOR EVALUATING A SET OF PERIODIC BSPLINE BASIS FUNCTIONS
-extern void periodic_bspline_basis_eval(double x, double period, int degree, int nbasis, double *y);
-extern void periodic_bspline_basis_eval_deriv(double x, double period, int degree, int nbasis, int deriv, double *y);
-
-// FACILITIES FOR EXTRACTING R OBJECTS FROM THE 'USERDATA' SLOT
-extern const SEXP get_pomp_userdata(const char *name);
-extern const int *get_pomp_userdata_int(const char *name);
-extern const double *get_pomp_userdata_double(const char *name);
-
 // THE FOLLOWING ARE C PROTOTYPES FOR COMPONENTS OF POMP MODELS
 // FOR USE WHEN THE LATTER ARE SPECIFIED USING NATIVE CODES COMPILED INTO
 // A MANUALLY-LINKED LIBRARY.
@@ -329,7 +326,7 @@ typedef void pomp_onestep_sim(double *x, const double *p,
 //     Inclusion of these calls in the user-defined function may result in significant slowdown.
 
 // PROTOTYPE FOR ONE-STEP LOG PROBABILITY DENSITY FUNCTION, AS USED BY "ONESTEP.DENS":
-typedef void pomp_onestep_pdf(double *f,
+typedef void pomp_onestep_pdf(double *loglik,
 			      const double *x1, const double *x2, double t1, double t2, const double *p,
 			      const int *stateindex, const int *parindex, const int *covindex,
 			      int ncovars, const double *covars);
@@ -350,7 +347,7 @@ typedef void pomp_onestep_pdf(double *f,
 // covars     = pointer to a vector containing the values of the covariates at time t, as interpolated
 //                from the covariate table supplied to 'euler.density'
 //  on output:
-// f          = pointer to the probability density (a single scalar)
+// loglik     = pointer to the log probability density (a single scalar)
 
 // PROTOTYPE FOR DETERMINISTIC SKELETON EVALUATION
 typedef void pomp_skeleton (double *f, const double *x, const double *p,

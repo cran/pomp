@@ -1,4 +1,5 @@
 ## basic methods
+setGeneric("construct_pomp",function(data,...)standardGeneric("construct_pomp"))
 setGeneric("print",function(x,...)standardGeneric("print"))
 setGeneric("plot",function(x,y,...)standardGeneric("plot"))
 setGeneric("summary",function(object,...)standardGeneric("summary"))
@@ -26,10 +27,10 @@ setGeneric("timezero",function(object,...)standardGeneric("timezero"))
 setGeneric("timezero<-",function(object,...,value)standardGeneric("timezero<-"))
 setGeneric("partrans",function(object,params,dir,...)standardGeneric("partrans"))
 setGeneric("logLik",function(object,...)standardGeneric("logLik"))
+setGeneric("solibs<-",function(object,...,value)standardGeneric("solibs<-"))
 
 ## internals
 setGeneric("pomp.fun",function(f,...)standardGeneric("pomp.fun"))
-setGeneric("plugin.handler",function(object,...)standardGeneric("plugin.handler"))
 
 ## prediction mean
 setGeneric("pred.mean",function(object,...)standardGeneric("pred.mean"))

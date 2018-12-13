@@ -1,5 +1,38 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 1.19}{
+  \itemize{
+    \item The \code{obs} and \code{states} arguments of \code{simulate} are deprecated and will be removed in a forthcoming release.
+    \item The C-level interface for \code{apply_probe_sims} has changed: the new argument \code{rho} must be the \dQuote{package:pomp} environment.
+    \item A bug in \code{pfilter} (and hence \code{pmcmc}) when \code{filter.traj=TRUE} was discovered and fixed.
+    In the buggy version, the filter trajectory was sampled with incorrect weights.
+    \item Timo Voipio contributed a pull request that traps the error resulting from \code{sannbox} being passed a \code{candidate.dist} that is not a function.
+    \item \code{show} and \code{print} methods have been made very terse:
+    they simply report on the class of the object in question.
+    To see more detailed information about a \sQuote{pomp} object, use \code{spy}.
+    \item New (unexported) \code{solibs<-} method allows developers of packages extending \pkg{pomp} to incorporate C snippets into object that contain \sQuote{pomp} objects.
+    \item New \code{verbose} option in \code{trajectory} gives diagnostic information from \pkg{deSolve} integration routines.
+    Of course, this is pertinent only if the model skeleton is a vectorfield.
+    \item Bug in the display of \code{istate} when \code{deSolve::ode} errors has been fixed.
+    \item New \code{hitch} function facilitates construction of \code{pomp.fun} objects from \R functions, C snippets, and links to external libraries.
+    \item Native routines needed to access \code{pomp.fun} objects in C are now registered for use by other packages.
+    \item \code{coef(object) <- NULL}, where \code{object} is of class \sQuote{pomp}, erases any parameters stored in \code{object}.
+    \item The \code{euler.sir}, \code{gillespie.sir}, \code{blowflies}, \code{ricker}, \code{bbs}, \code{dacca}, and \code{rw2} examples are all now implemented using C snippets.
+    \item A new \file{pomp_defines.h} header is provided for developers of packages that depend on \pkg{pomp}.
+    \item Internally, \code{rprocess} is no longer stored as an \R function.
+    The use of plugins is now required for the implementation of the \code{rprocess} component.
+    Currently, there are five plugins available:
+    \code{onestep.sim}, \code{discrete.time.sim}, \code{euler.sim}, \code{gillespie.sim}, and \code{gillespie.hl.sim}.
+    \item The new \code{hitch} function automates the building and linking of C snippets and \R functions into \code{pomp.fun}s.
+    \item The handling of \code{dprocess} has changed.
+    The \code{onestep.dens} plugin is now deprecated and will soon be removed.
+    \code{dprocess} is now specified directly using either a C snippet or an \R function, in much the same way that, for example, \code{dmeasure} is specified.
+    \item The old \sQuote{forward} and \sQuote{inverse} options for the \code{dir} argument of \code{partrans} have been dispensed with.
+    The much more descriptive options \sQuote{toEstimationScale} and \sQuote{fromEstimationScale} remain.
+    \item The C snippet compiling facilities have been thoroughly reworked.
+    \item \code{onestep.dens} can now take a \code{Csnippet} specification of the process-model transition density.
+  }
+}
 \section{Changes in \pkg{pomp} version 1.18}{
   \itemize{
     \item All inference functions can now take a list in the \code{start} or \code{params} arguments.

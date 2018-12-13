@@ -26,14 +26,12 @@ as.data.frame.pomp <- function (x, row.names, optional, ...) as(x,"data.frame")
 
 ## parameter transformations
 partrans.internal <- function (object, params,
-                               dir = c("fromEstimationScale",
-                                       "toEstimationScale",
-                                       "forward","inverse"),
-                               .getnativesymbolinfo = TRUE, ...) {
+  dir = c("fromEstimationScale",
+    "toEstimationScale"),
+  .getnativesymbolinfo = TRUE, ...) {
   if (!object@has.trans) return(params)
   pompLoad(object)
-  dir <- switch(match.arg(dir),fromEstimationScale=1L,toEstimationScale=-1L,
-                forward=1L,inverse=-1L)
+  dir <- switch(match.arg(dir),fromEstimationScale=1L,toEstimationScale=-1L)
   rv <- .Call(do_partrans,object,params,dir,.getnativesymbolinfo)
   pompUnload(object)
   rv
@@ -42,9 +40,8 @@ partrans.internal <- function (object, params,
 setMethod(
   "partrans",
   signature=signature(object="pomp"),
-  definition=function (object, params, dir = c("fromEstimationScale",
-                                               "toEstimationScale", "forward","inverse"),
-                       ...)
+  definition=function (object, params,
+    dir = c("fromEstimationScale", "toEstimationScale"), ...)
     partrans.internal(object=object,params=params,dir=dir,...)
 )
 
@@ -55,7 +52,7 @@ obs.internal <- function (object, vars, ...) {
     vars <- varnames
   else if (!all(vars%in%varnames))
     stop("in ",sQuote("obs"),": some elements of ",
-         sQuote("vars")," correspond to no observed variable",call.=FALSE)
+      sQuote("vars")," correspond to no observed variable",call.=FALSE)
   y <- object@data[vars,,drop=FALSE]
   dimnames(y) <- list(variable=rownames(y),time=time(object))
   y
@@ -169,10 +166,10 @@ setMethod(
     if (value[1L]>object@times[1L])
       if (!is.numeric(value) || length(value) > 1L)
         stop(ep,"the zero-time ",sQuote("t0"),
-             " must be a single number",call.=FALSE)
+          " must be a single number",call.=FALSE)
     if (value > object@times[1L])
       stop(ep,"the zero-time ",sQuote("t0"),
-           " must occur no later than the first observation",call.=FALSE)
+        " must occur no later than the first observation",call.=FALSE)
     storage.mode(value) <- "double"
     object@t0 <- value
     object
@@ -195,9 +192,9 @@ setMethod(
         excl <- setdiff(pars,names(params))
         if (length(excl)>0) {
           stop("in ",sQuote("coef"),": name(s) ",
-               paste(sQuote(excl),collapse=","),
-               " correspond to no parameter(s)",
-               call.=FALSE)
+            paste(sQuote(excl),collapse=","),
+            " correspond to no parameter(s)",
+            call.=FALSE)
         }
       }
       params[pars]
@@ -213,6 +210,7 @@ setMethod(
   signature=signature(object="pomp"),
   definition=function (object, pars, transform = FALSE, ..., value) {
     ep <- paste0("in ",sQuote("coef<-"),": ")
+    if (is.null(value)) value <- numeric(0)
     if (is.list(value)) value <- unlist(value)
     if (missing(pars)) {          ## replace the whole params slot with 'value'
       if (length(value)>0) {
@@ -222,7 +220,7 @@ setMethod(
         if (is.null(pars)) {
           if (transform)
             stop(ep,"parameter.transform(",sQuote("value"),
-                 ") must be a named vector",call.=FALSE)
+              ") must be a named vector",call.=FALSE)
           else
             stop(ep,sQuote("value")," must be a named vector",call.=FALSE)
         }
@@ -246,10 +244,10 @@ setMethod(
         excl <- !(pars%in%names(params)) ## new parameter names
         if (any(excl)) { ## append parameters
           warning(ep,"name(s) ",
-                  paste(sQuote(pars[excl]),collapse=","),
-                  " do not refer to existing parameter(s);",
-                  " they are being concatenated",
-                  call.=FALSE)
+            paste(sQuote(pars[excl]),collapse=","),
+            " do not refer to existing parameter(s);",
+            " they are being concatenated",
+            call.=FALSE)
           params <- c(params,val[excl])
         }
         params[pars] <- val
@@ -264,85 +262,102 @@ setMethod(
 )
 
 setMethod(
-  "print",
-  signature=signature(x="pomp"),
-  definition=function (x, ...) {
-    cat("<object of class ",sQuote("pomp"),">\n",sep="")
-    invisible(x)
-  }
-)
-
-setMethod(
-  "show",
+  "spy",
   signature=signature(object="pomp"),
   definition=function (object) {
-    cat(length(object@times),"records of",
-        nrow(obs(object)),"observables,",
-        "recorded from t =",
-        min(object@times),"to",max(object@times),"\n")
-    cat("summary of data:\n")
+    nm <- deparse(substitute(object,env=parent.frame()))
+    f <- tempfile()
+    con <- file(description=f,open="w+")
+    sink(file=con)
+    on.exit(if (sink.number()) sink())
+    cat("==================\npomp object ",sQuote(nm),":\n\n",sep="")
+    cat("-",length(object@times),"records of",
+      nrow(obs(object)),
+      ngettext(nrow(obs(object)),"observable,","observables,"),
+      "recorded from t =",
+      min(object@times),"to",max(object@times),"\n")
+    cat("- zero time, t0 = ",object@t0,"\n",sep="")
+    cat("- summary of data:\n")
     print(summary(as.data.frame(t(obs(object)))))
-    cat("zero time, t0 = ",object@t0,"\n",sep="")
     if (length(object@tcovar)>0) {
-      cat(nrow(object@covar),"records of",
-          ncol(object@covar),"covariates,",
-          "recorded from t =",min(object@tcovar),
-          "to",max(object@tcovar),"\n")
-      cat("summary of covariates:\n")
+      cat("-",nrow(object@covar),"records of",
+        ncol(object@covar),"covariates,",
+        "recorded from t =",min(object@tcovar),
+        "to",max(object@tcovar),"\n")
+      cat("- summary of covariates:\n")
       print(summary(as.data.frame(object@covar)))
     }
-    cat("process model simulator, rprocess = ")
-    show(object@rprocess)
-    cat("process model density, dprocess = ")
+    if (object@rprocess@type == 0L) {
+      cat("- undefined process-model simulator\n")
+    } else if (object@rprocess@type == 4L) {
+      cat("- Gillespie-method process-model simulator, rate.fun = ")
+      show(object@rprocess@rate.fn)
+    } else {
+      if (object@rprocess@type == 1L) {
+        cat("- one-step process-model simulator, step.fun = ")
+      } else if (object@rprocess@type == 2L) {
+        cat("- discrete-time process-model simulator, step.fun = ")
+      } else {
+        cat("- Euler-method process-model simulator, step.fun = ")
+      }
+      show(object@rprocess@step.fn)
+    }
+    cat("- process model density, dprocess = ")
     show(object@dprocess)
-    cat("measurement model simulator, rmeasure = ")
+    cat("- measurement model simulator, rmeasure = ")
     show(object@rmeasure)
-    cat("measurement model density, dmeasure = ")
+    cat("- measurement model density, dmeasure = ")
     show(object@dmeasure)
-    cat("prior simulator, rprior = ")
+    cat("- prior simulator, rprior = ")
     show(object@rprior)
-    cat("prior density, dprior = ")
+    cat("- prior density, dprior = ")
     show(object@dprior)
-    cat("skeleton ",
-        if (object@skeleton.type!="undef")
-          paste0("(",object@skeleton.type,") ")
-        else "",
-        "= ",sep="")
+    cat("- skeleton ",
+      if (object@skeleton.type!="undef")
+        paste0("(",object@skeleton.type,") ")
+      else "",
+      "= ",sep="")
     show(object@skeleton)
-    cat("initializer = ")
+    cat("- initializer = ")
     show(object@initializer)
-    cat("parameter transformation (to estimation scale) = ")
+    cat("- parameter transformation (to estimation scale) = ")
     show(object@to.trans)
-    cat("parameter transformation (from estimation scale) = ")
+    cat("- parameter transformation (from estimation scale) = ")
     show(object@from.trans)
     if (length(coef(object))>0) {
-      cat("parameter(s):\n")
+      cat("- parameter(s):\n")
       print(coef(object))
     } else {
-      cat ("parameter(s) unspecified\n");
+      cat ("- parameter(s) unspecified\n");
     }
     if (length(object@userdata)>0) {
-      cat("extra user-defined variables: ",
-          paste(sapply(names(object@userdata),sQuote),collapse=", "),
-          "\n")
+      cat("- extra user-defined variables: ",
+        paste(sapply(names(object@userdata),sQuote),collapse=", "),
+        "\n")
     }
+    ## now display C snippets
+    if (length(object@solibs) > 0) {
+      cat("- C snippet file 1:\n\n")
+      for (i in seq_along(object@solibs)) {
+        cat(object@solibs[[i]]$src)
+      }
+    }
+    sink()
+    close(con)
+    file.show(f,delete.file=TRUE)
     invisible(NULL)
   }
 )
 
+## useful for prepending the 'lib' generated by 'hitch' to the 'solibs'
+## slot of a 'pomp' object
 setMethod(
-  "spy",
+  "solibs<-",
   signature=signature(object="pomp"),
-  definition=function (object) {
-    if (length(object@solibs) > 0) {
-      f <- tempfile()
-      for (i in seq_along(object@solibs)) {
-        cat(object@solibs[[i]]$src,file=f)
-      }
-      file.show(f)
-      file.remove(f)
-    } else {
-      cat("no C snippets to display\n")
+  definition=function (object, ..., value) {
+    if (!is.null(value)) {
+      object@solibs <- c(list(value),object@solibs)
     }
+    object
   }
 )
