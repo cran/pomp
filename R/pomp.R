@@ -1,310 +1,447 @@
-## This file defines 'pomp', the basic constructor of the pomp class
+##' Constructor of the basic pomp object
+##'
+##' This function constructs a \sQuote{pomp} object, encoding a partially-observed Markov process (\acronym{POMP}) model together with a uni- or multi-variate time series.
+##' As such, it is central to all the package's functionality.
+##' One implements the \acronym{POMP} model by specifying some or all of its \emph{basic components}.
+##' These comprise:
+##' \describe{
+##' \item{rinit,}{which samples from the distribution of the state process at the zero-time;}
+##' \item{rprocess,}{the simulator of the unobserved Markov state process;}
+##' \item{dprocess,}{the evaluator of the probability density function for transitions of the unobserved Markov state process;}
+##' \item{rmeasure,}{the simulator of the observed process, conditional on the unobserved state;}
+##' \item{dmeasure,}{the evaluator of the measurement model probability density function;}
+##' \item{rprior,}{which samples from a prior probability distribution on the parameters;}
+##' \item{dprior,}{which evaluates the prior probability density function;}
+##' \item{skeleton,}{which computes the deterministic skeleton of the unobserved state process;}
+##' \item{partrans,}{which performs parameter transformations.}
+##' }
+##' The basic structure and its rationale are described in the \emph{Journal of Statistical Software} paper, an updated version of which is to be found on the \href{https://kingaa.github.io/pomp/}{package website}.
+##'
+##' Each basic component is supplied via an argument of the same name.
+##' These can be given in the call to \code{pomp}, or to many of the package's other functions.
+##' In any case, the effect is the same: to add, remove, or modify the basic component.
+##'
+##' Each basic component can be furnished using C snippets, \R functions, or pre-compiled native routine available in user-provided dynamically loaded libraries.
+##'
+##' @name pomp
+##' @rdname pomp
+##' @include pomp_class.R pomp_fun.R csnippet.R safecall.R builder.R
+##' @include rinit_spec.R rprocess_spec.R rmeasure_spec.R
+##' @include dprocess_spec.R dmeasure_spec.R prior_spec.R
+##' @include skeleton_spec.R parameter_trans.R covariate_table.R
+##' @importFrom stats setNames
+##'
+##' @inheritParams hitch
+##'
+##' @param data either a data frame holding the time series data,
+##' or an object of class \sQuote{pomp},
+##' i.e., the output of another \pkg{pomp} calculation.
+##'
+##' @param times the times at which observations are made.
+##' \code{times} must indicate the column of observation times by name or index.
+##' The time vector must be numeric and non-decreasing.
+##' Internally, \code{data} will be internally coerced to an array with storage-mode \code{double}.
+##'
+##' @param t0 The zero-time, i.e., the time of the initial state.
+##' This must be no later than the time of the first observation, i.e., \code{t0 <= times[1]}.
+##'
+##' @param rinit simulator of the initial-state distribution.
+##' This can be furnished either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
+##' Setting \code{rinit=NULL} sets the initial-state simulator to its default.
+##' For more information, see \link[=rinit_spec]{?rinit_spec}.
+##'
+##' @param rprocess simulator of the latent state process, specified using one of the \link[=rprocess_spec]{rprocess plugins}.
+##' Setting \code{rprocess=NULL} removes the latent-state simulator.
+##' For more information, \link[=rprocess_spec]{see ?rprocess_spec for the documentation on these plugins}.
+##'
+##' @param dprocess optional;
+##' specification of the probability density evaluation function of the unobserved state process.
+##' Setting \code{dprocess=NULL} removes the latent-state density evaluator.
+##' For more information, see \link[=dprocess_spec]{?dprocess_spec}.
+##'
+##' @param rmeasure simulator of the measurement model, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
+##' Setting \code{rmeasure=NULL} removes the measurement model simulator.
+##' For more information, see \link[=rmeasure_spec]{?rmeasure_spec}.
+##'
+##' @param dmeasure evaluator of the measurement model density, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
+##' Setting \code{dmeasure=NULL} removes the measurement density evaluator.
+##' For more information, see \link[=dmeasure_spec]{?dmeasure_spec}.
+##'
+##' @param skeleton optional; the deterministic skeleton of the unobserved state process.
+##' Depending on whether the model operates in continuous or discrete time, this is either a vectorfield or a map.
+##' Accordingly, this is supplied using either the \code{\link[=skeleton_spec]{vectorfield}} or \code{\link[=skeleton_spec]{map}} fnctions.
+##' For more information, see \link[=skeleton_spec]{?skeleton_spec}.
+##' Setting \code{skeleton=NULL} removes the deterministic skeleton.
+##'
+##' @param rprior optional; prior distribution sampler, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
+##' For more information, see \link[=prior_spec]{?prior_spec}.
+##' Setting \code{rprior=NULL} removes the prior distribution sampler.
+##'
+##' @param dprior optional; prior distribution density evaluator, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
+##' For more information, see \link[=prior_spec]{?prior_spec}.
+##' Setting \code{dprior=NULL} resets the prior distribution to its default, which is a flat improper prior.
+##'
+##' @param partrans optional parameter transformations, constructed using \code{\link{parameter_trans}}.
+##'
+##' Many algorithms for parameter estimation search an unconstrained space of parameters.
+##' When working with such an algorithm and a model for which the parameters are constrained, it can be useful to transform parameters.
+##' One should supply the \code{partrans} argument via a call to \code{\link{parameter_trans}}.
+##' For more information, see \link[=parameter_trans]{?parameter_trans}.
+##' Setting \code{partrans=NULL} removes the parameter transformations, i.e., sets them to the identity transformation.
+##'
+##' @param covar optional covariate table, constructed using \code{\link{covariate_table}}.
+##'
+##' If a covariate table is supplied, then the value of each of the covariates is interpolated as needed.
+##' The resulting interpolated values are made available to the appropriate basic components.
+##' See the documentation for \code{\link{covariate_table}} for details.
+##'
+##' @param params optional; named numeric vector of parameters.
+##' This will be coerced internally to storage mode \code{double}.
+##'
+##' @param obsnames optional character vector;
+##' names of the observables.
+##' It is not usually necessary to specify \code{obsnames} since, by default,
+##' these are read from the names of the data variables.
+##'
+##' @param statenames optional character vector;
+##' names of the latent state variables.
+##' It is typically only necessary to supply \code{statenames} when C snippets are in use.
+##'
+##' @param paramnames optional character vector;
+##' names of model parameters.
+##' It is typically only necessary to supply \code{paramnames} when C snippets are in use.
+##'
+##' @param covarnames optional character vector;
+##' names of the covariates.
+##' It is not usually necessary to specify \code{covarnames} since, by default,
+##' these are read from the names of the covariates.
+##'
+##' @param accumvars optional character vector;
+##' contains the names of accumulator variables.
+##' See \link[=accumulators]{?accumulators} for a definition and discussion of accumulator variables.
+##'
+##' @param \dots additional arguments supply new or modify existing model characteristics or components.
+##' See \code{\link{pomp}} for a full list of recognized arguments.
+##'
+##' When named arguments not recognized by \code{\link{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
+##' This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
+##' See \link[=userdata]{?userdata} for information on how to use this facility.
+##'
+##' @param verbose logical; if \code{TRUE}, diagnostic messages will be printed to the console.
+##'
+##' @return
+##' The \code{pomp} constructor function returns an object, call it \code{P}, of class \sQuote{pomp}.
+##' \code{P} contains, in addition to the data, any elements of the model that have been specified as arguments to the \code{pomp} constructor function.
+##' One can add or modify elements of \code{P} by means of further calls to \code{pomp}, using \code{P} as the first argument in such calls.
+##' One can pass \code{P} to most of the \pkg{pomp} package methods via their \code{data} argument.
+##'
+##' @section Note:
+##'
+##' \strong{It is not typically necessary (or indeed often feasible) to define all of the basic components for any given purpose.
+##' Each \pkg{pomp} algorithm makes use of only a subset of these components.
+##' Any algorithm requiring a component that is not present will generate an error letting you know that you have not provided a needed component.
+##' FIXME }
+##'
+##' @author Aaron A. King
+##'
+##' @references
+##' A. A. King, D. Nguyen, and E. L. Ionides (2016)
+##' Statistical Inference for Partially Observed Markov Processes via the Package \pkg{pomp}.
+##' Journal of Statistical Software 69(12): 1--43.
+NULL
 
-pomp <- function (data, times, t0, ..., rprocess, dprocess,
-  rmeasure, dmeasure, measurement.model,
-  skeleton, initializer, rprior, dprior, params, covar, tcovar,
-  obsnames, statenames, paramnames, covarnames, zeronames,
-  PACKAGE, fromEstimationScale, toEstimationScale,
-  globals, cdir, cfile, shlib.args) {
-
-  ep <- paste0("in ",sQuote("pomp"),": ")  # error prefix
+##' @rdname pomp
+##' @export
+pomp <- function (data, times, t0, ...,
+  rinit, rprocess, dprocess, rmeasure, dmeasure,
+  skeleton, rprior, dprior, partrans, covar,
+  params, accumvars,
+  obsnames, statenames, paramnames, covarnames,
+  PACKAGE, globals, cdir, cfile, shlib.args, compile = TRUE,
+  verbose = getOption("verbose", FALSE)) {
 
   if (missing(data))
-    stop(ep,sQuote("data")," is a required argument.",call.=FALSE)
+    reqd_arg("pomp","data")
+
+  if (!inherits(data,what=c("data.frame","pomp","NULL")))
+    pStop("pomp",sQuote("data")," must be a data frame or an object of ",
+      "class ",sQuote("pomp"),".")
 
   ## return as quickly as possible if no work is to be done
-  if (nargs()==1) return(data)
+  if (is(data,"pomp") && missing(times) && missing(t0) &&
+      missing(rinit) && missing(rprocess) && missing(dprocess) &&
+      missing(rmeasure) && missing(dmeasure) && missing(skeleton) &&
+      missing(rprior) && missing(dprior) && missing(partrans) &&
+      missing(covar) && missing(params) && missing(accumvars) &&
+      length(list(...)) == 0)
+    return(as(data,"pomp"))
 
-  if (!is(data,"data.frame") && !is(data,"pomp"))
-    stop(ep,sQuote("data")," must be a data frame or an object of class ",
-      sQuote("pomp"),call.=FALSE)
+  if (missing(times)) times <- NULL
 
-  ## if one transformation is supplied, then both must be
-  c1 <- missing(fromEstimationScale)
-  c2 <- missing(toEstimationScale)
-  if (xor(c1,c2))
-    stop(ep,"if one of ",sQuote("toEstimationScale"),", ",
-      sQuote("fromEstimationScale")," is supplied, then so must the other",
-      call.=FALSE)
-
-  ## if 'covar' is supplied, then so must 'tcovar'
-  c1 <- missing(covar)
-  c2 <- missing(tcovar)
-  if (xor(c1,c2))
-    stop(ep,"if one of ",sQuote("covar"),", ",
-      sQuote("tcovar")," is supplied, then so must the other",
-      call.=FALSE)
-
-  ## if 'measurement model' is specified as a formula, this overrides
-  ## specification of 'rmeasure' or 'dmeasure'
-  if (!missing(measurement.model)) {
-    if (!(missing(dmeasure) || is.null(dmeasure)) ||
-        !(missing(rmeasure) || is.null(rmeasure)))
-      warning(ep,"specifying ",sQuote("measurement.model"),
-        " overrides specification of ",
-        sQuote("rmeasure")," and ",sQuote("dmeasure"),".",
-        call.=FALSE)
-    mm <- measform2pomp(measurement.model)
-    rmeasure <- mm$rmeasure
-    dmeasure <- mm$dmeasure
-  }
-
-  ## the deterministic skeleton involves 'skeleton', 'skeleton.type', and
-  ## 'skelmap.delta.t'
-  .skel.type <- "undef"
-  .skelmap.delta.t <- 1
-  if (missing(skeleton)) {
-    skeleton <- NULL
-  } else if (is.null(skeleton)) {
-    .skel.type <- "remove"
-  } else if (is(skeleton,"safecall")) {
-    skeleton <- skeleton@call
-    flist <- list(
-      map=function (f, delta.t = 1) {
-        .skel.type <<- "map"
-        .skelmap.delta.t <<- as.numeric(delta.t)
-        if (.skelmap.delta.t <= 0)
-          stop("in ",sQuote("map"),", ",sQuote("delta.t"),
-            " must be positive",call.=FALSE)
-        f
-      },
-      vectorfield=function (f) {
-        .skel.type <<- "vectorfield"
-        f
-      }
-    )
-    skeleton <- eval(skeleton,envir=flist,enclos=parent.frame())
-  } else {
-    stop(ep,sQuote("skeleton")," must be specified as either a ",
-      sQuote("vectorfield")," or a ",sQuote("map"),".",call.=FALSE)
-  }
-
-  construct_pomp(
-    data=data,times=times,t0=t0,...,
-    rprocess=rprocess,dprocess=dprocess,
-    rmeasure=rmeasure,dmeasure=dmeasure,
-    initializer=initializer,
-    .skel.type=.skel.type,.skelmap.delta.t=.skelmap.delta.t,skeleton=skeleton,
-    rprior=rprior,dprior=dprior,params=params,
-    covar=covar,tcovar=tcovar,
-    obsnames=obsnames,statenames=statenames,paramnames=paramnames,
-    covarnames=covarnames,zeronames=zeronames,PACKAGE=PACKAGE,
-    fromEstimationScale=fromEstimationScale,toEstimationScale=toEstimationScale,
-    globals=globals,cdir=cdir,cfile=cfile,shlib.args=shlib.args
+  tryCatch(
+    construct_pomp(
+      data=data,times=times,t0=t0,...,
+      rinit=rinit,rprocess=rprocess,dprocess=dprocess,
+      rmeasure=rmeasure,dmeasure=dmeasure,
+      skeleton=skeleton,rprior=rprior,dprior=dprior,partrans=partrans,
+      params=params,covar=covar,accumvars=accumvars,
+      obsnames=obsnames,statenames=statenames,paramnames=paramnames,
+      covarnames=covarnames,PACKAGE=PACKAGE,
+      globals=globals,cdir=cdir,cfile=cfile,shlib.args=shlib.args,
+      compile=compile,verbose=verbose
+    ),
+    error = function (e) pStop_(conditionMessage(e))
   )
 }
 
-setMethod("construct_pomp",
-  signature=signature(data="data.frame"),
-  definition = function (data, times, ...) {
+setGeneric(
+  "construct_pomp",
+  function (data, times, ...)
+    standardGeneric("construct_pomp")
+)
 
-    ep <- paste0("in ",sQuote("pomp"),": ")  # error prefix
-
-    if (missing(times)) stop(ep,sQuote("times")," is a required argument",call.=FALSE)
-    if ((is.numeric(times) && (times<1 || times>ncol(data) || times!=as.integer(times))) ||
-        (is.character(times) && (!(times%in%names(data)))) ||
-        (!is.numeric(times) && !is.character(times)) ||
-        length(times)!=1) {
-      stop(ep,"when ",sQuote("data")," is a data frame, ",sQuote("times"),
-        " must identify a single column of ",sQuote("data"),
-        " either by name or by index.",call.=FALSE)
-    }
-    if (is.numeric(times)) {
-      tpos <- as.integer(times)
-    } else if (is.character(times)) {
-      tpos <- match(times,names(data))
-    }
-    times <- data[[tpos]]
-    data <- do.call(rbind,lapply(data[-tpos],as.double))
-
-    construct_pomp(data=data,times=times,...)
+setMethod(
+  "construct_pomp",
+  signature=signature(data="ANY", times="ANY"),
+  definition = function (data, times, t0, ...) {
+    pStop_(sQuote("times")," should either be a numeric vector of observation",
+      " times or a single name identifying the column of data that represents",
+      " the observation times.")
   }
 )
 
-setMethod("construct_pomp",
-  signature=signature(data="array"),
-  definition = function (data, times, t0, ...,
-    rprocess, dprocess,
-    rmeasure, dmeasure,
-    .skel.type, .skelmap.delta.t, skeleton,
-    initializer,
-    rprior, dprior,
-    params, covar, tcovar,
-    fromEstimationScale, toEstimationScale) {
+setMethod(
+  "construct_pomp",
+  signature=signature(data="data.frame", times="character"),
+  definition = function (data, times, t0, ...) {
 
-    ep <- paste0("in ",sQuote("pomp"),": ")  # error prefix
+    if (anyDuplicated(names(data)))
+      pStop_("names of data variables must be unique.")
 
-    if (missing(initializer)) initializer <- NULL
+    if (missing(t0)) reqd_arg(NULL,"t0")
+
+    tpos <- match(times,names(data),nomatch=0L)
+
+    if (length(times) != 1 || tpos == 0L)
+      pStop_(sQuote("times")," does not identify a single column of ",
+        sQuote("data")," by name.")
+
+    timename <- times
+
+    times <- data[[tpos]]
+    data <- do.call(rbind,lapply(data[-tpos],as.double))
+
+    construct_pomp(data=data,times=times,t0=t0,...,timename=timename)
+
+  }
+)
+
+setMethod(
+  "construct_pomp",
+  signature=signature(data="data.frame", times="numeric"),
+  definition = function (data, times, t0, ...) {
+
+    if (anyDuplicated(names(data)))
+      pStop_("names of data variables must be unique.")
+
+    if (missing(t0)) reqd_arg(NULL,"t0")
+
+    if (length(times) != nrow(data))
+      pStop_("the length of ",sQuote("times"),
+        " does not match that of the data.")
+
+    timename <- "time"
+    data <- do.call(rbind,lapply(data,as.double))
+
+    construct_pomp(data=data,times=times,t0=t0,...,timename=timename)
+
+  }
+)
+
+setMethod(
+  "construct_pomp",
+  signature=signature(data="NULL", times="numeric"),
+  definition = function (data, times, t0, ...) {
+
+    if (missing(t0)) reqd_arg(NULL,"t0")
+
+    construct_pomp(data=array(dim=c(0,length(times))),times=times,t0=t0,...)
+
+  }
+)
+
+setMethod(
+  "construct_pomp",
+  signature=signature(data="array", times="numeric"),
+  definition = function (data, times, ...,
+    rinit, rprocess, dprocess, rmeasure, dmeasure, skeleton, rprior, dprior,
+    partrans, params, covar) {
+
+    if (missing(rinit)) rinit <- NULL
 
     if (missing(rprocess) || is.null(rprocess)) {
-      rprocess <- plugin()
-    } else if (!is(rprocess,"pompPlugin")) {
-      stop(ep,sQuote("rprocess"),
-        " must be specified using one of the plugins:\n",
-        sQuote("onestep.sim"),", ",sQuote("discrete.time.sim"),
-        ", ",sQuote("euler.sim"),", ",sQuote("gillespie.sim"),
-        ", or ",sQuote("gillespie.hl.sim"),".",call.=FALSE)
+      rprocess <- rproc_plugin()
     }
 
     if (missing(dprocess)) dprocess <- NULL
     if (missing(rmeasure)) rmeasure <- NULL
     if (missing(dmeasure)) dmeasure <- NULL
+
+    if (missing(skeleton) || is.null(skeleton)) {
+      skeleton <- skel_plugin()
+    }
+
     if (missing(rprior)) rprior <- NULL
     if (missing(dprior)) dprior <- NULL
-    if (missing(fromEstimationScale)) fromEstimationScale <- NULL
-    if (missing(toEstimationScale)) toEstimationScale <- NULL
+
+    if (missing(partrans) || is.null(partrans)) {
+      partrans <- parameter_trans()
+    }
 
     if (missing(params)) params <- numeric(0)
-    if (missing(covar)) covar <- NULL
-    if (missing(tcovar)) tcovar <- NULL
+    if (is.list(params)) params <- unlist(params)
 
-    tryCatch(
-      pomp.internal(
-        data=data,
-        times=times,
-        t0=t0,
-        rprocess=rprocess,
-        dprocess=dprocess,
-        rmeasure=rmeasure,
-        dmeasure=dmeasure,
-        dprior=dprior,
-        rprior=rprior,
-        skeleton=skeleton,
-        .skel.type=.skel.type,
-        .skelmap.delta.t=.skelmap.delta.t,
-        initializer=initializer,
-        params=params,
-        covar=covar,
-        tcovar=tcovar,
-        fromEstimationScale=fromEstimationScale,
-        toEstimationScale=toEstimationScale,
-        ...
-      ),
-      error = function (e) {
-        stop(ep,conditionMessage(e),call.=FALSE)
-      }
+    if (missing(covar)) covar <- covariate_table()
+
+    pomp.internal(
+      data=data,
+      times=times,
+      rinit=rinit,
+      rprocess=rprocess,
+      dprocess=dprocess,
+      rmeasure=rmeasure,
+      dmeasure=dmeasure,
+      skeleton=skeleton,
+      dprior=dprior,
+      rprior=rprior,
+      partrans=partrans,
+      params=params,
+      covar=covar,
+      ...
     )
+
   }
 )
 
-setMethod("construct_pomp",
-  signature=signature(data="pomp"),
-  definition = function (
-    data, times, t0, ...,
-    rprocess, dprocess,
-    rmeasure, dmeasure,
-    .skel.type, .skelmap.delta.t, skeleton,
-    initializer,
-    rprior, dprior,
-    params, covar, tcovar,
-    zeronames,
-    fromEstimationScale, toEstimationScale
-  ) {
+setMethod(
+  "construct_pomp",
+  signature=signature(data="pomp", times="numeric"),
+  definition = function (data, times, ...) {
+    time(data) <- times
+    construct_pomp(data,times=NULL,...)
+  }
+)
 
-    ep <- paste0("in ",sQuote("pomp"),": ")  # error prefix
+setMethod(
+  "construct_pomp",
+  signature=signature(data="pomp", times="NULL"),
+  definition = function (data, times, t0, timename, ...,
+    rinit, rprocess, dprocess, rmeasure, dmeasure, skeleton, rprior, dprior,
+    partrans, params, covar, accumvars) {
 
-    if (missing(times)) {
-      times <- data@times
-    } else {
-      time(data) <- times
-    }
-
+    times <- data@times
     if (missing(t0)) t0 <- data@t0
+    if (missing(timename)) timename <- data@timename
 
-    if (missing(initializer)) initializer <- data@initializer
+    if (missing(rinit)) rinit <- data@rinit
 
-    if (missing(rprocess)) {
-      rprocess <- data@rprocess
-    } else if (is.null(rprocess)) {
-      rprocess <- plugin()
-    } else if (!is(rprocess,"pompPlugin")) {
-      stop(ep,sQuote("rprocess"),
-        " must be specified using one of the plugins:\n",
-        sQuote("onestep.sim"),", ",sQuote("discrete.time.sim"),
-        ", ",sQuote("euler.sim"),", ",sQuote("gillespie.sim"),
-        ", or ",sQuote("gillespie.hl.sim"),".",call.=FALSE)
-    }
+    if (missing(rprocess)) rprocess <- data@rprocess
+    else if (is.null(rprocess)) rprocess <- rproc_plugin()
 
     if (missing(dprocess)) dprocess <- data@dprocess
     if (missing(rmeasure)) rmeasure <- data@rmeasure
     if (missing(dmeasure)) dmeasure <- data@dmeasure
+
+    if (missing(skeleton)) skeleton <- data@skeleton
+    else if (is.null(skeleton)) skeleton <- skel_plugin()
+
     if (missing(rprior)) rprior <- data@rprior
     if (missing(dprior)) dprior <- data@dprior
-    if (missing(fromEstimationScale)) fromEstimationScale <- data@from.trans
-    if (missing(toEstimationScale)) toEstimationScale <- data@to.trans
+
+    if (missing(partrans)) partrans <- data@partrans
+    else if (is.null(partrans)) partrans <- parameter_trans()
 
     if (missing(params)) params <- data@params
     if (missing(covar)) covar <- data@covar
-    if (missing(tcovar)) tcovar <- data@tcovar
-    if (missing(zeronames)) zeronames <- data@zeronames
+    if (missing(accumvars)) accumvars <- data@accumvars
 
-    if (.skel.type == "remove") {
-      .skel.type <- "undef"
-      .skelmap.delta.t <- 1
-      skeleton <- NULL
-    } else if (.skel.type == "undef") {
-      .skel.type <- data@skeleton.type
-      .skelmap.delta.t <- data@skelmap.delta.t
-      skeleton <- data@skeleton
-    }
-
-    tryCatch(
-      pomp.internal(
-        data=data@data,
-        times=times,
-        t0=t0,
-        rprocess=rprocess,
-        dprocess=dprocess,
-        rmeasure=rmeasure,
-        dmeasure=dmeasure,
-        dprior=dprior,
-        rprior=rprior,
-        skeleton=skeleton,
-        .skel.type=.skel.type,
-        .skelmap.delta.t=.skelmap.delta.t,
-        initializer=initializer,
-        covar=covar,
-        tcovar=tcovar,
-        zeronames=zeronames,
-        fromEstimationScale=fromEstimationScale,
-        toEstimationScale=toEstimationScale,
-        params=params,
-        .solibs=data@solibs,
-        .userdata=data@userdata,
-        ...
-      ),
-      error = function (e) {
-        stop(ep,conditionMessage(e),call.=FALSE)
-      }
+    pomp.internal(
+      data=data@data,
+      times=times,
+      t0=t0,
+      timename=timename,
+      rinit=rinit,
+      rprocess=rprocess,
+      dprocess=dprocess,
+      rmeasure=rmeasure,
+      dmeasure=dmeasure,
+      skeleton=skeleton,
+      rprior=rprior,
+      dprior=dprior,
+      partrans=partrans,
+      covar=covar,
+      accumvars=accumvars,
+      params=params,
+      .solibs=data@solibs,
+      .userdata=data@userdata,
+      ...
     )
+
   }
 )
 
-pomp.internal <- function (data, times, t0,
-  rprocess, dprocess, rmeasure, dmeasure,
-  skeleton, .skel.type, .skelmap.delta.t,
-  initializer, rprior, dprior,
-  params, covar, tcovar,
-  obsnames, statenames, paramnames, covarnames,
-  zeronames, PACKAGE,
-  fromEstimationScale, toEstimationScale,
-  globals, cdir, cfile, shlib.args,
-  .userdata, ...,
-  .solibs = list(),
-  verbose = getOption("verbose",FALSE)) {
+pomp.internal <- function (data, times, t0, timename, ...,
+  rinit, rprocess, dprocess, rmeasure, dmeasure, skeleton, rprior, dprior,
+  partrans, params, covar, accumvars, obsnames, statenames,
+  paramnames, covarnames, PACKAGE, globals, cdir, cfile, shlib.args,
+  compile, .userdata, .solibs = list(), verbose = getOption("verbose", FALSE)) {
 
-  ep <- character(0)
-  wp <- paste0("in ",sQuote("pomp"),": ")
+  ## check times
+  if (missing(times) || !is.numeric(times) || !all(is.finite(times)) ||
+      (length(times)>1 && !all(diff(times)>=0)))
+    pStop_(sQuote("times")," must be a non-decreasing sequence of numbers.")
+  storage.mode(times) <- "double"
 
-  if (missing(t0)) stop(ep,sQuote("t0")," is a required argument",call.=FALSE)
+  ## check t0
+  if (missing(t0) || !is.numeric(t0) || !is.finite(t0) ||
+      length(t0) > 1 ||  t0 > times[1])
+    pStop_(sQuote("t0")," must be a single number not greater than ",
+      sQuote("times[1]"),".")
+  storage.mode(t0) <- "double"
+
+  if (missing(timename) || is.null(timename))
+    timename <- "time"
+  else
+    timename <- as.character(timename)
 
   if (missing(.userdata)) .userdata <- list()
   added.userdata <- list(...)
   if (length(added.userdata)>0) {
-    message(wp,"the following unrecognized argument(s) ",
-      "will be stored for use by user-defined functions: ",
-      paste(sQuote(names(added.userdata)),collapse=","))
+    message("in ",sQuote("pomp"),": the unrecognized ",
+      ngettext(length(added.userdata),"argument","arguments")," ",
+      paste(sQuote(names(added.userdata)),collapse=","),
+      ngettext(length(added.userdata)," is"," are"),
+      " available for use by the POMP basic components."
+    )
     .userdata[names(added.userdata)] <- added.userdata
+  }
+
+  if (!is(rprocess,"rprocPlugin")) {
+    pStop_(sQuote("rprocess"),
+      " must be specified using one of the plugins:\n",
+      sQuote("onestep"),", ",sQuote("discrete_time"),
+      ", ",sQuote("euler"),", ",sQuote("gillespie"),
+      ", or ",sQuote("gillespie_hl"),".")
+  }
+
+  if (!is(skeleton,"skelPlugin")) {
+    pStop_(sQuote("skeleton")," must be specified using either ",
+      sQuote("map")," or ",sQuote("vectorfield"),".")
+  }
+
+  if (!is(partrans,"partransPlugin")) {
+    pStop_(sQuote("partrans")," must be specified using ",
+      sQuote("parameter_trans"),".")
   }
 
   if (missing(statenames)) statenames <- NULL
@@ -312,101 +449,42 @@ pomp.internal <- function (data, times, t0,
   if (missing(obsnames)) obsnames <- NULL
   if (missing(covarnames)) covarnames <- NULL
 
-  statenames <- as.character(statenames)
-  paramnames <- as.character(paramnames)
-  obsnames <- as.character(obsnames)
-  covarnames <- as.character(covarnames)
-
-  if (missing(zeronames)) zeronames <- NULL
-  zeronames <- as.character(zeronames)
-  if (anyDuplicated(zeronames)) {
-    stop(ep,"all ",sQuote("zeronames")," must be unique", call.=FALSE)
-  }
+  if (missing(accumvars)) accumvars <- NULL
+  accumvars <- unique(as.character(accumvars))
 
   ## store the data as double-precision matrix
-  storage.mode(data) <- 'double'
-  if (length(obsnames) == 0) obsnames <- rownames(data)
-  if (anyDuplicated(obsnames)) {
-    stop(ep,"all ",sQuote("obsnames")," must be unique", call.=FALSE)
-  }
+  storage.mode(data) <- "double"
+  if (is.null(obsnames)) obsnames <- rownames(data)
 
   ## check the parameters and force them to be double-precision
-  if (length(params)>0) {
-    if (is.null(names(params)) || !is.numeric(params))
-      stop(sQuote("params")," must be a named numeric vector",call.=FALSE)
+  params <- setNames(as.double(params),names(params))
+  if (length(params) > 0) {
+    if (is.null(names(params)) || !is.numeric(params) ||
+        !all(nzchar(names(params))))
+      pStop_(sQuote("params")," must be a named numeric vector.")
   }
-  storage.mode(params) <- 'double'
 
-  ## check times
-  if (!is.numeric(times) || any(is.na(times)) || !all(diff(times)>0))
-    stop(sQuote("times"),
-      " must be an increasing numeric vector without missing values.",
-      call.=FALSE)
-  storage.mode(times) <- 'double'
+  if (is(rinit,"Csnippet") && is.null(statenames)) {
+    pStop_("when ",sQuote("rinit")," is provided as a C snippet, ",
+      "you must also provide ",sQuote("statenames"),".")
+  }
 
-  ## check t0
-  if (!is.numeric(t0) || length(t0) > 1)
-    stop("the zero-time ",sQuote("t0")," must be a single number",call.=FALSE)
-  storage.mode(t0) <- 'double'
+  if (is(rmeasure,"Csnippet") && is.null(obsnames)) {
+    pStop_("when ",sQuote("rmeasure")," is provided as a C snippet, ",
+           "you must also provide ",sQuote("obsnames"),".")
+  }
 
   ## check and arrange covariates
   if (is.null(covar)) {
-    covar <- matrix(data=0,nrow=0,ncol=0)
-    tcovar <- numeric(0)
-  } else if (is.data.frame(covar)) {
-    if ((is.numeric(tcovar) && (tcovar<1 || tcovar>length(covar))) ||
-        (is.character(tcovar) && (!(tcovar%in%names(covar)))) ||
-        (!is.numeric(tcovar) && !is.character(tcovar))) {
-      stop("if ",sQuote("covar")," is a data frame, ",sQuote("tcovar"),
-        " should indicate the time variable",call.=FALSE)
-    } else if (is.numeric(tcovar)) {
-      tpos <- tcovar
-      tcovar <- covar[[tpos]]
-      covar <- do.call(cbind,lapply(covar[-tpos],as.double))
-    } else if (is.character(tcovar)) {
-      tpos <- match(tcovar,names(covar))
-      tcovar <- covar[[tpos]]
-      covar <- do.call(cbind,lapply(covar[-tpos],as.double))
-    }
-  } else {
-    covar <- as.matrix(covar)
-    storage.mode(covar) <- "double"
-  }
-  if (length(covarnames)==0) {
-    covarnames <- as.character(colnames(covar))
-  } else {
-    if (!all(covarnames %in% colnames(covar))) {
-      missing <- covarnames[!(covarnames%in%colnames(covar))]
-      stop("covariate(s) ",paste(sapply(missing,sQuote),collapse=","),
-        " are not among the columns of ",sQuote("covar"),call.=FALSE)
-    }
-    covar <- covar[,covarnames,drop=FALSE]
-  }
-  if (anyDuplicated(covarnames)) {
-    stop(ep,"all ",sQuote("covarnames")," must be unique", call.=FALSE)
-  }
-  storage.mode(tcovar) <- "double"
-  storage.mode(covar) <- "double"
-
-  ## use default initializer?
-  default.init <- is.null(initializer) ||
-    (is(initializer,"pomp.fun") && initializer@mode == pompfunmode$undef )
-  if (default.init) initializer <- pomp.fun(slotname="initializer")
-
-  if (is(initializer,"Csnippet") && length(statenames)==0) {
-    stop(ep,"when ",sQuote("initializer")," is provided as a C snippet, ",
-      "you must also provide ",sQuote("statenames"),call.=FALSE)
+    covar <- covariate_table()
+  } else if (!is(covar,"covartable")) {
+    pStop_("bad option for ",sQuote("covar"),".")
   }
 
-  ## by default, use flat improper prior
-  if (is.null(dprior))
-    dprior <- pomp.fun(f="_pomp_default_dprior",PACKAGE="pomp")
-
-  ## handle skeleton
-  if (is.null(skeleton)) .skel.type <- "undef"
+  if (is.null(covarnames)) covarnames <- get_covariate_names(covar)
 
   hitches <- hitch(
-    initializer=initializer,
+    rinit=rinit,
     step.fn=rprocess@step.fn,
     rate.fn=rprocess@rate.fn,
     dprocess=dprocess,
@@ -414,9 +492,9 @@ pomp.internal <- function (data, times, t0,
     dmeasure=dmeasure,
     rprior=rprior,
     dprior=dprior,
-    fromEstimationScale=fromEstimationScale,
-    toEstimationScale=toEstimationScale,
-    skeleton=skeleton,
+    toEst=partrans@to,
+    fromEst=partrans@from,
+    skeleton=skeleton@skel.fn,
     templates=workhorse_templates,
     obsnames=obsnames,
     statenames=statenames,
@@ -427,44 +505,21 @@ pomp.internal <- function (data, times, t0,
     cfile=cfile,
     cdir=cdir,
     shlib.args=shlib.args,
+    compile=compile,
     verbose=verbose
   )
 
-  ## are parameter transformations defined?
-  has.trans <- hitches$funs$fromEstimationScale@mode != pompfunmode$undef &&
-    hitches$funs$toEstimationScale@mode != pompfunmode$undef
-
-  ## check to make sure 'covars' is included as an argument where needed
-  if (nrow(covar) > 0) {
-    if ((hitches$funs$skeleton@mode==pompfunmode$Rfun) &&
-        !("covars"%in%names(formals(hitches$funs$skeleton@R.fun))))
-      warning(wp,"a covariate table has been given, yet the ",
-        sQuote("skeleton")," function does not have ",
-        sQuote("covars")," as a formal argument: see ",
-        sQuote("?pomp"),call.=FALSE)
-    if ((hitches$funs$rmeasure@mode==pompfunmode$Rfun) &&
-        !("covars"%in%names(formals(hitches$funs$rmeasure@R.fun))))
-      warning(wp,"a covariate table has been given, yet the ",
-        sQuote("rmeasure")," function does not have ",
-        sQuote("covars")," as a formal argument: see ",
-        sQuote("?pomp"),call.=FALSE)
-    if ((hitches$funs$dmeasure@mode==pompfunmode$Rfun) &&
-        !("covars"%in%names(formals(hitches$funs$dmeasure@R.fun))))
-      warning(wp,"a covariate table has been given, yet the ",
-        sQuote("dmeasure")," function does not have ",
-        sQuote("covars")," as a formal argument: see ",
-        sQuote("?pomp"),call.=FALSE)
-  }
-
-  if ((length(tcovar)>0) && ((min(tcovar)>t0) || (max(tcovar)<max(times))))
-    warning(wp,"the supplied covariate covariate times ",sQuote("tcovar"),
-      " do not embrace the data times: covariates may be extrapolated",
-      call.=FALSE
-    )
+  ## check to see if covariate times embrace the data times
+  covar_time_warning(covar,times,t0,"pomp")
 
   new(
-    'pomp',
-    rprocess = plugin(
+    "pomp",
+    data = data,
+    times = times,
+    t0 = t0,
+    timename = timename,
+    rinit = hitches$funs$rinit,
+    rprocess = rproc_plugin(
       rprocess,
       step.fn=hitches$funs$step.fn,
       rate.fn=hitches$funs$rate.fn
@@ -472,109 +527,24 @@ pomp.internal <- function (data, times, t0,
     dprocess = hitches$funs$dprocess,
     dmeasure = hitches$funs$dmeasure,
     rmeasure = hitches$funs$rmeasure,
+    skeleton = skel_plugin(
+      skeleton,
+      skel.fn=hitches$funs$skeleton
+    ),
     dprior = hitches$funs$dprior,
     rprior = hitches$funs$rprior,
-    skeleton = hitches$funs$skeleton,
-    skeleton.type = .skel.type,
-    skelmap.delta.t = .skelmap.delta.t,
-    data = data,
-    times = times,
-    t0 = t0,
-    default.init = default.init,
-    initializer = hitches$funs$initializer,
+    partrans = parameter_trans(
+      toEst=hitches$funs$toEst,
+      fromEst=hitches$funs$fromEst
+    ),
     params = params,
     covar = covar,
-    tcovar = tcovar,
-    zeronames = zeronames,
-    has.trans = has.trans,
-    from.trans = hitches$funs$fromEstimationScale,
-    to.trans = hitches$funs$toEstimationScale,
-    solibs = if (is.null(hitches$lib)) .solibs else c(list(hitches$lib),.solibs),
+    accumvars = accumvars,
+    solibs = if (is.null(hitches$lib)) {
+      .solibs
+    } else {
+      c(list(hitches$lib),.solibs)
+    },
     userdata = .userdata
   )
 }
-
-measform2pomp <- function (formulae) {
-
-  ep <- paste0("in ",sQuote("pomp"),": ")
-
-  if (!is.list(formulae))
-    formulae <- list(formulae)
-  nobs <- length(formulae)
-  if (nobs < 1)
-    stop(ep,"to use ",sQuote("measurement.model"),
-      " you must provide at least one formula",call.=FALSE)
-  for (k in seq_len(nobs)) {
-    if (!inherits(formulae[[k]],"formula"))
-      stop(ep,sQuote("measurement.model")," takes formulae as arguments",call.=FALSE)
-  }
-  obsnames <- unlist(lapply(formulae,function(x)x[[2L]]))
-  distrib <- lapply(formulae,function(x)as.character(x[[3L]][[1L]]))
-  ddistrib <- lapply(distrib,function(x)paste0("d",x))
-  rdistrib <- lapply(distrib,function(x)paste0("r",x))
-  for (k in seq_len(nobs)) {
-    tryCatch(
-      match.fun(ddistrib[[k]]),
-      error = function (e)
-        stop(ep,"distribution function ",ddistrib[[k]]," not found",call.=FALSE)
-    )
-    tryCatch(
-      match.fun(rdistrib[[k]]),
-      error = function (e)
-        stop(ep,"random deviate function ",rdistrib[[k]]," not found",call.=FALSE)
-    )
-  }
-  pred.args <- lapply(formulae,function(x)as.list(x[[3L]][-1L]))
-  dcalls <- vector(mode='list',length=nobs)
-  rcalls <- vector(mode='list',length=nobs)
-  for (k in seq_len(nobs)) {
-    dcalls[[k]] <- as.call(
-      c(
-        list(
-          as.name(ddistrib[[k]]),
-          x=obsnames[[k]]
-        ),
-        pred.args[[k]],
-        list(
-          log=TRUE
-        )
-      )
-    )
-    rcalls[[k]] <- as.call(
-      c(
-        list(
-          as.name(rdistrib[[k]]),
-          n=1
-        ),
-        pred.args[[k]]
-      )
-    )
-  }
-  list(
-    dmeasure = function (y, x, t, params, log, covars, ...) {
-      f <- 0
-      for (k in seq_len(nobs)) {
-        f <- f+eval(
-          dcalls[[k]],
-          envir=as.list(c(y,x,params,covars,t=t))
-        )
-      }
-      if (log) f else exp(f)
-    },
-    rmeasure = function (x, t, params, covars, ...) {
-      y <- numeric(length=nobs)
-      names(y) <- obsnames
-      for (k in seq_len(nobs)) {
-        y[k] <- eval(
-          rcalls[[k]],
-          envir=as.list(c(x,params,covars,t=t))
-        )
-      }
-      y
-    }
-  )
-}
-
-vectorfield <- safecall
-map <- safecall
-

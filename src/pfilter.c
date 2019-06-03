@@ -12,24 +12,23 @@
 // tracks ancestry of particles if desired.
 // returns all of the above in a named list.
 SEXP pfilter_computations (SEXP x, SEXP params, SEXP Np,
-  SEXP rw_sd,
   SEXP predmean, SEXP predvar,
-  SEXP filtmean, SEXP trackancestry, SEXP onepar,
+  SEXP filtmean, SEXP trackancestry, SEXP doparRS,
   SEXP weights, SEXP tol)
 {
   int nprotect = 0;
   SEXP pm = R_NilValue, pv = R_NilValue, fm = R_NilValue, anc = R_NilValue;
-  SEXP rw_names, ess, fail, loglik;
+  SEXP ess, fail, loglik;
   SEXP newstates = R_NilValue, newparams = R_NilValue;
   SEXP retval, retvalnames;
   const char *dimnm[2] = {"variable","rep"};
   double *xpm = 0, *xpv = 0, *xfm = 0, *xw = 0, *xx = 0, *xp = 0;
   int *xanc = 0;
-  SEXP dimX, dimP, newdim, Xnames, Pnames, pindex;
-  int *dim, *pidx, lv, np;
-  int nvars, npars = 0, nrw = 0, nreps, offset, nlost;
-  int do_rw, do_pm, do_pv, do_fm, do_ta, do_par_resamp, all_fail = 0;
-  double sum, sumsq, vsq, ws, w, toler;
+  SEXP dimX, dimP, newdim, Xnames, Pnames;
+  int *dim, np;
+  int nvars, npars = 0, nreps, nlost;
+  int do_pm, do_pv, do_fm, do_ta, do_pr, all_fail = 0;
+  double sum = 0, sumsq = 0, vsq, ws, w, toler;
   int j, k;
 
   PROTECT(dimX = GET_DIM(x)); nprotect++;
@@ -38,6 +37,7 @@ SEXP pfilter_computations (SEXP x, SEXP params, SEXP Np,
   xx = REAL(x);
   PROTECT(Xnames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
 
+  PROTECT(params = as_matrix(params)); nprotect++;
   PROTECT(dimP = GET_DIM(params)); nprotect++;
   dim = INTEGER(dimP);
   npars = dim[0];
@@ -47,21 +47,14 @@ SEXP pfilter_computations (SEXP x, SEXP params, SEXP Np,
 
   np = *(INTEGER(AS_INTEGER(Np))); // number of particles to resample
 
-  nrw = LENGTH(rw_sd);	     // number of parameters that are variable
-  do_rw = nrw > 0;	     // do random walk in parameters?
-  if (do_rw) {
-    // names of parameters undergoing random walk
-    PROTECT(rw_names = GET_NAMES(rw_sd)); nprotect++;
-  }
-
   do_pm = *(LOGICAL(AS_LOGICAL(predmean))); // calculate prediction means?
   do_pv = *(LOGICAL(AS_LOGICAL(predvar)));  // calculate prediction variances?
   do_fm = *(LOGICAL(AS_LOGICAL(filtmean))); // calculate filtering means?
   do_ta = *(LOGICAL(AS_LOGICAL(trackancestry))); // track ancestry?
-  do_par_resamp = *(LOGICAL(AS_LOGICAL(onepar))); // are all cols of 'params' the same?
-  do_par_resamp = !do_par_resamp || do_rw; // should we do parameter resampling?
+  // Do we need to do parameter resampling?
+  do_pr = *(LOGICAL(AS_LOGICAL(doparRS)));
 
-  if (do_par_resamp) {
+  if (do_pr) {
     if (dim[1] != nreps)
       errorcall(R_NilValue,"ncol('states') should be equal to ncol('params')"); // # nocov
   }
@@ -93,33 +86,18 @@ SEXP pfilter_computations (SEXP x, SEXP params, SEXP Np,
   }
   *(LOGICAL(fail)) = all_fail;
 
-  if (do_rw) {
-    // indices of parameters undergoing random walk
-    PROTECT(pindex = matchnames(Pnames,rw_names,"parameters")); nprotect++;
-    xp = REAL(params);
-    pidx = INTEGER(pindex);
-    lv = nvars+nrw;
-  } else {
-    pidx = NULL;
-    lv = nvars;
-  }
-
   if (do_pm || do_pv) {
-    PROTECT(pm = NEW_NUMERIC(lv)); nprotect++;
+    PROTECT(pm = NEW_NUMERIC(nvars)); nprotect++;
     xpm = REAL(pm);
   }
 
   if (do_pv) {
-    PROTECT(pv = NEW_NUMERIC(lv)); nprotect++;
+    PROTECT(pv = NEW_NUMERIC(nvars)); nprotect++;
     xpv = REAL(pv);
   }
 
   if (do_fm) {
-    if (do_rw) {
-      PROTECT(fm = NEW_NUMERIC(nvars+npars)); nprotect++;
-    } else {
-      PROTECT(fm = NEW_NUMERIC(nvars)); nprotect++;
-    }
+    PROTECT(fm = NEW_NUMERIC(nvars)); nprotect++;
     xfm = REAL(fm);
   }
 
@@ -159,40 +137,6 @@ SEXP pfilter_computations (SEXP x, SEXP params, SEXP Np,
 
   }
 
-  // compute means and variances for parameters (if needed)
-  if (do_rw) {
-    for (j = 0; j < nrw; j++) {
-      offset = pidx[j];		// position of the parameter
-
-      if (do_pm || do_pv) {
-        for (k = 0, sum = 0; k < nreps; k++) sum += xp[offset+k*npars];
-        sum /= ((double) nreps);
-        xpm[nvars+j] = sum;
-      }
-
-      if (do_pv) {
-        for (k = 0, sumsq = 0; k < nreps; k++) {
-          vsq = xp[offset+k*npars]-sum;
-          sumsq += vsq*vsq;
-        }
-        xpv[nvars+j] = sumsq / ((double) (nreps - 1));
-      }
-
-    }
-
-    if (do_fm) {
-      for (j = 0; j < npars; j++) {
-        if (all_fail) {		// unweighted average
-          for (k = 0, ws = 0; k < nreps; k++) ws += xp[j+k*npars];
-          xfm[nvars+j] = ws/((double) nreps);
-        } else {		// weighted average
-          for (k = 0, ws = 0; k < nreps; k++) ws += xp[j+k*npars]*xw[k];
-          xfm[nvars+j] = ws/w;
-        }
-      }
-    }
-  }
-
   GetRNGstate();
 
   if (!all_fail) { // resample the particles unless we have filtering failure
@@ -209,7 +153,7 @@ SEXP pfilter_computations (SEXP x, SEXP params, SEXP Np,
     st = REAL(newstates);
 
     // create storage for new parameters
-    if (do_par_resamp) {
+    if (do_pr) {
       xdim[0] = npars; xdim[1] = np;
       PROTECT(newparams = makearray(2,xdim)); nprotect++;
       setrownames(newparams,Pnames,2);
@@ -223,7 +167,7 @@ SEXP pfilter_computations (SEXP x, SEXP params, SEXP Np,
     for (k = 0; k < np; k++) { // copy the particles
       for (j = 0, xx = ss+nvars*sample[k]; j < nvars; j++, st++, xx++)
         *st = *xx;
-      if (do_par_resamp) {
+      if (do_pr) {
         for (j = 0, xp = ps+npars*sample[k]; j < npars; j++, pt++, xp++)
           *pt = *xp;
       }
@@ -268,7 +212,7 @@ SEXP pfilter_computations (SEXP x, SEXP params, SEXP Np,
     SET_ELEMENT(retval,3,newstates);
   }
 
-  if (all_fail || !do_par_resamp) {
+  if (all_fail || !do_pr) {
     SET_ELEMENT(retval,4,params);
   } else {
     SET_ELEMENT(retval,4,newparams);

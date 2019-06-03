@@ -1,5 +1,115 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 2.1}{
+  \itemize{
+    \item The \code{melt} function can now be applied to arbitrary \sQuote{pomp} objects.
+    \item A new function, \code{runifDesign} allows construction of design matrices using samples from multivariate uniform distributions.
+    \item The \code{profileDesign} function takes a new argument, \code{type}, with two options:
+    \code{"sobol"}, the default, constructs the design using \code{sobolDesign}, as before.
+    \code{"runif"} uses the new \code{runifDesign} function.
+    \item A new example, comprising models and data for the 2014--2016 west African Ebola virus disease outbreak, is included.
+    See \code{?ebola} for details.
+    \item It is now possible to adjust the observation times and zero-time in the \code{sir} and \code{sir2} examples.
+    One can also change the default RNG seed used in generating the simulated data.
+    \item The codes underlying the \code{rprocess} workhorse have been streamlined to obviate an unnecessary copy operation.
+    As a result, the interface to the \code{rprocess} workhorse has been changed.
+    \item The interface to the new \code{flow} workhorse has been changed to match.
+    \item The new \code{flow} workhorse allows integration/iteration of the deterministic skeleton at arbitrary times from an arbitrary initial condition.
+    \item When \code{coef} is applied to a \sQuote{listie}, the result can be more usefully \code{melt}ed.
+    \item The probe-names returned by \code{probe.acf} and \code{probe.ccf} have changed.
+    \item A bug, whereby the \sQuote{coef} method from other packages was masked, has been fixed.
+    \item Errors in the documentation have been corrected.
+    \item There is a new \code{as.data.frame} method for \sQuote{listie}s.
+    \item Some problems with the exposure of internal objects for package developers have been corrected.
+    \item The \pkg{magrittr} pipe operator, \code{\%>\%}, is now re-exported.
+    \item More examples have been included.
+    \item Minor changes to error messages.
+    \item The names of the \sQuote{objfun} methods have been changed to \code{probe_objfun}, \code{spect_objfun}, \code{traj_objfun}, and \code{nlf_objfun}.
+    \item The package directory structure has been modified to include a new \file{examples} directory, which holds the examples used in the documentation.
+    \item The names of the \sQuote{objfun} methods have been shortened.
+    \item It is now permissible that the sequence of observation times (and sequences of covariate times) be merely non-decreasing sequences.
+    Previously, \pkg{pomp} insisted on strictly increasing time sequences.
+    \item The default cooling schedule (\code{cooling.type}) in \code{mif2} is now \dQuote{geometric}, in contrast to \dQuote{hyperbolic}, as before.
+    \item \pkg{pomp} now requires at least \R version 3.5.
+    \item The \code{zeronames} argument has been renamed \code{accumvars}.
+    \item In the course of ordinary work, one should never need to interact with the low-level \code{pomp} constructor function now.
+    \item The \code{pompExample} function has been dropped.
+    The various examples are now included as regular functions that construct \sQuote{pomp} objects.
+    \item The \code{bbs} example has been dropped.
+    \item One can now modify basic model components at (almost) any stage in a pipeline of \pkg{pomp} computations.
+    All the top-level inference functions, plus \code{probe}, \code{pfilter}, and \code{simulate} now allow modification of basic model components.
+    \item The \code{rprocess} plugins \code{onestep.sim}, \code{discrete.time.sim}, \code{euler.sim}, \code{gillespie.sim}, and \code{gillespie.hl.sim} have been renamed \code{onestep}, \code{discrete_time}, \code{euler}, \code{gillespie}, and \code{gillespie_hl}, respectively.
+    The old usage is available but deprecated.
+    \item One can now call \code{simulate} on a model without reference to any data.
+    \item The covariate table facility (\code{covariate_table}) now supports piecewise constant interpolation.
+    \item The syntax with which one includes covariates via \code{covariate_table} has become more flexible.
+    Specifically, the arguments to \code{covariate_table} are now evaluated sequentially, so that later ones can depend on earlier ones.
+    Once evaluated, the covariates are bound column-wise into a single data frame.
+    \item The manner in which one writes \R functions to specify basic model components has been totally changed.
+    Before, one wrote functions that took specific arguments such as 'x', 'params', and 'covars'.
+    Now, one writes such functions with any or all state variables, observables, covariates, and/or time as arguments.
+    \item \code{simulate} now returns more informative results when simulations from multiple parameter sets are simultaneously computed.
+    Specifically, if \code{params} has column names, these are used to identify the resulting simulations.
+    Thus when \code{format = "pomps"} (the default), the names of the resulting list will be constructed from the column names of \code{params}.
+    Likewise, when \code{format = "arrays"}, the resulting arrays will have informative column names;
+    When \code{format = "data.frame"}, the identifier variable will make use of the column names.
+    \item The basic particle filter, \code{pfilter}, has a simpler mode of operation:
+    \code{params} should be a single parameter set only.
+    That is, it is no longer possible to pass a matrix of parameters to \code{pfilter}.
+    \item The Liu-West algorithm, \code{bsmc2}, has a simpler mode of operation:
+    \code{params} should be a single parameter set only:
+    the SMC particles are drawn from \code{rprior}.
+    \item The \code{as.data.frame}, \code{states}, and \code{obs} options for \code{simulate} have been done away with.
+    One now chooses the format of the returned simulations via the \code{format} argument.
+    When one simulates at multiple parameter sets, list names, array \code{dimnames}, or identifying variables in the output data frame help to correlate simulations with parameter sets.
+    \item The \code{as.data.frame} argument to \code{trajectory} has been removed in favor of a new \code{format} argument that allows one to choose between receiving the results in the form of an \code{"array"} or a \code{"data.frame"}.
+    \item All the basic model components now have defaults.
+    \itemize{
+      \item The default \code{rinit} behavior remains as it was:
+      it assumes the initial state distribution is concentrated at a point mass determined by parameters with \dQuote{\code{.0}} or \dQuote{\code{_0}} suffices.
+
+      \item The default process model is \dQuote{missing}: calls to \code{dprocess} and \code{rprocess} will result in missing values (\code{NA}).
+      \item The default measurement model is \dQuote{missing} as well.
+      \item The default prior is flat and improper:
+      all calls to the default \code{dprior} result in \code{1} (\code{0} if \code{log = TRUE}, and all calls to \code{rprior} result in \code{NA}.
+      \item The default skeleton is missing.
+      \item The default parameter transformations remain the identity.
+    }
+    \item The \code{transform} argument present in many \pkg{pomp} algorithms has been removed.
+    Parameter transformations are now automatically performed when appropriate.
+    The default parameter transformation remains the identity.
+    \item The old \code{probe.match} and \code{traj.match} functions have been removed.
+    The new approach to parameter estimation based on numerical optimization involves constructing stateful objective functions.
+    There are now three of these: \code{traj.match.objfun}, \code{probe.match.objfun}, and \code{spect.match.objfun}.
+    \item The documentation system has been thoroughly overhauled.
+    \item In \code{skeleton}, the \code{t} argument has been replaced by \code{times}, to make this uniform with the other workhorse functions.
+    \item Covariates are now included using the \code{covariate_table} construction, passed via the \code{covar} argument to \code{pomp}.
+    The \code{tcovar} argument is no longer used.
+    \item Instead of providing separate \code{fromEstimationScale} and \code{toEstimationScale} arguments to \code{pomp}, one now provides a single \code{partrans} argument constructed by means of the new function \code{parameter_trans}.
+    In addition, references to \dQuote{fromEstimationScale} and \dQuote{toEstimationScale} have been abbreviated to \dQuote{fromEst} and \dQuote{toEst}, respectively, throughout the package.
+    \item When writing C snippets for parameter transformations, the notation \code{T_p} refers to the value of \code{p} on the estimation scale.
+    Thus, if parameter \eqn{alpha} is to be log-transformed for estimation, the \code{toEst} snippet would contain the line \code{T_alpha = log(alpha);} and the \code{fromEst} snippet would include \code{alpha = exp(T_alpha);}.
+    \item The \code{parameter_trans} function now takes optional arguments \code{log}, \code{logit}, and \code{barycentric}, with names of parameters to be log-, logit-, and log-barycentric transformed, respectively.
+    \item The \code{measurement.model} argument to \code{pomp} has been removed.
+    It is now necessary to specify the measurement model directly using \code{rmeasure} and/or \code{dmeasure}.
+    \item The \code{initializer} is no longer referred to by that name.
+    It is now \code{rinit}, since it draws from the distribution of the latent state at the initial time.
+    The low-level function \code{init.state} has been replaced by \code{rinit}.
+    \item The \code{conv.rec} method has been deprecated, replaced by the new \code{traces} method.
+    \item The \code{euler.sir} example has been renamed \code{sir}.
+    \item The \code{gillespie.sir} example has been renamed \code{sir2}.
+    \item The \code{covmat} method can now be applied to a \code{probed.pomp} object.
+    It returns the estimated covariance matrix of the probes.
+    \item When \code{trajectory} calls on \pkg{deSolve} routines to numerically integrate a model vectorfield, more informative error messages are generated, and diagnostics are printed when \code{verbose = TRUE}.
+    \item The \code{show} method applied to pomp objects is now quite terse.
+    To obtain detailed information, the \code{spy} method is available.
+    \item The \code{spy} method now returns the information formerly displayed in a call to \code{show}, in addition to the C files associated with any C snippets.
+    \item The use of \code{$} methods to access the slots of \pkg{pomp} S4 objects has now been removed.
+    These classes are no longer exported (for the most part).
+    \item The \code{transform} argument to the \code{probe.quantile} function has been removed (as it is entirely redundant!).
+    \item The old and deprecated \code{mif} and \code{bsmc} methods have been removed.
+    }
+}
 \section{Changes in \pkg{pomp} version 1.19}{
   \itemize{
     \item The \code{obs} and \code{states} arguments of \code{simulate} are deprecated and will be removed in a forthcoming release.

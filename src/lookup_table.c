@@ -4,44 +4,45 @@
 
 #include "pomp_internal.h"
 
+SEXP get_covariate_names (SEXP object) {
+  return GET_ROWNAMES(GET_DIMNAMES(GET_SLOT(object,install("table"))));
+}
+
 lookup_table_t make_covariate_table (SEXP object, int *ncovar) {
   lookup_table_t tab;
   int *dim;
-  dim = INTEGER(GET_DIM(GET_SLOT(object,install("covar"))));
-  tab.length = dim[0];
-  *ncovar = tab.width = dim[1];
+  dim = INTEGER(GET_DIM(GET_SLOT(object,install("table"))));
+  *ncovar = tab.width = dim[0];
+  tab.length = dim[1];
   tab.index = 0;
-  tab.x = REAL(GET_SLOT(object,install("tcovar")));
-  tab.y = REAL(GET_SLOT(object,install("covar")));
+  tab.x = REAL(GET_SLOT(object,install("times")));
+  tab.y = REAL(GET_SLOT(object,install("table")));
+  tab.order = *(INTEGER(GET_SLOT(object,install("order"))));
   return tab;
 }
 
-SEXP lookup_in_table (SEXP ttable, SEXP xtable, SEXP t) {
+SEXP lookup_in_table (SEXP covar, SEXP t) {
   int nprotect = 0;
-  int *dim, xdim[2], ntimes, nvar;
+  int xdim[2], nvar;
   int j, nt;
   double *tp, *xp;
-  SEXP X;
+  SEXP Cnames, X;
 
   PROTECT(t = AS_NUMERIC(t)); nprotect++;
   nt = LENGTH(t);
+  PROTECT(Cnames = get_covariate_names(covar)); nprotect++;
 
-  dim = INTEGER(GET_DIM(xtable));
-  ntimes = dim[0]; nvar = dim[1];
-  PROTECT(ttable = AS_NUMERIC(ttable)); nprotect++;
-  if (ntimes != LENGTH(ttable))
-    errorcall(R_NilValue,"in 'lookup_in_table': incommensurate dimensions");
+  lookup_table_t tab = make_covariate_table(covar,&nvar);
 
   if (nt > 1) {
     xdim[0] = nvar; xdim[1] = nt;
     PROTECT(X = makearray(2,xdim)); nprotect++;
-    setrownames(X,GET_COLNAMES(GET_DIMNAMES(xtable)),2);
+    setrownames(X,Cnames,2);
   } else {
     PROTECT(X = NEW_NUMERIC(nvar)); nprotect++;
-    SET_NAMES(X,GET_COLNAMES(GET_DIMNAMES(xtable)));
+    SET_NAMES(X,Cnames);
   }
 
-  lookup_table_t tab = {ntimes,nvar,0,REAL(ttable),REAL(xtable)};
   for (j = 0, tp = REAL(t), xp = REAL(X); j < nt; j++, tp++, xp += nvar)
     table_lookup(&tab,*tp,xp);
 
@@ -59,13 +60,21 @@ void table_lookup (lookup_table_t *tab, double x, double *y)
   tab->index = findInterval(tab->x,tab->length,x,TRUE,TRUE,tab->index,&flag);
   // warn only if we are *outside* the interval
   if ((x < tab->x[0]) || (x > tab->x[(tab->length)-1]))
-    warningcall(R_NilValue,"in 'table_lookup': extrapolating at %le", x);
-  e = (x - tab->x[tab->index-1]) / (tab->x[tab->index] - tab->x[tab->index-1]);
-  for (j = 0; j < tab->width; j++) {
-    k = j*(tab->length)+(tab->index);
-    y[j] = e*(tab->y[k])+(1-e)*(tab->y[k-1]);
-    //    if (dydt != 0)
-    //      dydt[j] = ((tab->y[k])-(tab->y[k-1]))/((tab->x[tab->index])-(tab->x[tab->index-1]));
+    warningcall(R_NilValue,"in 'table_lookup': extrapolating at %le.", x);
+  switch (tab->order) {
+  case 1: default: // linear interpolation
+    e = (x - tab->x[tab->index-1]) / (tab->x[tab->index] - tab->x[tab->index-1]);
+    for (j = 0; j < tab->width; j++) {
+      k = j+(tab->width)*(tab->index);
+      y[j] = e*(tab->y[k])+(1-e)*(tab->y[k-tab->width]);
+    }
+    break;
+  case 0: // piecewise constant
+    for (j = 0; j < tab->width; j++) {
+      k = j+(tab->width)*(tab->index);
+      y[j] = tab->y[k-tab->width];
+    }
+    break;
   }
 }
 

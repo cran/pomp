@@ -1,5 +1,261 @@
 _N_e_w_s _f_o_r _p_a_c_k_a_g_e '_p_o_m_p'
 
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _2._1:
+
+        • The ‘melt’ function can now be applied to arbitrary ‘pomp’
+          objects.
+
+        • A new function, ‘runifDesign’ allows construction of design
+          matrices using samples from multivariate uniform
+          distributions.
+
+        • The ‘profileDesign’ function takes a new argument, ‘type’,
+          with two options: ‘"sobol"’, the default, constructs the
+          design using ‘sobolDesign’, as before.  ‘"runif"’ uses the
+          new ‘runifDesign’ function.
+
+        • A new example, comprising models and data for the 2014--2016
+          west African Ebola virus disease outbreak, is included.  See
+          ‘?ebola’ for details.
+
+        • It is now possible to adjust the observation times and
+          zero-time in the ‘sir’ and ‘sir2’ examples.  One can also
+          change the default RNG seed used in generating the simulated
+          data.
+
+        • The codes underlying the ‘rprocess’ workhorse have been
+          streamlined to obviate an unnecessary copy operation.  As a
+          result, the interface to the ‘rprocess’ workhorse has been
+          changed.
+
+        • The interface to the new ‘flow’ workhorse has been changed to
+          match.
+
+        • The new ‘flow’ workhorse allows integration/iteration of the
+          deterministic skeleton at arbitrary times from an arbitrary
+          initial condition.
+
+        • When ‘coef’ is applied to a ‘listie’, the result can be more
+          usefully ‘melt’ed.
+
+        • The probe-names returned by ‘probe.acf’ and ‘probe.ccf’ have
+          changed.
+
+        • A bug, whereby the ‘coef’ method from other packages was
+          masked, has been fixed.
+
+        • Errors in the documentation have been corrected.
+
+        • There is a new ‘as.data.frame’ method for ‘listie’s.
+
+        • Some problems with the exposure of internal objects for
+          package developers have been corrected.
+
+        • The ‘magrittr’ pipe operator, ‘%>%’, is now re-exported.
+
+        • More examples have been included.
+
+        • Minor changes to error messages.
+
+        • The names of the ‘objfun’ methods have been changed to
+          ‘probe_objfun’, ‘spect_objfun’, ‘traj_objfun’, and
+          ‘nlf_objfun’.
+
+        • The package directory structure has been modified to include
+          a new ‘examples’ directory, which holds the examples used in
+          the documentation.
+
+        • The names of the ‘objfun’ methods have been shortened.
+
+        • It is now permissible that the sequence of observation times
+          (and sequences of covariate times) be merely non-decreasing
+          sequences.  Previously, ‘pomp’ insisted on strictly
+          increasing time sequences.
+
+        • The default cooling schedule (‘cooling.type’) in ‘mif2’ is
+          now “geometric”, in contrast to “hyperbolic”, as before.
+
+        • ‘pomp’ now requires at least R version 3.5.
+
+        • The ‘zeronames’ argument has been renamed ‘accumvars’.
+
+        • In the course of ordinary work, one should never need to
+          interact with the low-level ‘pomp’ constructor function now.
+
+        • The ‘pompExample’ function has been dropped.  The various
+          examples are now included as regular functions that construct
+          ‘pomp’ objects.
+
+        • The ‘bbs’ example has been dropped.
+
+        • One can now modify basic model components at (almost) any
+          stage in a pipeline of ‘pomp’ computations.  All the
+          top-level inference functions, plus ‘probe’, ‘pfilter’, and
+          ‘simulate’ now allow modification of basic model components.
+
+        • The ‘rprocess’ plugins ‘onestep.sim’, ‘discrete.time.sim’,
+          ‘euler.sim’, ‘gillespie.sim’, and ‘gillespie.hl.sim’ have
+          been renamed ‘onestep’, ‘discrete_time’, ‘euler’,
+          ‘gillespie’, and ‘gillespie_hl’, respectively.  The old usage
+          is available but deprecated.
+
+        • One can now call ‘simulate’ on a model without reference to
+          any data.
+
+        • The covariate table facility (‘covariate_table’) now supports
+          piecewise constant interpolation.
+
+        • The syntax with which one includes covariates via
+          ‘covariate_table’ has become more flexible.  Specifically,
+          the arguments to ‘covariate_table’ are now evaluated
+          sequentially, so that later ones can depend on earlier ones.
+          Once evaluated, the covariates are bound column-wise into a
+          single data frame.
+
+        • The manner in which one writes R functions to specify basic
+          model components has been totally changed.  Before, one wrote
+          functions that took specific arguments such as 'x', 'params',
+          and 'covars'.  Now, one writes such functions with any or all
+          state variables, observables, covariates, and/or time as
+          arguments.
+
+        • ‘simulate’ now returns more informative results when
+          simulations from multiple parameter sets are simultaneously
+          computed.  Specifically, if ‘params’ has column names, these
+          are used to identify the resulting simulations.  Thus when
+          ‘format = "pomps"’ (the default), the names of the resulting
+          list will be constructed from the column names of ‘params’.
+          Likewise, when ‘format = "arrays"’, the resulting arrays will
+          have informative column names; When ‘format = "data.frame"’,
+          the identifier variable will make use of the column names.
+
+        • The basic particle filter, ‘pfilter’, has a simpler mode of
+          operation: ‘params’ should be a single parameter set only.
+          That is, it is no longer possible to pass a matrix of
+          parameters to ‘pfilter’.
+
+        • The Liu-West algorithm, ‘bsmc2’, has a simpler mode of
+          operation: ‘params’ should be a single parameter set only:
+          the SMC particles are drawn from ‘rprior’.
+
+        • The ‘as.data.frame’, ‘states’, and ‘obs’ options for
+          ‘simulate’ have been done away with.  One now chooses the
+          format of the returned simulations via the ‘format’ argument.
+          When one simulates at multiple parameter sets, list names,
+          array ‘dimnames’, or identifying variables in the output data
+          frame help to correlate simulations with parameter sets.
+
+        • The ‘as.data.frame’ argument to ‘trajectory’ has been removed
+          in favor of a new ‘format’ argument that allows one to choose
+          between receiving the results in the form of an ‘"array"’ or
+          a ‘"data.frame"’.
+
+        • All the basic model components now have defaults.
+
+            • The default ‘rinit’ behavior remains as it was: it
+              assumes the initial state distribution is concentrated at
+              a point mass determined by parameters with “‘.0’” or
+              “‘_0’” suffices.
+
+            • The default process model is “missing”: calls to
+              ‘dprocess’ and ‘rprocess’ will result in missing values
+              (‘NA’).
+
+            • The default measurement model is “missing” as well.
+
+            • The default prior is flat and improper: all calls to the
+              default ‘dprior’ result in ‘1’ (‘0’ if ‘log = TRUE’, and
+              all calls to ‘rprior’ result in ‘NA’.
+
+            • The default skeleton is missing.
+
+            • The default parameter transformations remain the
+              identity.
+
+        • The ‘transform’ argument present in many ‘pomp’ algorithms
+          has been removed.  Parameter transformations are now
+          automatically performed when appropriate.  The default
+          parameter transformation remains the identity.
+
+        • The old ‘probe.match’ and ‘traj.match’ functions have been
+          removed.  The new approach to parameter estimation based on
+          numerical optimization involves constructing stateful
+          objective functions.  There are now three of these:
+          ‘traj.match.objfun’, ‘probe.match.objfun’, and
+          ‘spect.match.objfun’.
+
+        • The documentation system has been thoroughly overhauled.
+
+        • In ‘skeleton’, the ‘t’ argument has been replaced by ‘times’,
+          to make this uniform with the other workhorse functions.
+
+        • Covariates are now included using the ‘covariate_table’
+          construction, passed via the ‘covar’ argument to ‘pomp’.  The
+          ‘tcovar’ argument is no longer used.
+
+        • Instead of providing separate ‘fromEstimationScale’ and
+          ‘toEstimationScale’ arguments to ‘pomp’, one now provides a
+          single ‘partrans’ argument constructed by means of the new
+          function ‘parameter_trans’.  In addition, references to
+          “fromEstimationScale” and “toEstimationScale” have been
+          abbreviated to “fromEst” and “toEst”, respectively,
+          throughout the package.
+
+        • When writing C snippets for parameter transformations, the
+          notation ‘T_p’ refers to the value of ‘p’ on the estimation
+          scale.  Thus, if parameter alpha is to be log-transformed for
+          estimation, the ‘toEst’ snippet would contain the line
+          ‘T_alpha = log(alpha);’ and the ‘fromEst’ snippet would
+          include ‘alpha = exp(T_alpha);’.
+
+        • The ‘parameter_trans’ function now takes optional arguments
+          ‘log’, ‘logit’, and ‘barycentric’, with names of parameters
+          to be log-, logit-, and log-barycentric transformed,
+          respectively.
+
+        • The ‘measurement.model’ argument to ‘pomp’ has been removed.
+          It is now necessary to specify the measurement model directly
+          using ‘rmeasure’ and/or ‘dmeasure’.
+
+        • The ‘initializer’ is no longer referred to by that name.  It
+          is now ‘rinit’, since it draws from the distribution of the
+          latent state at the initial time.  The low-level function
+          ‘init.state’ has been replaced by ‘rinit’.
+
+        • The ‘conv.rec’ method has been deprecated, replaced by the
+          new ‘traces’ method.
+
+        • The ‘euler.sir’ example has been renamed ‘sir’.
+
+        • The ‘gillespie.sir’ example has been renamed ‘sir2’.
+
+        • The ‘covmat’ method can now be applied to a ‘probed.pomp’
+          object.  It returns the estimated covariance matrix of the
+          probes.
+
+        • When ‘trajectory’ calls on ‘deSolve’ routines to numerically
+          integrate a model vectorfield, more informative error
+          messages are generated, and diagnostics are printed when
+          ‘verbose = TRUE’.
+
+        • The ‘show’ method applied to pomp objects is now quite terse.
+          To obtain detailed information, the ‘spy’ method is
+          available.
+
+        • The ‘spy’ method now returns the information formerly
+          displayed in a call to ‘show’, in addition to the C files
+          associated with any C snippets.
+
+        • The use of ‘$’ methods to access the slots of ‘pomp’ S4
+          objects has now been removed.  These classes are no longer
+          exported (for the most part).
+
+        • The ‘transform’ argument to the ‘probe.quantile’ function has
+          been removed (as it is entirely redundant!).
+
+        • The old and deprecated ‘mif’ and ‘bsmc’ methods have been
+          removed.
+
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._1_9:
 
         • The ‘obs’ and ‘states’ arguments of ‘simulate’ are deprecated

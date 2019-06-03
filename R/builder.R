@@ -1,16 +1,100 @@
+##' Hitching C snippets and R functions to pomp_fun objects
+##'
+##' The algorithms in \pkg{pomp} are formulated in terms of elementary functions
+##' that access the basic model components
+##' (\code{rprocess}, \code{dprocess}, \code{rmeasure}, \code{dmeasure}, etc.).
+##' For short, we refer to these elementary functions as \dQuote{\link{workhorses}}.
+##' In implementing a model, the user specifies basic model components
+##' using functions, procedures in dynamically-linked libraries, or C snippets.
+##' Each component is then packaged into a \sQuote{pomp_fun} objects, which gives a uniform interface.
+##' The construction of \sQuote{pomp_fun} objects is handled by the \code{hitch} function,
+##' which conceptually \dQuote{hitches} the workhorses to the user-defined procedures.
+##'
+##' @name hitch
+##' @docType methods
+##' @include pomp_class.R csnippet.R safecall.R templates.R
+##'
+##' @importFrom digest digest
+##' @importFrom stats runif
+##'
+##' @param \dots named arguments representing the user procedures to be hitched.
+##' These can be functions, character strings naming routines in external, dynamically-linked libraries, C snippets, or \code{NULL}.
+##' The first three are converted by \code{hitch} to \sQuote{pomp_fun} objects which perform the indicated computations.
+##' \code{NULL} arguments are translated to default \sQuote{pomp_fun} objects.
+##' If any of these procedures are already \sQuote{pomp_fun} objects, they are returned unchanged.
+##'
+##' @param templates named list of templates.
+##' Each workhorse must have a corresponding template.
+##' See \code{pomp:::workhorse_templates} for a list.
+##'
+##' @param obsnames,statenames,paramnames,covarnames character vectors
+##' specifying the names of observable variables, latent state variables, parameters, and covariates, respectively.
+##' These are only needed if one or more of the horses are furnished as C snippets.
+##'
+##' @param PACKAGE optional character;
+##' the name (without extension) of the external, dynamically loaded library in which any native routines are to be found.
+##' This is only useful if one or more of the model components has been specified using a precompiled dynamically loaded library;
+##' it is not used for any component specified using C snippets.
+##' \code{PACKAGE} can name at most one library.
+##'
+##' @param globals optional character;
+##' arbitrary C code that will be hard-coded into the shared-object library created when  C snippets are provided.
+##' If no C snippets are used, \code{globals} has no effect.
+##'
+##' @param cdir,cfile optional character variables.
+##' \code{cdir} specifies the name of the directory within which C snippet code will be compiled.
+##' By default, this is in a temporary directory specific to the \R session.
+##' \code{cfile} gives the name of the file (in directory \code{cdir}) into which C snippet codes will be written.
+##' By default, a random filename is used.
+##'
+##' @param shlib.args optional character variables.
+##' Command-line arguments to the \code{R CMD SHLIB} call that compiles the C snippets.
+##'
+##' @param compile logical;
+##' if \code{FALSE}, compilation of the C snippets will be postponed until they are needed.
+##'
+##' @param verbose logical.
+##' Setting \code{verbose=TRUE} will cause additional information to be displayed.
+##'
+##' @return
+##' \code{hitch} returns a named list of length two.  The element named
+##' \dQuote{funs} is itself a named list of \sQuote{pomp_fun} objects, each of
+##' which corresponds to one of the horses passed in.  The element named
+##' \dQuote{lib} contains information on the shared-object library created
+##' using the C snippets (if any were passed to \code{hitch}).  If no C
+##' snippets were passed to \code{hitch}, \code{lib} is \code{NULL}.
+##' Otherwise, it is a length-3 named list with the following elements:
+##' \describe{
+##' \item{name}{The name of the library created.}
+##' \item{dir}{ The
+##' directory in which the library was created.  If this is \code{NULL}, the
+##' library was created in the session's temporary directory.  }
+##' \item{src}{ A
+##' character string with the full contents of the C snippet file.  } }
+##'
+##' @author Aaron A. King
+##'
+##' @seealso \code{\link{pomp}}, \code{\link{spy}}
+##' @concept extending the pomp package
+##' @concept low-level interface
+##'
+NULL
+
 ## 'hitch' takes (as '...') the workhorse specifications (as R functions or
-## C snippets, processes these, and hitches them to 'pomp.fun' objects
+## C snippets, processes these, and hitches them to 'pomp_fun' objects
 ## suitable for use in the appropriate slots in 'pomp' objects.
 
+##' @rdname hitch
+##' @export
 hitch <- function (..., templates,
   obsnames, statenames, paramnames, covarnames,
-  PACKAGE, globals, cfile, cdir, shlib.args,
+  PACKAGE, globals, cfile, cdir, shlib.args, compile = TRUE,
   verbose = getOption("verbose", FALSE)) {
 
-  ep <- character(0)
+  ep <- "hitch"
 
   if (missing(templates))
-    stop(ep,sQuote("templates")," must be supplied.",call.=FALSE)
+    pStop(ep,sQuote("templates")," must be supplied.")
 
   if (missing(cfile)) cfile <- NULL
   if (missing(cdir)) cdir <- NULL
@@ -18,6 +102,7 @@ hitch <- function (..., templates,
   if (missing(globals)) globals <- NULL
   if (missing(shlib.args)) shlib.args <- NULL
   PACKAGE <- as.character(PACKAGE)
+  compile <- as.logical(compile)
 
   ## defaults for names of states, parameters, observations, and covariates
   if (missing(statenames)) statenames <- NULL
@@ -30,17 +115,10 @@ hitch <- function (..., templates,
   obsnames <- as.character(obsnames)
   covarnames <- as.character(covarnames)
 
-  if (anyDuplicated(statenames)) {
-    stop(ep,"all ",sQuote("statenames")," must be unique", call.=FALSE)
-  }
-  if (anyDuplicated(paramnames)) {
-    stop(ep,"all ",sQuote("paramnames")," must be unique", call.=FALSE)
-  }
-  if (anyDuplicated(obsnames)) {
-    stop(ep,"all ",sQuote("obsnames")," must be unique", call.=FALSE)
-  }
-  if (anyDuplicated(covarnames)) {
-    stop(ep,"all ",sQuote("covarnames")," must be unique", call.=FALSE)
+  if (anyDuplicated(c(statenames,paramnames,obsnames,covarnames))) {
+    pStop(ep,"the variable names in ",sQuote("statenames"),", ",
+      sQuote("paramnames"),", ",sQuote("covarnames"),", ",
+      ", and ",sQuote("obsnames")," must be unique and disjoint.")
   }
 
   horses <- list(...)
@@ -62,15 +140,14 @@ hitch <- function (..., templates,
             covarnames=covarnames,
             globals=globals,
             shlib.args=shlib.args,
+            compile=compile,
             verbose=verbose
           ),
           snippets
         )
       ),
-      error = function (e) {
-        stop("error in building shared-object library from C snippets: ",
-          conditionMessage(e),call.=FALSE)
-      }
+      error = function (e)
+        pStop_("error in building shared-object library from C snippets: ",conditionMessage(e)) # nocov
     )
     libname <- lib$name
   } else {
@@ -82,7 +159,7 @@ hitch <- function (..., templates,
   names(funs) <- names(horses)
 
   for (s in names(funs)) {
-    funs[[s]] <- pomp.fun(
+    funs[[s]] <- pomp_fun(
       f=horses[[s]],
       slotname=templates[[s]]$slotname,
       PACKAGE=PACKAGE,
@@ -101,7 +178,7 @@ hitch <- function (..., templates,
 
 Cbuilder <- function (..., templates, name = NULL, dir = NULL,
   statenames, paramnames, covarnames, obsnames,
-  globals, shlib.args = NULL,
+  globals, shlib.args = NULL, compile,
   verbose = getOption("verbose",FALSE))
 {
 
@@ -202,17 +279,18 @@ Cbuilder <- function (..., templates, name = NULL, dir = NULL,
       direc=srcDir(dir,verbose=verbose),
       src=csrc,
       shlib.args=shlib.args,
+      compile=compile,
       verbose=verbose
     ),
-    error = function (e) {
-      stop("in ",sQuote("Cbuilder"),": compilation error: ",conditionMessage(e),call.=FALSE)
-    }
+    error = function (e)
+      pStop("Cbuilder","compilation error: ",conditionMessage(e)) # nocov
   )
 
   invisible(list(name=name,dir=dir,src=csrc))
 }
 
-pompCompile <- function (fname, direc, src, shlib.args = NULL, verbose) {
+pompCompile <- function (fname, direc, src, shlib.args = NULL,
+  compile = TRUE, verbose) {
 
   stem <- file.path(direc,fname)
   if (.Platform$OS.type=="windows")
@@ -223,9 +301,10 @@ pompCompile <- function (fname, direc, src, shlib.args = NULL, verbose) {
   tryCatch(
     cat(src,file=modelfile),
     error = function (e) {
-      stop("cannot write file ",sQuote(modelfile),call.=FALSE)   #nocov
+      pStop_("cannot write file ",sQuote(modelfile))   #nocov
     }
   )
+
   if (verbose) cat("model codes written to",sQuote(modelfile),"\n")
 
   cflags <- Sys.getenv("PKG_CPPFLAGS")
@@ -237,28 +316,34 @@ pompCompile <- function (fname, direc, src, shlib.args = NULL, verbose) {
   shlib.args <- as.character(shlib.args)
 
   solib <- paste0(stem,.Platform$dynlib.ext)
-  if (verbose) cat("compiling",sQuote(solib),"\n")
-  tryCatch(
-    {
-      rv <- system2(
-        command=R.home("bin/R"),
-        args=c("CMD","SHLIB","-c","-o",solib,modelfile,shlib.args),
-        env=cflags,
-        wait=TRUE,
-        stdout=TRUE,
-        stderr=TRUE
-      )
-    },
-    error = function (e) {
-      stop("error compiling C snippets: ",conditionMessage(e),call.=FALSE) #nocov
+
+  if (compile) {
+
+    if (verbose) cat("compiling",sQuote(solib),"\n")
+
+    tryCatch(
+      {
+        rv <- system2(
+          command=R.home("bin/R"),
+          args=c("CMD","SHLIB","-c","-o",solib,modelfile,shlib.args),
+          env=cflags,
+          wait=TRUE,
+          stdout=TRUE,
+          stderr=TRUE
+        )
+      },
+      error = function (e) pStop_("error compiling C snippets: ",conditionMessage(e)) # nocov
+    )
+
+    stat <- as.integer(attr(rv,"status"))
+
+    if (length(stat) > 0 && stat != 0L) {
+      pStop_("cannot compile shared-object library ",sQuote(solib),          # nocov
+        ": status = ",stat,"\ncompiler messages:\n",paste(rv,collapse="\n")) # nocov
+    } else if (verbose) {
+      cat("compiler messages:",rv,sep="\n")
     }
-  )
-  stat <- as.integer(attr(rv,"status"))
-  if (length(stat) > 0 && stat != 0L) {
-    stop("cannot compile shared-object library ",sQuote(solib),": status = ",stat,
-      "\ncompiler messages:\n",paste(rv,collapse="\n"),call.=FALSE)
-  } else if (verbose) {
-    cat("compiler messages:",rv,sep="\n")
+
   }
 
   invisible(solib)
@@ -270,15 +355,13 @@ srcDir <- function (dir, verbose) {
     dir <- file.path(tempdir(),pid)
   }
   if (!dir.exists(dir)) {
-    if (verbose) cat("creating C snippet directory ",sQuote(dir),"\n")
+    if (verbose) cat("creating C snippet directory ",sQuote(dir),"\n") # nocov
     tryCatch(
       {
         dir.create(dir,recursive=TRUE,showWarnings=FALSE,mode="0700")
         stopifnot(dir.exists(dir))
       },
-      error = function (e) {
-        stop("cannot create cache directory ",sQuote(dir),call.=FALSE)
-      }
+      error = function (e) pStop_("cannot create cache directory ",sQuote(dir))   # nocov
     )
   }
   dir
@@ -296,7 +379,7 @@ render <- function (template, ...) {
   if (length(vars)==0) return(template)
   n <- sapply(vars,length)
   if (!all((n==max(n))|(n==1)))
-    stop("in ",sQuote("render")," incommensurate lengths of replacements",call.=FALSE)
+    pStop("render","incommensurate lengths of replacements.") # nocov
   short <- which(n==1)
   n <- max(n)
   for (i in short) vars[[i]] <- rep(vars[[i]],n)
@@ -329,20 +412,20 @@ pomp_templates <- list(
 \n",
       reg="__pomp_periodic_bspline_basis_eval = (periodic_bspline_basis_eval_t *) R_GetCCallable(\"pomp\",\"periodic_bspline_basis_eval\");\n"
     ),
-    get_pomp_userdata_int=list(
-      trigger="get_pomp_userdata_int",
-      header="static get_pomp_userdata_int_t *__pomp_get_pomp_userdata_int;\n#define get_pomp_userdata_int(X)\t(__pomp_get_pomp_userdata_int(X))\n",
-      reg="__pomp_get_pomp_userdata_int = (get_pomp_userdata_t *) R_GetCCallable(\"pomp\",\"get_pomp_userdata_int\");\n"
+    get_userdata_int=list(
+      trigger="get_userdata_int",
+      header="static get_userdata_int_t *__pomp_get_userdata_int;\n#define get_userdata_int(X)\t(__pomp_get_userdata_int(X))\n",
+      reg="__pomp_get_userdata_int = (get_userdata_t *) R_GetCCallable(\"pomp\",\"get_userdata_int\");\n"
     ),
-    get_pomp_userdata_double=list(
-      trigger="get_pomp_userdata_double",
-      header="static get_pomp_userdata_double_t *__pomp_get_pomp_userdata_double;\n#define get_pomp_userdata_double(X)\t(__pomp_get_pomp_userdata_double(X))\n",
-      reg="__pomp_get_pomp_userdata_double = (get_pomp_userdata_double_t *) R_GetCCallable(\"pomp\",\"get_pomp_userdata_double\");\n"
+    get_userdata_double=list(
+      trigger="get_userdata_double",
+      header="static get_userdata_double_t *__pomp_get_userdata_double;\n#define get_userdata_double(X)\t(__pomp_get_userdata_double(X))\n",
+      reg="__pomp_get_userdata_double = (get_userdata_double_t *) R_GetCCallable(\"pomp\",\"get_userdata_double\");\n"
     ),
-    get_pomp_userdata=list(
-      trigger="get_pomp_userdata(\\b|[^_])",
-      header="static get_pomp_userdata_t *__pomp_get_pomp_userdata;\n#define get_pomp_userdata(X)\t(__pomp_get_pomp_userdata(X))\n",
-      reg="__pomp_get_pomp_userdata = (get_pomp_userdata_t *) R_GetCCallable(\"pomp\",\"get_pomp_userdata\");\n"
+    get_userdata=list(
+      trigger="get_userdata(\\b|[^_])",
+      header="static get_userdata_t *__pomp_get_userdata;\n#define get_userdata(X)\t(__pomp_get_userdata(X))\n",
+      reg="__pomp_get_userdata = (get_userdata_t *) R_GetCCallable(\"pomp\",\"get_userdata\");\n"
     )
   ),
   stackhandling="\nstatic int __pomp_load_stack = 0;\n\nvoid __pomp_load_stack_incr (void) {++__pomp_load_stack;}\n\nvoid __pomp_load_stack_decr (int *val) {*val = --__pomp_load_stack;}\n",

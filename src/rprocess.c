@@ -4,29 +4,43 @@
 #include <Rmath.h>
 #include <Rdefines.h>
 #include <Rinternals.h>
+#include <R_ext/Arith.h>
 #include <string.h>
 
 #include "pomp_internal.h"
 
-SEXP do_rprocess (SEXP object, SEXP xstart, SEXP times, SEXP params, SEXP offset, SEXP gnsi)
+static SEXP pomp_default_rprocess (SEXP xstart, int nvars, int nreps, int ntimes)
+{
+  SEXP Snames, X;
+  int dim[3] = {nvars, nreps, ntimes};
+  int i, n = nvars*nreps*ntimes;
+  double *xp = 0;
+  PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(xstart)));
+  PROTECT(X = makearray(3,dim));
+  setrownames(X,Snames,3);
+  for (i= 0, xp = REAL(X); i < n; i++, xp++) *xp = R_NaReal;
+  warningcall(R_NilValue,"'rprocess' unspecified: NAs generated.");
+  UNPROTECT(2);
+  return X;
+}
+
+SEXP do_rprocess (SEXP object, SEXP xstart, SEXP tstart, SEXP times, SEXP params, SEXP gnsi)
 {
   int nprotect = 0;
-  int *xdim, type, nvars, npars, nreps, nrepsx, ntimes, off;
-  SEXP X, Xoff, copy, rproc, args, zeronames, tcovar, covar;
-  SEXP dimXstart, dimP, dimX;
+  int *xdim, type, nvars, npars, nreps, nrepsx, ntimes;
+  SEXP X, copy, rproc, args, accumvars, covar;
+  SEXP dimXstart, dimP;
   const char *dimnm[3] = {"variable","rep","time"};
 
   PROTECT(gnsi = duplicate(gnsi)); nprotect++;
 
+  PROTECT(tstart = AS_NUMERIC(tstart)); nprotect++;
+
   PROTECT(times = AS_NUMERIC(times)); nprotect++;
   ntimes = length(times);
-  if (ntimes < 2) {
-    errorcall(R_NilValue,"in 'rprocess': length(times) < 2: with no transitions, there is no work to do.");
+  if (ntimes < 1) {
+    errorcall(R_NilValue,"length(times) < 1: no work to do.");
   }
-
-  off = *(INTEGER(AS_INTEGER(offset)));
-  if ((off < 0)||(off>=ntimes))
-    errorcall(R_NilValue,"illegal 'offset' value %d",off);
 
   PROTECT(xstart = as_matrix(xstart)); nprotect++;
   PROTECT(dimXstart = GET_DIM(xstart)); nprotect++;
@@ -40,7 +54,7 @@ SEXP do_rprocess (SEXP object, SEXP xstart, SEXP times, SEXP params, SEXP offset
 
   if (nrepsx > nreps) {		// more ICs than parameters
     if (nrepsx % nreps != 0) {
-      errorcall(R_NilValue,"in 'rprocess': the larger number of replicates is not a multiple of smaller.");
+      errorcall(R_NilValue,"the larger number of replicates is not a multiple of smaller.");
     } else {
       double *src, *tgt;
       int dims[2];
@@ -60,7 +74,7 @@ SEXP do_rprocess (SEXP object, SEXP xstart, SEXP times, SEXP params, SEXP offset
     nreps = nrepsx;
   } else if (nrepsx < nreps) {	// more parameters than ICs
     if (nreps % nrepsx != 0) {
-      errorcall(R_NilValue,"in 'rprocess': the larger number of replicates is not a multiple of smaller.");
+      errorcall(R_NilValue,"the larger number of replicates is not a multiple of smaller.");
     } else {
       double *src, *tgt;
       int dims[2];
@@ -81,62 +95,48 @@ SEXP do_rprocess (SEXP object, SEXP xstart, SEXP times, SEXP params, SEXP offset
 
   PROTECT(rproc = GET_SLOT(object,install("rprocess"))); nprotect++;
   PROTECT(args = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;
-  PROTECT(zeronames = GET_SLOT(object,install("zeronames"))); nprotect++;
+  PROTECT(accumvars = GET_SLOT(object,install("accumvars"))); nprotect++;
   PROTECT(covar = GET_SLOT(object,install("covar"))); nprotect++;
-  PROTECT(tcovar = GET_SLOT(object,install("tcovar"))); nprotect++;
 
   // extract the process function
   type = *(INTEGER(GET_SLOT(rproc,install("type"))));
   switch (type) {
-  case 1: // one-step simulator
+  case onestep: // one-step simulator
   {
     SEXP fn;
     double deltat = 1.0;
     PROTECT(fn = GET_SLOT(rproc,install("step.fn"))); nprotect++;
-    PROTECT(X = euler_model_simulator(
-      fn,xstart,times,params,deltat,type,
-      zeronames,tcovar,covar,args,gnsi)); nprotect++;
+    PROTECT(X = euler_model_simulator(fn,xstart,tstart,times,params,deltat,type,
+      accumvars,covar,args,gnsi)); nprotect++;
   }
     break;
-  case 2: case 3: // discrete-time and Euler
+  case discrete: case euler: // discrete-time and Euler
   {
     SEXP fn;
     double deltat;
     PROTECT(fn = GET_SLOT(rproc,install("step.fn"))); nprotect++;
     deltat = *(REAL(AS_NUMERIC(GET_SLOT(rproc,install("delta.t")))));
-    PROTECT(X = euler_model_simulator(fn,xstart,times,params,deltat,type,
-        zeronames,tcovar,covar,args,gnsi)); nprotect++;
+    PROTECT(X = euler_model_simulator(fn,xstart,tstart,times,params,deltat,type,
+      accumvars,covar,args,gnsi)); nprotect++;
   }
     break;
-  case 4: // Gillespie's method
+  case gill: // Gillespie's method
   {
     SEXP fn, vmatrix, hmax;
     PROTECT(fn = GET_SLOT(rproc,install("rate.fn"))); nprotect++;
     PROTECT(vmatrix = GET_SLOT(rproc,install("v"))); nprotect++;
     PROTECT(hmax = GET_SLOT(rproc,install("hmax"))); nprotect++;
-    PROTECT(X = SSA_simulator(fn,xstart,times,params,vmatrix,tcovar,covar,
-        zeronames,hmax,args,gnsi)); nprotect++;
+    PROTECT(X = SSA_simulator(fn,xstart,tstart,times,params,vmatrix,covar,
+      accumvars,hmax,args,gnsi)); nprotect++;
   }
     break;
-  case 0: default:
-    errorcall(R_NilValue,"'rprocess' is undefined.");
+  case dflt: default:
+    PROTECT(X = pomp_default_rprocess(xstart,nvars,nreps,ntimes)); nprotect++;
     break;
   }
 
-  PROTECT(dimX = GET_DIM(X)); nprotect++;
-  xdim = INTEGER(dimX);
+  fixdimnames(X,dimnm,3);
+  UNPROTECT(nprotect);
+  return X;
 
-  if (off > 0) {
-    xdim[2] -= off;
-    PROTECT(Xoff = makearray(3,xdim)); nprotect++;
-    setrownames(Xoff,GET_ROWNAMES(GET_DIMNAMES(X)),3);
-    fixdimnames(Xoff,dimnm,3);
-    memcpy(REAL(Xoff),REAL(X)+off*nvars*nreps,(ntimes-off)*nvars*nreps*sizeof(double));
-    UNPROTECT(nprotect);
-    return Xoff;
-  } else {
-    fixdimnames(X,dimnm,3);
-    UNPROTECT(nprotect);
-    return X;
-  }
 }

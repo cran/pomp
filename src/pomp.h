@@ -10,9 +10,9 @@
 
 typedef void periodic_bspline_basis_eval_t (double x, double period, int degree, int nbasis, double *y);
 typedef void periodic_bspline_basis_eval_deriv_t (double x, double period, int degree, int nbasis, int deriv, double *y);
-typedef const SEXP get_pomp_userdata_t (const char *name);
-typedef const int *get_pomp_userdata_int_t (const char *name);
-typedef const double *get_pomp_userdata_double_t (const char *name);
+typedef const SEXP get_userdata_t (const char *name);
+typedef const int *get_userdata_int_t (const char *name);
+typedef const double *get_userdata_double_t (const char *name);
 
 // UTILITY FOR GAMMA WHITENOISE
 // This function draws a random increment of a gamma whitenoise process.
@@ -69,7 +69,7 @@ static R_INLINE double expit (double x) {
 // there is no need to call {Get,Put}RNGState() as this is handled by pomp
 
 static R_INLINE void reulermultinom (int m, double size, const double *rate,
-				     double dt, double *trans) {
+  double dt, double *trans) {
   double p = 0.0;
   int j, k;
   if ((size < 0.0) || (dt < 0.0) || (floor(size+0.5) != size)) {
@@ -86,13 +86,13 @@ static R_INLINE void reulermultinom (int m, double size, const double *rate,
   if (p > 0.0) {
     size = rbinom(size,1-exp(-p*dt)); // total number of events
     if (!(R_FINITE(size)))
-      warningcall(R_NilValue,"in 'reulermultinom': result of binomial draw is not finite");
+      warningcall(R_NilValue,"in 'reulermultinom': result of binomial draw is not finite.");
     m -= 1;
     for (k = 0; k < m; k++) {
       if (rate[k] > p) p = rate[k];
       trans[k] = ((size > 0) && (p > 0)) ? rbinom(size,rate[k]/p) : 0;
       if (!(R_FINITE(size)&&R_FINITE(p)&&R_FINITE(rate[k])&&R_FINITE(trans[k])))
-	warningcall(R_NilValue,"in 'reulermultinom': result of binomial draw is not finite");
+        warningcall(R_NilValue,"in 'reulermultinom': result of binomial draw is not finite.");
       size -= trans[k];
       p -= rate[k];
     }
@@ -118,18 +118,18 @@ static R_INLINE void reulermultinom (int m, double size, const double *rate,
 // distributions.
 
 static R_INLINE double deulermultinom (int m, double size, const double *rate,
-				       double dt, double *trans, int give_log) {
+  double dt, double *trans, int give_log) {
   double p = 0.0;
   double n = 0.0;
   double ff = 0.0;
   int k;
   if ((dt < 0.0) || (size < 0.0) || (floor(size+0.5) != size)) {
-    warningcall(R_NilValue,"in 'deulermultinom': NaNs produced");
+    warningcall(R_NilValue,"in 'deulermultinom': NaNs produced.");
     return R_NaN;
   }
   for (k = 0; k < m; k++) {
     if (rate[k] < 0.0) {
-      warningcall(R_NilValue,"in 'deulermultinom': NaNs produced");
+      warningcall(R_NilValue,"in 'deulermultinom': NaNs produced.");
       return R_NaN;
     }
     if (trans[k] < 0.0) {
@@ -174,7 +174,7 @@ static R_INLINE double dmultinom (int m, const double *prob, double *x, int give
 
   for (k = 0; k < m; k++) {
     if (prob[k] < 0.0) {
-      warningcall(R_NilValue,"in 'dmultinom': NaNs produced");
+      warningcall(R_NilValue,"in 'dmultinom': NaNs produced.");
       return R_NaN;
     }
 
@@ -250,7 +250,7 @@ static R_INLINE double rbetabinom (double size, double prob, double theta) {
 }
 
 static R_INLINE double dbetabinom (double x, double size, double prob,
-				   double theta, int give_log) {
+  double theta, int give_log) {
   double a = theta*prob;
   double b = theta*(1.0-prob);
   double f = lchoose(size,x)-lbeta(a,b)+lbeta(a+x,b+size-x);
@@ -263,7 +263,7 @@ static R_INLINE double rbetanbinom (double mu, double size, double theta) {
 }
 
 static R_INLINE double dbetanbinom (double x, double mu, double size,
-				    double theta, int give_log) {
+  double theta, int give_log) {
   double prob = size/(size+mu);
   double a = theta*prob;
   double b = theta*(1.0-prob);
@@ -276,10 +276,33 @@ static R_INLINE double dbetanbinom (double x, double mu, double size,
 // A MANUALLY-LINKED LIBRARY.
 // THEY CANNOT BE USED WITHIN C SNIPPETS.
 
+// PROTOTYPE FOR INITIAL-STATE SAMPLER (rinit)
+typedef void pomp_rinit(double *x, const double *p, double t,
+  const int *stateindex, const int *parindex, const int *covindex,
+  const double *covars);
+// Description:
+//  on input:
+// p          = pointer to parameter vector
+// t          = time
+// stateindex = pointer to vector of integers pointing to the states in 'x' in the order specified by
+//                the 'statenames' argument of 'euler.simulator'
+// parindex   = pointer to vector of integers pointing to the parameters in 'p' in the order specified by
+//                the 'paramnames' argument of 'euler.simulator'
+// covindex   = pointer to vector of integers pointing to the covariates in 'covars' in the order
+//                specified by the 'covarnames' argument of 'euler.simulator'
+// covars     = pointer to a vector containing the values of the covariates at time t, as interpolated
+//                from the covariate table supplied to 'euler.simulator'
+//  on output:
+// x          = contains the state vector (i.e., at time t)
+//
+// NB: There is no need to call GetRNGstate() or PutRNGstate() in the body of the user-defined function.
+//     The RNG is initialized before any call to this function, and the RNG state is written afterward.
+//     Inclusion of these calls in the user-defined function may result in significant slowdown.
+
+
 // PROTOTYPE FOR STOCHASTIC SIMULATION ALGORITHM REACTION-RATE FUNCTION, AS USED BY "GILLESPIE.SIM":
 typedef double pomp_ssa_rate_fn(int event, double t, const double *x, const double *p,
-				const int *stateindex, const int *parindex, const int *covindex,
-				int ncovar, const double *covars);
+  const int *stateindex, const int *parindex, const int *covindex, const double *covars);
 // Description:
 //  on input:
 // event      = integer specifying the number of the reaction whose rate is desired
@@ -293,16 +316,14 @@ typedef double pomp_ssa_rate_fn(int event, double t, const double *x, const doub
 //                the 'paramnames' argument of 'SSA.simulator'
 // covindex   = pointer to vector of integers pointing to the covariates in 'covars' in the order
 //                specified by the 'covarnames' argument of 'SSA.simulator'
-// ncovars    = number of covariates
 // covars     = pointer to a vector containing the values of the covariates at time t, as interpolated
 //                from the covariate table supplied to 'SSA.simulator'
 //  returns the rate of the j-th reaction
 
 // PROTOTYPE FOR ONE-STEP SIMULATOR, AS USED BY "EULER.SIM" AND "ONESTEP.SIM":
 typedef void pomp_onestep_sim(double *x, const double *p,
-			      const int *stateindex, const int *parindex, const int *covindex,
-			      int ncovars, const double *covars,
-			      double t, double dt);
+  const int *stateindex, const int *parindex, const int *covindex,
+  const double *covars, double t, double dt);
 // Description:
 //  on input:
 // x          = pointer to state vector
@@ -313,7 +334,6 @@ typedef void pomp_onestep_sim(double *x, const double *p,
 //                the 'paramnames' argument of 'euler.simulator'
 // covindex   = pointer to vector of integers pointing to the covariates in 'covars' in the order
 //                specified by the 'covarnames' argument of 'euler.simulator'
-// ncovars    = number of covariates
 // covars     = pointer to a vector containing the values of the covariates at time t, as interpolated
 //                from the covariate table supplied to 'euler.simulator'
 // t          = time at the beginning of the Euler step
@@ -327,9 +347,9 @@ typedef void pomp_onestep_sim(double *x, const double *p,
 
 // PROTOTYPE FOR ONE-STEP LOG PROBABILITY DENSITY FUNCTION, AS USED BY "ONESTEP.DENS":
 typedef void pomp_onestep_pdf(double *loglik,
-			      const double *x1, const double *x2, double t1, double t2, const double *p,
-			      const int *stateindex, const int *parindex, const int *covindex,
-			      int ncovars, const double *covars);
+  const double *x1, const double *x2, double t1, double t2, const double *p,
+  const int *stateindex, const int *parindex, const int *covindex,
+  const double *covars);
 // Description:
 //  on input:
 // x1         = pointer to state vector at time t1
@@ -343,7 +363,6 @@ typedef void pomp_onestep_pdf(double *loglik,
 //                the 'paramnames' argument of 'euler.density'
 // covindex   = pointer to vector of integers indexing the parameters in 'covar'' in the order specified by
 //                the 'covarnames' argument of 'euler.density'
-// ncovars    = number of covariates
 // covars     = pointer to a vector containing the values of the covariates at time t, as interpolated
 //                from the covariate table supplied to 'euler.density'
 //  on output:
@@ -351,8 +370,8 @@ typedef void pomp_onestep_pdf(double *loglik,
 
 // PROTOTYPE FOR DETERMINISTIC SKELETON EVALUATION
 typedef void pomp_skeleton (double *f, const double *x, const double *p,
-			    const int *stateindex, const int *parindex, const int *covindex,
-			    int ncovars, const double *covars, double t);
+  const int *stateindex, const int *parindex, const int *covindex,
+  const double *covars, double t);
 
 // Description:
 //  on input:
@@ -364,7 +383,6 @@ typedef void pomp_skeleton (double *f, const double *x, const double *p,
 //                the 'paramnames' slot
 // covindex   = pointer to vector of integers indexing the parameters in 'covar'' in the order specified by
 //                the 'covarnames' slot
-// ncovars    = number of covariates
 // covars     = pointer to a vector containing the values of the covariates at time t, as interpolated
 //                from the covariate table supplied to 'pomp.skeleton'
 // t          = time at the beginning of the Euler step
@@ -373,8 +391,8 @@ typedef void pomp_skeleton (double *f, const double *x, const double *p,
 
 // PROTOTYPE FOR MEASUREMENT MODEL SIMULATION
 typedef void pomp_measure_model_simulator (double *y, const double *x, const double *p,
-					   const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
-					   int ncovars, const double *covars, double t);
+  const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
+  const double *covars, double t);
 // Description:
 //  on input:
 // x          = pointer to state vector at time t
@@ -387,7 +405,6 @@ typedef void pomp_measure_model_simulator (double *y, const double *x, const dou
 //                the 'paramnames' slot
 // covindex   = pointer to vector of integers indexing the parameters in 'covar'' in the order specified by
 //                the 'covarnames' slot
-// ncovars    = number of covariates
 // covars     = pointer to a vector containing the values of the covariates at time t, as interpolated
 //                from the covariate table supplied to 'pomp.skeleton'
 // t          = time at the beginning of the Euler step
@@ -401,7 +418,7 @@ typedef void pomp_measure_model_simulator (double *y, const double *x, const dou
 // PROTOTYPE FOR MEASUREMENT MODEL DENSITY EVALUATOR
 typedef void pomp_measure_model_density (double *lik, const double *y, const double *x, const double *p, int give_log,
 					 const int *obsindex, const int *stateindex, const int *parindex, const int *covindex,
-					 int ncovars, const double *covars, double t);
+					 const double *covars, double t);
 // Description:
 //  on input:
 // y          = pointer to vector of observables at time t
@@ -416,7 +433,6 @@ typedef void pomp_measure_model_density (double *lik, const double *y, const dou
 //                the 'paramnames' slot
 // covindex   = pointer to vector of integers indexing the parameters in 'covar'' in the order specified by
 //                the 'covarnames' slot
-// ncovars    = number of covariates
 // covars     = pointer to a vector containing the values of the covariates at time t, as interpolated
 //                from the covariate table supplied to 'pomp.skeleton'
 // t          = time at the beginning of the Euler step

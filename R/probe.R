@@ -1,8 +1,77 @@
+##' Probes (AKA summary statistics)
+##'
+##' Probe a partially-observed Markov process by computing summary statistics
+##' and the synthetic likelihood.
+##'
+##' \code{probe} applies one or more \dQuote{probes} to time series data and
+##' model simulations and compares the results.  It can be used to diagnose
+##' goodness of fit and/or as the basis for \dQuote{probe-matching}, a
+##' generalized method-of-moments approach to parameter estimation.
+##'
+##' A call to \code{probe} results in the evaluation of the probe(s) in
+##' \code{probes} on the data.  Additionally, \code{nsim} simulated data sets
+##' are generated (via a call to \code{\link[=simulate-pomp]{simulate}}) and
+##' the probe(s) are applied to each of these.  The results of the probe
+##' computations on real and simulated data are stored in an object of class
+##' \sQuote{probed_pomp}.
+##'
+##' @name probe
+##' @docType methods
+##' @rdname probe
+##' @aliases probe probe,missing-method probe,ANY-method
+##' @author Daniel C. Reuman, Aaron A. King
+##' @family elementary POMP methods
+##' @family summary statistics methods
+##'
+##' @include pomp_class.R pomp_fun.R pomp.R
+##' @importFrom stats quantile
+##'
+##' @param probes a single probe or a list of one or more probes.
+##' A probe is simply a scalar- or vector-valued function of one argument that can be applied to the data array of a \sQuote{pomp}.
+##' A vector-valued probe must always return a vector of the same size.
+##' A number of useful probes are provided with the package:
+##' see \link[=basic_probes]{basic probes}.
+##' @param nsim the number of model simulations to be computed.
+##' @param seed optional integer;
+##' if non-\code{NULL}, the random number generator will be initialized with this seed for simulations.
+##' See \code{\link[=simulate-pomp]{simulate}}.
+##' @inheritParams pomp
+##'
+##' @return
+##' \code{probe} returns an object of class \sQuote{probed_pomp}, which contains the data and the model, together with the results of the \code{probe} calculation.
+##'
+##' @section Methods:
+##' The following methods are available.
+##' \describe{
+##' \item{plot}{ displays diagnostic plots.  }
+##' \item{summary}{ displays summary information.
+##' The summary includes quantiles (fractions of simulations with probe values less than those realized on the data) and the corresponding two-sided p-values.
+##' In addition, the \dQuote{synthetic likelihood} (Wood 2010) is computed,
+##' under the assumption that the probe values are multivariate-normally distributed.  }
+##' \item{logLik}{ returns the synthetic likelihood for the probes.
+##' NB: in general, this is not the same as the likelihood.  }
+##' \item{as.data.frame}{
+##'  coerces a \sQuote{probed_pomp} to a \sQuote{data.frame}.
+##'  The latter contains the realized values of the probes on the data and on the simulations.
+##' The variable \code{.id} indicates whether the probes are from the data or simulations.  }
+##' }
+##'
+##' @references
+##' B. E. Kendall, C. J. Briggs, W. M. Murdoch, P. Turchin, S. P.
+##' Ellner, E. McCauley, R. M. Nisbet, S. N. Wood Why do populations cycle? A
+##' synthesis of statistical and mechanistic modeling approaches, Ecology,
+##' 80:1789--1805, 1999.
+##'
+##' S. N. Wood Statistical inference for noisy nonlinear ecological dynamic
+##' systems, Nature, 466: 1102--1104, 2010.
+NULL
+
 setClass(
-  "probed.pomp",
+  "probed_pomp",
   contains="pomp",
   slots=c(
     probes="list",
+    nsim="integer",
     datvals="numeric",
     simvals="array",
     quantiles="numeric",
@@ -12,53 +81,153 @@ setClass(
   )
 )
 
-probe.internal <- function (object, probes, params, nsim = 1L, seed = NULL, ...) {
+setGeneric(
+  "probe",
+  function (data, ...)
+    standardGeneric("probe")
+)
 
-  ep <- paste0("in ",sQuote("probe"),": ")
+setMethod(
+  "probe",
+  signature=signature(data="missing"),
+  definition=function (...) {
+    reqd_arg("probe","data")
+  }
+)
 
-  pompLoad(object)
+setMethod(
+  "probe",
+  signature=signature(data="ANY"),
+  definition=function (data, ...) {
+    undef_method("probe",data)
+  }
+)
 
+##' @name probe-data.frame
+##' @aliases probe,data.frame-method
+##' @rdname probe
+##' @export
+setMethod(
+  "probe",
+  signature=signature(data="data.frame"),
+  definition=function (data,
+    probes, nsim, seed = NULL,
+    params, rinit, rprocess, rmeasure,
+    ..., verbose = getOption("verbose", FALSE)) {
+
+    tryCatch(
+      probe.internal(data,probes=probes,nsim=nsim,seed=seed,
+        rinit=rinit,rprocess=rprocess,rmeasure=rmeasure,params=params,
+        ...,verbose=verbose),
+      error = function (e) pStop("probe",conditionMessage(e))
+    )
+
+
+  }
+)
+
+##' @name probe-pomp
+##' @aliases probe,pomp-method
+##' @rdname probe
+##' @export
+setMethod(
+  "probe",
+  signature=signature(data="pomp"),
+  definition=function (data,
+    probes, nsim, seed = NULL, ...,
+    verbose = getOption("verbose", FALSE))
+  {
+
+    tryCatch(
+      probe.internal(data,probes=probes,nsim=nsim,seed=seed,
+        ...,verbose=verbose),
+      error = function (e) pStop("probe",conditionMessage(e))
+    )
+
+  }
+)
+
+##' @name probe-probed_pomp
+##' @aliases probe,probed_pomp-method
+##' @rdname probe
+##' @export
+setMethod(
+  "probe",
+  signature=signature(data="probed_pomp"),
+  definition=function (data,
+    probes, nsim, seed = NULL, ...,
+    verbose = getOption("verbose", FALSE)) {
+
+    if (missing(probes)) probes <- data@probes
+    if (missing(nsim)) nsim <- data@nsim
+
+    probe(as(data,"pomp"),probes=probes,nsim=nsim,seed=seed,
+      ...,verbose=verbose)
+
+  }
+)
+
+probe.internal <- function (object, probes, nsim, seed, ...,
+  .gnsi = TRUE, verbose) {
+
+  verbose <- as.logical(verbose)
+
+  object <- pomp(object,...,verbose=verbose)
+
+  if (undefined(object@rprocess) || undefined(object@rmeasure))
+    pStop_(paste(sQuote(c("rprocess","rmeasure")),collapse=", ")," are needed basic components.")
+
+  if (missing(probes)) probes <- NULL
+  if (missing(nsim)) nsim <- NULL
+
+  if (is.null(probes)) pStop_(sQuote("probes")," must be furnished.")
   if (!is.list(probes)) probes <- list(probes)
   if (!all(sapply(probes,is.function)))
-    stop(ep,sQuote("probes")," must be a function or a list of functions",call.=FALSE)
+    pStop_(sQuote("probes")," must be a function or a list of functions.")
   if (!all(sapply(probes,function(f)length(formals(f))==1)))
-    stop(ep,"each probe must be a function of a single argument",call.=FALSE)
+    pStop_("each probe must be a function of a single argument.")
+
+  nsim <- as.integer(nsim)
+  if (length(nsim) < 1) pStop_(sQuote("nsim")," must be specified.")
+  if (length(nsim) > 1 || !is.finite(nsim) || nsim <= 0)
+    pStop_("number of simulations, ",sQuote("nsim"),", must be a single positive integer.")
 
   seed <- as.integer(seed)
+  gnsi <- as.logical(.gnsi)
 
-  if (missing(params)) params <- coef(object)
-  if (is.list(params)) params <- unlist(params)
+  params <- coef(object)
+
+  pompLoad(object,verbose=verbose)
+  on.exit(pompUnload(object,verbose=verbose))
 
   ## apply probes to data
   datval <- tryCatch(
-    .Call(apply_probe_data,object,probes),
-    error = function (e) {
-      stop(ep,"applying probes to actual data: ",conditionMessage(e),call.=FALSE)
-    }
+    .Call(P_apply_probe_data,object,probes),
+    error = function (e)
+      pStop_("applying probes to actual data: ",conditionMessage(e))
   )
+
   nprobes <- length(datval)
+
+  if (nprobes >= nsim)
+    pStop_(sQuote("nsim")," (=",nsim,"), should be (much) larger than the ", "number of probes (=",nprobes,").")
 
   ## apply probes to model simulations
   simval <- tryCatch(
-    .Call(
-      apply_probe_sim,
-      object=object,
-      nsim=nsim,
-      params=params,
-      seed=seed,
-      probes=probes,
-      datval=datval,
-      rho=parent.frame(2)
+    freeze(
+      .Call(P_apply_probe_sim,object=object,nsim=nsim,params=params,probes=probes,
+        datval=datval,gnsi=gnsi),
+      seed=seed
     ),
-    error = function (e) {
-      stop(ep,"applying probes to simulated data: ",conditionMessage(e),call.=FALSE)
-    }
+    error = function (e)
+      pStop_("applying probes to simulated data: ",conditionMessage(e))
   )
 
   pvals <- numeric(nprobes)
   names(pvals) <- names(datval)
   quants <- numeric(nprobes)
   names(quants) <- names(datval)
+
   for (k in seq_len(nprobes)) {
     r <- min(sum(simval[,k]>datval[k]),sum(simval[,k]<datval[k]))
     tails <- (r+1)/(nsim+1)
@@ -67,20 +236,18 @@ probe.internal <- function (object, probes, params, nsim = 1L, seed = NULL, ...)
   }
 
   ll <- tryCatch(
-    .Call(synth_loglik,simval,datval),
-    error = function (e) {
-      stop(ep,"in synthetic likelihood computation: ",conditionMessage(e),call.=FALSE)
-    }
+    .Call(P_synth_loglik,simval,datval),
+    error = function (e)
+      pStop_("in synthetic likelihood computation: ",conditionMessage(e))
   )
 
-  coef(object) <- params
-
-  pompUnload(object)
+  names(dimnames(simval)) <- c("rep","probe")
 
   new(
-    "probed.pomp",
+    "probed_pomp",
     object,
     probes=probes,
+    nsim=nsim,
     datvals=datval,
     simvals=simval,
     quantiles=quants,
@@ -90,121 +257,13 @@ probe.internal <- function (object, probes, params, nsim = 1L, seed = NULL, ...)
   )
 }
 
-setMethod(
-  "probe",
-  signature=signature(object="pomp"),
-  definition=function (object, probes, params, nsim = 1, seed = NULL, ...)
-  {
-    probe.internal(
-      object=object,
-      probes=probes,
-      params=params,
-      nsim=nsim,
-      seed=seed,
-      ...
-    )
-  }
-)
-
-setMethod(
-  "probe",
-  signature=signature(object="probed.pomp"),
-  definition=function (object, probes, nsim, seed, ...) {
-
-    if (missing(probes)) probes <- object@probes
-    if (missing(nsim)) nsim <- nrow(object@simvals)
-    if (missing(seed)) seed <- object@seed
-
-    probe(
-      as(object,"pomp"),
-      probes=probes,
-      nsim=nsim,
-      seed=seed,
-      ...
-    )
-  }
-)
-
-probeplot.internal <- function (x, ...) {
-  ##function for plotting diagonal panels
-  diag.panel.hist <- function(x, ...) {
-    ##plot a histogram for the simulations
-    usr <- par("usr")
-    on.exit(par(usr))
-    par(usr=c(usr[c(1L,2L)],0,1.5))
-    h <- hist(x[-1L],plot=FALSE)
-    breaks <- h$breaks
-    nB <- length(breaks)
-    y <- h$counts
-    y <- y/max(y)
-    rect(breaks[-nB],0,breaks[-1L],y,...)
-    ##plot the data point
-    lines(c(x[1L],x[1L]),c(0,max(h$counts)),col="red")
-  }
-
-  ##function for plotting above-diagonal panels
-  above.diag.panel <- function (x, y, ...) {
-    ##plot the simulations
-    points(x[-1L],y[-1L],...)
-    ##plot the data
-    mMx <- c(min(x),max(x))
-    mMy <- c(min(y),max(y))
-    lines(c(x[1L],x[1L]),mMy,col="red")
-    lines(mMx,c(y[1L],y[1L]),col="red")
-  }
-
-  ##function for plotting below-diagonal panels
-  below.diag.panel <- function (x, y, ...) {
-    mMx <- c(min(x),max(x))
-    mMy <- c(min(y),max(y))
-    x <- x[-1L]
-    y <- y[-1L]
-    correls <- round(cor(x,y),3)
-    text(mean(mMx),mean(mMy),correls,cex=1)
-  }
-
-  ##prepare the arguments for these functions
-  nprobes <- length(x@datvals)
-  nsim <- nrow(x@simvals)
-  datsimvals <- array(dim=c(nsim+1,nprobes))
-  datsimvals[1L,] <- x@datvals
-  datsimvals[-1L,] <- x@simvals
-
-  labels <- paste("pb",seq_len(nprobes))
-  if (!is.null(names(x@datvals)))
-    labels <- ifelse(names(x@datvals)=="",labels,names(x@datvals))
-  lab.plus <- paste(labels,paste0("p=",round(x@pvals,3)),sep="\n")
-  ##now make the plot
-
-  if (nprobes>1) {
-    pairs(
-      datsimvals,
-      diag.panel=diag.panel.hist,
-      lower.panel=below.diag.panel,
-      upper.panel=above.diag.panel,
-      labels=lab.plus,
-      cex.labels=if (nprobes>5) 5/nprobes else 1
-    )
-  } else {
-    plot(datsimvals,datsimvals,type="n",xlab="",ylab="",yaxt="n",main=lab.plus)
-    diag.panel.hist(datsimvals)
-  }
-}
-
-setMethod("plot",
-  signature=signature(x="probed.pomp"),
-  definition=function (x, y, ...) {
-    if (!missing(y))
-      warning("in ",sQuote("plot-probed.pomp"),": ",
-        sQuote("y")," is ignored",call.=FALSE)
-    probeplot.internal(x=x,...)
-  }
-)
-
+##' @name summary-probed_pomp
+##' @aliases summary,probed_pomp-method
+##' @rdname summary
 setMethod(
   "summary",
-  signature=signature(object="probed.pomp"),
-  definition=function (object, ...) {
+  signature=signature(object="probed_pomp"),
+  definition=function (object) {
     list(
       coef=coef(object),
       nsim=nrow(object@simvals),
@@ -213,44 +272,4 @@ setMethod(
       synth.loglik=object@synth.loglik
     )
   }
-)
-
-setAs(
-  from="probed.pomp",
-  to="data.frame",
-  def = function (from) {
-    x <- rbind(from@datvals,as.data.frame(from@simvals))
-    rownames(x) <- c(
-      "data",
-      paste("sim",seq_len(nrow(from@simvals)),sep=".")
-    )
-    x
-  }
-)
-
-as.data.frame.probed.pomp <- function (x, row.names, optional, ...) as(x,"data.frame")
-
-setMethod(
-  "logLik",
-  signature=signature(object="probed.pomp"),
-  definition=function(object,...)object@synth.loglik
-)
-
-setMethod(
-  "$",
-  signature=signature(x="probed.pomp"),
-  definition=function(x, name)slot(x,name)
-)
-
-values.probe.internal <- function (object, ...) {
-  x <- as.data.frame(rbind(object@datvals,object@simvals))
-  row.names(x) <- seq.int(from=0,to=nrow(x)-1)
-  x$.id <- factor(c("data",rep("sim",nrow(x)-1)))
-  x
-}
-
-setMethod(
-  "values",
-  signature=signature(object="probed.pomp"),
-  definition=values.probe.internal
 )

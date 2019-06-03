@@ -6,23 +6,21 @@ static const R_CallMethodDef callMethods[] = {
   {"periodic_bspline_basis", (DL_FUNC) &periodic_bspline_basis, 5},
   {"systematic_resampling", (DL_FUNC) &systematic_resampling, 1},
   {"euler_model_simulator", (DL_FUNC) &euler_model_simulator, 11},
-  {"onestep_density", (DL_FUNC) &onestep_density, 9},
-  {"lookup_in_table", (DL_FUNC) &lookup_in_table, 3},
+  {"lookup_in_table", (DL_FUNC) &lookup_in_table, 2},
   {"load_stack_incr", (DL_FUNC) &load_stack_incr, 1},
   {"load_stack_decr", (DL_FUNC) &load_stack_decr, 1},
   {"SSA_simulator", (DL_FUNC) &SSA_simulator, 11},
   {"R_Euler_Multinom", (DL_FUNC) &R_Euler_Multinom, 4},
   {"D_Euler_Multinom", (DL_FUNC) &D_Euler_Multinom, 5},
   {"R_GammaWN", (DL_FUNC) &R_GammaWN, 3},
-  {"mif_update", (DL_FUNC) &mif_update, 6},
-  {"pfilter_computations", (DL_FUNC) &pfilter_computations, 11},
+  {"pfilter_computations", (DL_FUNC) &pfilter_computations, 10},
   {"randwalk_perturbation", (DL_FUNC) &randwalk_perturbation, 2},
-  {"simulation_computations", (DL_FUNC) &simulation_computations, 8},
+  {"do_simulate", (DL_FUNC) &do_simulate, 5},
   {"iterate_map", (DL_FUNC) &iterate_map, 6},
   {"pomp_desolve_setup", (DL_FUNC) &pomp_desolve_setup, 4},
   {"pomp_desolve_takedown", (DL_FUNC) &pomp_desolve_takedown, 0},
   {"apply_probe_data", (DL_FUNC) &apply_probe_data, 2},
-  {"apply_probe_sim", (DL_FUNC) &apply_probe_sim, 7},
+  {"apply_probe_sim", (DL_FUNC) &apply_probe_sim, 6},
   {"probe_marginal_setup", (DL_FUNC) &probe_marginal_setup, 3},
   {"probe_marginal_solve", (DL_FUNC) &probe_marginal_solve, 3},
   {"probe_acf", (DL_FUNC) &probe_acf, 3},
@@ -38,23 +36,27 @@ static const R_CallMethodDef callMethods[] = {
   {"do_rprior", (DL_FUNC) &do_rprior, 3},
   {"do_dprior", (DL_FUNC) &do_dprior, 4},
   {"do_skeleton", (DL_FUNC) &do_skeleton, 5},
-  {"do_init_state", (DL_FUNC) &do_init_state, 5},
+  {"do_rinit", (DL_FUNC) &do_rinit, 5},
+  {"LogitTransform", (DL_FUNC) &LogitTransform, 1},
+  {"ExpitTransform", (DL_FUNC) &ExpitTransform, 1},
+  {"LogBarycentricTransform", (DL_FUNC) &LogBarycentricTransform, 1},
+  {"InverseLogBarycentricTransform", (DL_FUNC) &InverseLogBarycentricTransform, 1},
   {NULL, NULL, 0}
 };
 
 void R_init_pomp (DllInfo *info) {
   // C functions provided for users
   R_RegisterCCallable("pomp","periodic_bspline_basis_eval",(DL_FUNC) &periodic_bspline_basis_eval);
-  R_RegisterCCallable("pomp","get_pomp_userdata",(DL_FUNC) &get_pomp_userdata);
-  R_RegisterCCallable("pomp","get_pomp_userdata_int",(DL_FUNC) &get_pomp_userdata_int);
-  R_RegisterCCallable("pomp","get_pomp_userdata_double",(DL_FUNC) &get_pomp_userdata_double);
+  R_RegisterCCallable("pomp","get_userdata",(DL_FUNC) &get_userdata);
+  R_RegisterCCallable("pomp","get_userdata_int",(DL_FUNC) &get_userdata_int);
+  R_RegisterCCallable("pomp","get_userdata_double",(DL_FUNC) &get_userdata_double);
   R_RegisterCCallable("pomp","pomp_fun_handler",(DL_FUNC) &pomp_fun_handler);
   R_RegisterCCallable("pomp","load_stack_incr",(DL_FUNC) &load_stack_incr);
   R_RegisterCCallable("pomp","load_stack_decr",(DL_FUNC) &load_stack_decr);
   R_RegisterCCallable("pomp","set_pomp_userdata",(DL_FUNC) &set_pomp_userdata);
   R_RegisterCCallable("pomp","unset_pomp_userdata",(DL_FUNC) &unset_pomp_userdata);
   R_RegisterCCallable("pomp","make_covariate_table",(DL_FUNC) &make_covariate_table);
-  R_RegisterCCallable("pomp","lookup_in_table",(DL_FUNC) &lookup_in_table);
+  R_RegisterCCallable("pomp","get_covariate_names",(DL_FUNC) &get_covariate_names);
   R_RegisterCCallable("pomp","table_lookup",(DL_FUNC) &table_lookup);
   R_RegisterCCallable("pomp","apply_probe_data",(DL_FUNC) &apply_probe_data);
   R_RegisterCCallable("pomp","apply_probe_sim",(DL_FUNC) &apply_probe_sim);

@@ -2,96 +2,20 @@
 
 #include <Rdefines.h>
 #include <R_ext/Constants.h>
+#include <string.h>
 
 #include "pomp_internal.h"
 
-static void iterate_map_native (double *X, double *time, double *p,
-  double deltat, double t, double *x,
-  int ntimes, int nvars, int npars, int ncovars, int nzeros, int nreps,
-  int *sidx, int *pidx, int *cidx, int *zidx,
-  lookup_table_t *covar_table,
-  pomp_skeleton *ff, SEXP args)
+static R_INLINE SEXP ret_array (int nvars, int nreps, int ntimes, SEXP Snames)
 {
-  double *covars = NULL;
-  int nsteps;
-  double *Xs, *xs, *ps;
-  int h, i, j, k;
-  set_pomp_userdata(args);
-  if (ncovars > 0) covars = (double *) Calloc(ncovars, double);
-  for (k = 0; k < ntimes; k++, time++, X += nvars*nreps) {
-    R_CheckUserInterrupt();
-    for (i = 0; i < nzeros; i++)
-      for (j = 0, xs = &x[zidx[i]]; j < nreps; j++, xs += nvars)
-	*xs = 0.0;
-    nsteps = num_map_steps(t,*time,deltat);
-    for (h = 0; h < nsteps; h++) {
-      table_lookup(covar_table,t,covars);
-      for (j = 0, Xs = X, xs = x, ps = p; j < nreps; j++, Xs += nvars, xs += nvars, ps += npars) {
-	(*ff)(Xs,xs,ps,sidx,pidx,cidx,ncovars,covars,t);
-      }
-      memcpy(x,X,nvars*nreps*sizeof(double));
-      t += deltat;
-    }
-    if (nsteps == 0) memcpy(X,x,nvars*nreps*sizeof(double));
-  }
-  if (ncovars > 0) Free(covars);
-  unset_pomp_userdata();
-}
-
-static void iterate_map_R (double *X, double *time, double *p,
-  double deltat, double t, double *x,
-  double *tp, double *xp, double *pp, double *cp,
-  int ntimes, int nvars, int npars, int nzeros, int nreps,
-  lookup_table_t *covar_table, int *zidx,
-  SEXP Snames, SEXP fcall, SEXP rho)
-{
-  int nprotect = 0;
-  int first = 1;
-  int use_names;
-  int nsteps;
-  SEXP ans, nm;
-  double *fs, *xs, *ps;
-  int *posn = 0;
-  int h, i, j, k;
-
-  for (k = 0; k < ntimes; k++, time++, X += nvars*nreps) {
-    R_CheckUserInterrupt();
-    nsteps = num_map_steps(t,*time,deltat);
-    for (i = 0; i < nzeros; i++)
-      for (j = 0, xs = &x[zidx[i]]; j < nreps; j++, xs += nvars)
-	*xs = 0.0;
-    for (h = 0; h < nsteps; h++) {
-      table_lookup(covar_table,t,cp);
-      for (j = 0, xs = x, ps = p; j < nreps; j++, xs += nvars, ps += npars) {
-	*tp = t;
-	memcpy(xp,xs,nvars*sizeof(double));
-	memcpy(pp,ps,npars*sizeof(double));
-	if (first) {
-	  PROTECT(ans = eval(fcall,rho)); nprotect++;
-	  if (LENGTH(ans)!=nvars)
-	    errorcall(R_NilValue,"in 'trajectory': user 'skeleton' returns a vector of %d state variables but %d are expected",LENGTH(ans),nvars);
-	  // get name information to fix possible alignment problems
-	  PROTECT(nm = GET_NAMES(ans)); nprotect++;
-	  use_names = !isNull(nm);
-	  if (use_names) {
-	    posn = INTEGER(PROTECT(matchnames(Snames,nm,"state variables"))); nprotect++;
-	  }
-	  fs = REAL(AS_NUMERIC(ans));
-	  first = 0;
-	} else {
-	  fs = REAL(AS_NUMERIC(PROTECT(eval(fcall,rho))));
-	  UNPROTECT(1);
-	}
-	if (use_names)
-	  for (i = 0; i < nvars; i++) xs[posn[i]] = fs[i];
-	else
-	  for (i = 0; i < nvars; i++) xs[i] = fs[i];
-      }
-      t += deltat;
-    }
-    memcpy(X,x,nvars*nreps*sizeof(double));
-  }
-  UNPROTECT(nprotect);
+  SEXP X;
+  int dim[3] = {nvars, nreps, ntimes};
+  const char *dimnms[3] = {"variable","rep","time"};
+  PROTECT(X = makearray(3,dim));
+  setrownames(X,Snames,3);
+  fixdimnames(X,dimnms,3);
+  UNPROTECT(1);
+  return X;
 }
 
 SEXP iterate_map (SEXP object, SEXP times, SEXP t0, SEXP x0, SEXP params, SEXP gnsi)
@@ -99,120 +23,94 @@ SEXP iterate_map (SEXP object, SEXP times, SEXP t0, SEXP x0, SEXP params, SEXP g
   int nprotect = 0;
   pompfunmode mode = undef;
   SEXP fn, args;
-  SEXP X;
+  SEXP X, cov;
   SEXP Snames, Pnames, Cnames;
-  SEXP pompfun;
-  SEXP zeronames;
+  SEXP skel, pompfun;
+  SEXP accumvars;
   int *zidx = 0;
-  int nvars, npars, nreps, ntimes, ncovars, nzeros;
+  int nvars, npars, nreps, nrepp, ntimes, ncovars, nzeros;
   int *dim;
   lookup_table_t covariate_table;
   double deltat, t;
 
-  deltat = *(REAL(GET_SLOT(object,install("skelmap.delta.t"))));
+  PROTECT(skel = GET_SLOT(object,install("skeleton"))); nprotect++;
+  deltat = *(REAL(GET_SLOT(skel,install("delta.t"))));
   t = *(REAL(AS_NUMERIC(t0)));
 
-  PROTECT(x0 = as_matrix(PROTECT(duplicate(x0)))); nprotect += 2;
+  PROTECT(x0 = duplicate(x0)); nprotect++;
+  PROTECT(x0 = as_matrix(x0)); nprotect++;
   dim = INTEGER(GET_DIM(x0));
   nvars = dim[0]; nreps = dim[1];
 
   PROTECT(params = as_matrix(params)); nprotect++;
   dim = INTEGER(GET_DIM(params));
-  npars = dim[0];
-
-  if (nreps != dim[1])
-    errorcall(R_NilValue,"in 'trajectory': dimension mismatch between 'x0' and 'params'"); // # nocov
+  npars = dim[0]; nrepp = dim[1];
 
   PROTECT(times = AS_NUMERIC(times)); nprotect++;
   ntimes = LENGTH(times);
 
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x0))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
-  PROTECT(Cnames = GET_COLNAMES(GET_DIMNAMES(GET_SLOT(object,install("covar"))))); nprotect++;
+  PROTECT(Cnames = get_covariate_names(GET_SLOT(object,install("covar")))); nprotect++;
 
   // set up the covariate table
-  covariate_table = make_covariate_table(object,&ncovars);
+  covariate_table = make_covariate_table(GET_SLOT(object,install("covar")),&ncovars);
+  PROTECT(cov = NEW_NUMERIC(ncovars)); nprotect++;
 
   // extract user-defined function
-  PROTECT(pompfun = GET_SLOT(object,install("skeleton"))); nprotect++;
-  PROTECT(fn = pomp_fun_handler(pompfun,gnsi,&mode)); nprotect++;
+  PROTECT(pompfun = GET_SLOT(skel,install("skel.fn"))); nprotect++;
+  PROTECT(fn = pomp_fun_handler(pompfun,gnsi,&mode,Snames,Pnames,NA_STRING,Cnames)); nprotect++;
 
   // extract 'userdata' as pairlist
   PROTECT(args = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;
 
   // get names and indices of accumulator variables
-  PROTECT(zeronames = GET_SLOT(object,install("zeronames"))); nprotect++;
-  nzeros = LENGTH(zeronames);
+  PROTECT(accumvars = GET_SLOT(object,install("accumvars"))); nprotect++;
+  nzeros = LENGTH(accumvars);
   if (nzeros > 0) {
-    zidx = INTEGER(PROTECT(matchnames(Snames,zeronames,"state variables"))); nprotect++;
+    zidx = INTEGER(PROTECT(matchnames(Snames,accumvars,"state variables"))); nprotect++;
   }
 
   // create array to store results
-  {
-    int dim[3] = {nvars, nreps, ntimes};
-    PROTECT(X = makearray(3,dim)); nprotect++;
-    setrownames(X,Snames,3);
-  }
+  PROTECT(X = ret_array(nvars,nreps,ntimes,Snames)); nprotect++;
 
   // set up the computations
   switch (mode) {
 
-  case Rfun:                       // R function
-    {
-      SEXP cvec, tvec, xvec, pvec;
-      SEXP fcall, rho;
-      PROTECT(tvec = NEW_NUMERIC(1)); nprotect++;
-      PROTECT(xvec = NEW_NUMERIC(nvars)); nprotect++;
-      PROTECT(pvec = NEW_NUMERIC(npars)); nprotect++;
-      PROTECT(cvec = NEW_NUMERIC(ncovars)); nprotect++;
-      SET_NAMES(xvec,Snames);
-      SET_NAMES(pvec,Pnames);
-      SET_NAMES(cvec,Cnames);
-      // set up the function call
-      PROTECT(fcall = LCONS(cvec,args)); nprotect++;
-      SET_TAG(fcall,install("covars"));
-      PROTECT(fcall = LCONS(pvec,fcall)); nprotect++;
-      SET_TAG(fcall,install("params"));
-      PROTECT(fcall = LCONS(tvec,fcall)); nprotect++;
-      SET_TAG(fcall,install("t"));
-      PROTECT(fcall = LCONS(xvec,fcall)); nprotect++;
-      SET_TAG(fcall,install("x"));
-      PROTECT(fcall = LCONS(fn,fcall)); nprotect++;
-      // get function's environment
-      PROTECT(rho = (CLOENV(fn))); nprotect++;
+  case Rfun: {
 
-      iterate_map_R(REAL(X),REAL(times),REAL(params),
-		    deltat,t,REAL(x0),
-		    REAL(tvec),REAL(xvec),REAL(pvec),REAL(cvec),
-		    ntimes,nvars,npars,nzeros,nreps,
-		    &covariate_table,zidx,Snames,fcall,rho);
-    }
+    PROTECT(args = add_skel_args(args,Snames,Pnames,Cnames)); nprotect++;
+
+    iterate_skeleton_R(REAL(X),t,deltat,REAL(times),REAL(x0),REAL(params),
+      fn,args,Snames,nvars,npars,ncovars,ntimes,nrepp,nreps,nzeros,
+      &covariate_table,zidx,REAL(cov));
+
+  }
 
     break;
 
-  case native:                       // native skeleton
-    {
-      int *sidx, *pidx, *cidx;
-      pomp_skeleton *ff;
-      *((void **) (&ff)) = R_ExternalPtrAddr(fn);
-      // construct state, parameter, covariate indices
-      sidx = INTEGER(PROTECT(name_index(Snames,pompfun,"statenames","state variables"))); nprotect++;
-      pidx = INTEGER(PROTECT(name_index(Pnames,pompfun,"paramnames","parameters"))); nprotect++;
-      cidx = INTEGER(PROTECT(name_index(Cnames,pompfun,"covarnames","covariates"))); nprotect++;
+  case native: case regNative: {
+    int *sidx, *pidx, *cidx;
+    pomp_skeleton *ff;
 
-      iterate_map_native(REAL(X),REAL(times),REAL(params),deltat,t,REAL(x0),
-			 ntimes,nvars,npars,ncovars,nzeros,nreps,
-			 sidx,pidx,cidx,zidx,&covariate_table,ff,args);
+    *((void **) (&ff)) = R_ExternalPtrAddr(fn);
 
-    }
+    // construct state, parameter, covariate indices
+    sidx = INTEGER(GET_SLOT(pompfun,install("stateindex")));
+    pidx = INTEGER(GET_SLOT(pompfun,install("paramindex")));
+    cidx = INTEGER(GET_SLOT(pompfun,install("covarindex")));
 
-    break;
+    iterate_skeleton_native(REAL(X),t,deltat,REAL(times),REAL(x0),REAL(params),
+      nvars,npars,ncovars,ntimes,nrepp,nreps,nzeros,sidx,pidx,cidx,
+      &covariate_table,zidx,ff,args,REAL(cov));
 
-  default:
-
-    errorcall(R_NilValue,"in 'iterate_map': unrecognized 'mode'"); // # nocov
+  }
 
     break;
+
+  default: // #nocov
+
+    break; // #nocov
 
   }
 
@@ -225,6 +123,7 @@ static struct {
     pompfunmode mode;
     SEXP object;
     SEXP params;
+    SEXP cov;
     lookup_table_t covar_table;
     int nvars;
     int npars;
@@ -233,10 +132,9 @@ static struct {
   } common;
   union {
     struct {
-      SEXP fcall;
-      SEXP rho;
+      SEXP fn;
+      SEXP args;
       SEXP Snames;
-      SEXP tvec, xvec, pvec, cvec;
     } R_fun;
     struct {
       SEXP args;
@@ -262,12 +160,9 @@ SEXP pomp_desolve_setup (SEXP object, SEXP x0, SEXP params, SEXP gnsi) {
   int nvars, npars, nreps, ncovars;
 
   // extract user-defined skeleton function
-  PROTECT(pompfun = GET_SLOT(object,install("skeleton"))); nprotect++;
-  PROTECT(fn = pomp_fun_handler(pompfun,gnsi,&mode)); nprotect++;
+  PROTECT(pompfun = GET_SLOT(GET_SLOT(object,install("skeleton")),install("skel.fn"))); nprotect++;
   // extract 'userdata' as pairlist
   PROTECT(args = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;
-
-  COMMON(mode) = mode;
 
   COMMON(object) = object;
   COMMON(params) = params;
@@ -286,87 +181,71 @@ SEXP pomp_desolve_setup (SEXP object, SEXP x0, SEXP params, SEXP gnsi) {
   COMMON(nreps) = nreps;
 
   // set up the covariate table
-  COMMON(covar_table) = make_covariate_table(object,&ncovars);
+  COMMON(covar_table) = make_covariate_table(GET_SLOT(object,install("covar")),&ncovars);
   COMMON(ncovars) = ncovars;
+  PROTECT(COMMON(cov) = NEW_NUMERIC(ncovars)); nprotect++;
+  R_PreserveObject(COMMON(cov));
 
   PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x0))); nprotect++;
   PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
-  PROTECT(Cnames = GET_COLNAMES(GET_DIMNAMES(GET_SLOT(object,install("covar"))))); nprotect++;
+  PROTECT(Cnames = get_covariate_names(GET_SLOT(object,install("covar")))); nprotect++;
+
+  PROTECT(fn = pomp_fun_handler(pompfun,gnsi,&mode,Snames,Pnames,NA_STRING,Cnames)); nprotect++;
+
+  COMMON(mode) = mode;
 
   switch (COMMON(mode)) {
 
-  case Rfun:			// R function
-    // arguments of the R function
-    PROTECT(RFUN(tvec) = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(RFUN(xvec) = NEW_NUMERIC(nvars)); nprotect++;
-    PROTECT(RFUN(pvec) = NEW_NUMERIC(npars)); nprotect++;
-    PROTECT(RFUN(cvec) = NEW_NUMERIC(ncovars)); nprotect++;
-    SET_NAMES(RFUN(xvec),Snames);
-    SET_NAMES(RFUN(pvec),Pnames);
-    SET_NAMES(RFUN(cvec),Cnames);
-    // set up the function call
-    PROTECT(RFUN(fcall) = LCONS(RFUN(cvec),args)); nprotect++;
-    SET_TAG(RFUN(fcall),install("covars"));
-    PROTECT(RFUN(fcall) = LCONS(RFUN(pvec),RFUN(fcall))); nprotect++;
-    SET_TAG(RFUN(fcall),install("params"));
-    PROTECT(RFUN(fcall) = LCONS(RFUN(tvec),RFUN(fcall))); nprotect++;
-    SET_TAG(RFUN(fcall),install("t"));
-    PROTECT(RFUN(fcall) = LCONS(RFUN(xvec),RFUN(fcall))); nprotect++;
-    SET_TAG(RFUN(fcall),install("x"));
-    PROTECT(RFUN(fcall) = LCONS(fn,RFUN(fcall))); nprotect++;
-    // environment of the user-defined function
-    PROTECT(RFUN(rho) = (CLOENV(fn))); nprotect++;
+  case Rfun: {
 
+    PROTECT(RFUN(fn) = fn); nprotect++;
+    PROTECT(RFUN(args) = add_skel_args(args,Snames,Pnames,Cnames)); nprotect++;
     PROTECT(RFUN(Snames) = Snames); nprotect++;
 
-    if (!isNull(RFUN(fcall))) R_ReleaseObject(RFUN(fcall));
-    if (!isNull(RFUN(rho))) R_ReleaseObject(RFUN(rho));
+    if (!isNull(RFUN(fn))) R_ReleaseObject(RFUN(fn));
+    if (!isNull(RFUN(args))) R_ReleaseObject(RFUN(args));
     if (!isNull(RFUN(Snames))) R_ReleaseObject(RFUN(Snames));
-    if (!isNull(RFUN(tvec))) R_ReleaseObject(RFUN(tvec));
-    if (!isNull(RFUN(xvec))) R_ReleaseObject(RFUN(xvec));
-    if (!isNull(RFUN(pvec))) R_ReleaseObject(RFUN(pvec));
-    if (!isNull(RFUN(cvec))) R_ReleaseObject(RFUN(cvec));
-    R_PreserveObject(RFUN(fcall));
-    R_PreserveObject(RFUN(rho));
+
+    R_PreserveObject(RFUN(fn));
+    R_PreserveObject(RFUN(args));
     R_PreserveObject(RFUN(Snames));
-    R_PreserveObject(RFUN(tvec));
-    R_PreserveObject(RFUN(xvec));
-    R_PreserveObject(RFUN(pvec));
-    R_PreserveObject(RFUN(cvec));
+
+  }
 
     break;
 
-  case native:			// native code
-    // set aside userdata
+  case native: case regNative: {
+
     NAT(args) = args;
-    // construct index vectors
-    PROTECT(NAT(sindex) = name_index(Snames,pompfun,"statenames","state variables")); nprotect++;
-    PROTECT(NAT(pindex) = name_index(Pnames,pompfun,"paramnames","parameters")); nprotect++;
-    PROTECT(NAT(cindex) = name_index(Cnames,pompfun,"covarnames","covariates")); nprotect++;
-    // extract pointer to user-defined function
+
+    PROTECT(NAT(sindex) = GET_SLOT(pompfun,install("stateindex"))); nprotect++;
+    PROTECT(NAT(pindex) = GET_SLOT(pompfun,install("paramindex"))); nprotect++;
+    PROTECT(NAT(cindex) = GET_SLOT(pompfun,install("covarindex"))); nprotect++;
+
     *((void **) (&(NAT(fun)))) = R_ExternalPtrAddr(fn);
 
     if (!isNull(NAT(args))) R_ReleaseObject(NAT(args));
     if (!isNull(NAT(sindex))) R_ReleaseObject(NAT(sindex));
     if (!isNull(NAT(pindex))) R_ReleaseObject(NAT(pindex));
     if (!isNull(NAT(cindex))) R_ReleaseObject(NAT(cindex));
+
     R_PreserveObject(NAT(args));
     R_PreserveObject(NAT(sindex));
     R_PreserveObject(NAT(pindex));
     R_PreserveObject(NAT(cindex));
 
+  }
+
     break;
 
-  default:
+  default: // #nocov
 
     errorcall(R_NilValue,"in 'pomp_desolve_setup': unrecognized 'mode'"); // # nocov
-
-    break;
 
   }
 
   UNPROTECT(nprotect);
-  //  return retval;
+
   return R_NilValue;
 }
 
@@ -375,28 +254,29 @@ void pomp_vf_eval (int *neq, double *t, double *y, double *ydot, double *yout, i
   switch (COMMON(mode)) {
 
   case Rfun:			// R function
+
     eval_skeleton_R(ydot,t,y,REAL(COMMON(params)),
-		    RFUN(fcall),RFUN(rho),RFUN(Snames),
-		    REAL(RFUN(tvec)),REAL(RFUN(xvec)),REAL(RFUN(pvec)),REAL(RFUN(cvec)),
-		    COMMON(nvars),COMMON(npars),1,COMMON(nreps),COMMON(nreps),COMMON(nreps),
-		    &COMMON(covar_table));
+      RFUN(fn),RFUN(args),RFUN(Snames),
+      COMMON(nvars),COMMON(npars),COMMON(ncovars),1,
+      COMMON(nreps),COMMON(nreps),COMMON(nreps),
+      &COMMON(covar_table),REAL(COMMON(cov)));
 
     break;
 
-  case native:			// native code
+  case native: case regNative:		// native code
     eval_skeleton_native(ydot,t,y,REAL(COMMON(params)),
-			 COMMON(nvars),COMMON(npars),COMMON(ncovars),1,
-			 COMMON(nreps),COMMON(nreps),COMMON(nreps),
-			 INTEGER(NAT(sindex)),INTEGER(NAT(pindex)),INTEGER(NAT(cindex)),
-			 &COMMON(covar_table),NAT(fun),NAT(args));
+      COMMON(nvars),COMMON(npars),COMMON(ncovars),1,
+      COMMON(nreps),COMMON(nreps),COMMON(nreps),
+      INTEGER(NAT(sindex)),INTEGER(NAT(pindex)),INTEGER(NAT(cindex)),
+      &COMMON(covar_table),NAT(fun),NAT(args),REAL(COMMON(cov)));
 
     break;
 
-  default:
+  default: // #nocov
 
     errorcall(R_NilValue,"in 'pomp_vf_eval': unrecognized 'mode'"); // # nocov
 
-    break;
+  break;
 
   }
 }
@@ -404,8 +284,10 @@ void pomp_vf_eval (int *neq, double *t, double *y, double *ydot, double *yout, i
 void pomp_desolve_takedown (void) {
   R_ReleaseObject(COMMON(object));
   R_ReleaseObject(COMMON(params));
+  R_ReleaseObject(COMMON(cov));
   COMMON(object) = R_NilValue;
   COMMON(params) = R_NilValue;
+  COMMON(cov) = R_NilValue;
   COMMON(nvars) = 0;
   COMMON(npars) = 0;
   COMMON(ncovars) = 0;
@@ -413,25 +295,21 @@ void pomp_desolve_takedown (void) {
 
   switch (COMMON(mode)) {
 
-  case Rfun:			// R function
-    R_ReleaseObject(RFUN(fcall));
-    R_ReleaseObject(RFUN(rho));
+  case Rfun: {
+
+    R_ReleaseObject(RFUN(fn));
+    R_ReleaseObject(RFUN(args));
     R_ReleaseObject(RFUN(Snames));
-    R_ReleaseObject(RFUN(tvec));
-    R_ReleaseObject(RFUN(xvec));
-    R_ReleaseObject(RFUN(pvec));
-    R_ReleaseObject(RFUN(cvec));
-    RFUN(fcall) = R_NilValue;
-    RFUN(rho) = R_NilValue;
+    RFUN(fn) = R_NilValue;
+    RFUN(args) = R_NilValue;
     RFUN(Snames) = R_NilValue;
-    RFUN(tvec) = R_NilValue;
-    RFUN(xvec) = R_NilValue;
-    RFUN(pvec) = R_NilValue;
-    RFUN(cvec) = R_NilValue;
+
+  }
 
     break;
 
-  case native:			// native code
+  case native: case regNative: {
+
     NAT(fun) = 0;
     R_ReleaseObject(NAT(args));
     R_ReleaseObject(NAT(sindex));
@@ -442,45 +320,22 @@ void pomp_desolve_takedown (void) {
     NAT(pindex) = R_NilValue;
     NAT(cindex) = R_NilValue;
 
+  }
+
     break;
 
-  default:
+  default: // #nocov
 
     errorcall(R_NilValue,"in 'pomp_desolve_takedown': unrecognized 'mode'"); // # nocov
 
-    break;
+  break;
 
   }
 
-  COMMON(mode) = -1;
+  COMMON(mode) = undef;
 
 }
 
 #undef COMMON
 #undef RFUN
 #undef NAT
-
-// copy t(x[-1,-1]) -> y[,rep,]
-// SEXP traj_transp_and_copy (SEXP y, SEXP x, SEXP rep) {
-//   int nprotect = 0;
-//   SEXP ans = R_NilValue;
-//   int nvars, nreps, ntimes;
-//   int i, j, k, m, n;
-//   double *xp, *yp;
-
-//   j = INTEGER(rep)[0]-1;
-//   nvars = INTEGER(GET_DIM(y))[0];
-//   nreps = INTEGER(GET_DIM(y))[1];
-//   ntimes = INTEGER(GET_DIM(y))[2];
-//   n = INTEGER(GET_DIM(x))[0];
-//   m = nvars*nreps;
-
-//   for (i = 0, xp = REAL(x)+n+1; i < nvars; i++, xp += n) {
-//     for (k = 0, yp = REAL(y)+i+nvars*j; k < ntimes; k++, yp += m) {
-//       *yp = xp[k];
-//     }
-//   }
-
-//   UNPROTECT(nprotect);
-//   return ans;
-// }

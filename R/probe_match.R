@@ -1,257 +1,296 @@
+##' Probe matching
+##'
+##' Estimation of parameters by maximum synthetic likelihood
+##'
+##' In probe-matching, one attempts to minimize the discrepancy between simulated and actual data, as measured by a set of summary statistics called \emph{probes}.
+##' In \pkg{pomp}, this discrepancy is measured using the \dQuote{synthetic likelihood} as defined by Wood (2010).
+##'
+##' @name probe.match
+##' @rdname probe_match
+##' @aliases probe.match probe_objfun probe_objfun,missing-method
+##' probe_objfun,ANY-method
+##' @include probe.R
+##' @author Aaron A. King
+##' @family summary statistics methods
+##' @family pomp parameter estimation methods
+##' @seealso \code{\link{optim}} \code{\link[subplex]{subplex}} \code{\link[nloptr]{nloptr}}
+##'
+##' @param est character vector; the names of parameters to be estimated.
+##'
+##' @param fail.value optional numeric scalar;
+##' if non-\code{NA}, this value is substituted for non-finite values of the objective function.
+##' It should be a large number (i.e., bigger than any legitimate values the objective function is likely to take).
+##'
+##' @param seed  integer.
+##' When fitting, it is often best to fix the seed of the random-number generator (RNG).
+##' This is accomplished by setting \code{seed} to an integer.
+##' By default, \code{seed = NULL}, which does not alter the RNG state.
+##'
+##' @inheritParams probe
+##' @inheritParams pomp
+##'
+##' @return
+##' \code{probe_objfun} constructs a stateful objective function for probe matching.
+##' Specifically, \code{probe_objfun} returns an object of class \sQuote{probe_match_objfun}, which is a function suitable for use in an \code{\link{optim}}-like optimizer.
+##' In particular, this function takes a single numeric-vector argument that is assumed to contain the parameters named in \code{est}, in that order.
+##' When called, it will return the negative synthetic log likelihood for the probes specified.
+##' It is a stateful function:
+##' Each time it is called, it will remember the values of the parameters and its estimate of the synthetic likelihood.
+##'
+##' @inheritSection objfun Important Note
+##'
+##' @example examples/probe_match.R
+##'
+NULL
+
 setClass(
-  "probe.matched.pomp",
-  contains="probed.pomp",
+  "probe_match_objfun",
+  contains="function",
   slots=c(
-    transform="logical",
-    est="character",
-    fail.value="numeric",
-    value="numeric",
-    evals="integer",
-    convergence="integer",
-    msg="character"
+    env="environment",
+    est="character"
   )
 )
 
-setMethod("$",signature=signature(x="probe.matched.pomp"),function(x, name)slot(x,name))
+setGeneric(
+  "probe_objfun",
+  function (data, ...)
+    standardGeneric("probe_objfun")
+)
 
 setMethod(
-  "summary",
-  "probe.matched.pomp",
-  function (object, ...) {
-    c(
-      summary(as(object,"probed.pomp")),
-      list(
-        est=object@est,
-        value=object@value,
-        eval=object@evals,
-        convergence=object@convergence
-      ),
-      if(length(object@msg)>0) list(msg=object@msg) else NULL
-    )
+  "probe_objfun",
+  signature=signature(data="missing"),
+  definition=function (...) {
+    reqd_arg("probe_objfun","data")
   }
 )
 
-pmof.internal <- function (object, params, est, probes,
-  nsim, seed = NULL, fail.value = NA,
-  transform = FALSE, ...)
-{
+setMethod(
+  "probe_objfun",
+  signature=signature(data="ANY"),
+  definition=function (data, ...) {
+    undef_method("probe_objfun",data)
+  }
+)
 
-  ep <- paste0("in ",sQuote("probe.match.objfun"),": ")
-  object <- as(object,"pomp")
-  transform <- as.logical(transform)
+##' @name probe_objfun-data.frame
+##' @aliases probe_objfun,data.frame-method
+##' @rdname probe_match
+##' @export
+setMethod(
+  "probe_objfun",
+  signature=signature(data="data.frame"),
+  definition=function (data,
+    est = character(0), fail.value = NA,
+    probes, nsim, seed = NULL,
+    params, rinit, rprocess, rmeasure, partrans,
+    ..., verbose = getOption("verbose", FALSE)) {
+
+    tryCatch(
+      pmof.internal(
+        data,
+        est=est,
+        fail.value=fail.value,
+        probes=probes,
+        nsim=nsim,
+        seed=seed,
+        params=params,
+        rinit=rinit,
+        rprocess=rprocess,
+        rmeasure=rmeasure,
+        partrans=partrans,
+        ...,
+        verbose=verbose
+      ),
+      error = function (e) pStop("probe_objfun",conditionMessage(e))
+    )
+
+  }
+)
+
+##' @name probe_objfun-pomp
+##' @aliases probe_objfun,pomp-method
+##' @rdname probe_match
+##' @export
+setMethod(
+  "probe_objfun",
+  signature=signature(data="pomp"),
+  definition=function (data,
+    est = character(0), fail.value = NA,
+    probes, nsim, seed = NULL,
+    ..., verbose = getOption("verbose", FALSE)) {
+
+    tryCatch(
+      pmof.internal(
+        data,
+        est=est,
+        fail.value=fail.value,
+        probes=probes,
+        nsim=nsim,
+        seed=seed,
+        ...,
+        verbose=verbose
+      ),
+      error = function (e) pStop("probe_objfun",conditionMessage(e))
+    )
+
+  }
+)
+
+##' @name probe_objfun-probed_pomp
+##' @aliases probe_objfun,probed_pomp-method
+##' @rdname probe_match
+##' @export
+setMethod(
+  "probe_objfun",
+  signature=signature(data="probed_pomp"),
+  definition=function (data,
+    est = character(0), fail.value = NA,
+    probes, nsim, seed = NULL,
+    ..., verbose = getOption("verbose", FALSE)) {
+
+    if (missing(probes)) probes <- data@probes
+    if (missing(nsim)) nsim <- data@nsim
+
+    probe_objfun(
+      as(data,"pomp"),
+      est=est,
+      fail.value=fail.value,
+      probes=probes,
+      nsim=nsim,
+      seed=seed,
+      ...,
+      verbose=verbose
+    )
+
+  }
+)
+
+##' @name probe_objfun-probe_match_objfun
+##' @aliases probe_objfun,probe_match_objfun-method
+##' @rdname probe_match
+##' @export
+setMethod(
+  "probe_objfun",
+  signature=signature(data="probe_match_objfun"),
+  definition=function (data,
+    est, fail.value, seed = NULL,
+    ..., verbose = getOption("verbose", FALSE)) {
+
+    if (missing(est)) est <- data@est
+    if (missing(fail.value)) fail.value <- data@env$fail.value
+
+    probe_objfun(
+      data@env$object,
+      est=est,
+      fail.value=fail.value,
+      seed=seed,
+      ...,
+      verbose=verbose
+    )
+
+  }
+)
+
+pmof.internal <- function (object,
+  est, fail.value = NA,
+  probes, nsim, seed = NULL,
+  ..., verbose) {
+
+  verbose <- as.logical(verbose)
+
+  object <- probe(object,probes=probes,nsim=nsim,seed=seed,...,verbose=verbose)
+
   fail.value <- as.numeric(fail.value)
-  if (missing(est)) est <- character(0)
+  loglik <- logLik(object)
+
   est <- as.character(est)
-  if (missing(nsim)) stop(ep,sQuote("nsim")," must be specified",call.=FALSE)
-  nsim <- as.integer(nsim)
+  est <- est[nzchar(est)]
 
-  if (missing(params)) params <- coef(object)
-  if (is.list(params)) params <- unlist(params)
-  if ((!is.numeric(params))||(is.null(names(params))))
-    stop(ep,sQuote("params")," must be a named numeric vector",call.=FALSE)
-  if (transform)
-    params <- partrans(object,params,dir="toEstimationScale")
-  par.est.idx <- match(est,names(params))
-  if (any(is.na(par.est.idx)))
-    stop(ep,"parameter(s): ",sQuote(est[is.na(par.est.idx)])," not found in ",sQuote("params"),call.=FALSE)
+  params <- coef(object,transform=TRUE)
 
-  if (missing(probes)) stop(ep,sQuote("probes")," must be supplied",call.=FALSE)
-  if (!is.list(probes)) probes <- list(probes)
-  if (!all(sapply(probes,is.function)))
-    stop(ep,sQuote("probes")," must be a function or a list of functions",call.=FALSE)
-  if (!all(sapply(probes,function(f)length(formals(f))==1)))
-    stop(ep,"each probe must be a function of a single argument",call.=FALSE)
-  ## apply probes to data
-  datval <- tryCatch(
-    .Call(apply_probe_data,object,probes),
-    error = function (e) {
-      stop(ep,"applying probes to actual data: ",conditionMessage(e),call.=FALSE)
-    }
+  idx <- match(est,names(params))
+  if (any(is.na(idx))) {
+    missing <- est[is.na(idx)]
+    pStop_("parameter",ngettext(length(missing),"","s")," ",
+      paste(sQuote(missing),collapse=",")," not found in ",sQuote("params"),".")
+  }
+
+  pompLoad(object,verbose=verbose)
+
+  ofun <- function (par) {
+    params[idx] <- par
+    coef(object,transform=TRUE) <<- params
+    loglik <<- probe.eval(object)
+    if (is.finite(loglik) || is.na(fail.value)) -loglik else fail.value
+  }
+
+  environment(ofun) <- list2env(
+    list(object=object,fail.value=fail.value,
+      params=params,idx=idx,loglik=loglik,seed=seed),
+    parent=parent.frame(2)
   )
 
-  function (par) {
+  new("probe_match_objfun",ofun,env=environment(ofun),est=est)
 
-    pompLoad(object)
-
-    params[par.est.idx] <- par
-
-    if (transform)
-      tparams <- partrans(object,params,dir="fromEstimationScale")
-
-    ## apply probes to model simulations
-    simval <- tryCatch(
-      .Call(
-        apply_probe_sim,
-        object=object,
-        nsim=nsim,
-        params=if (transform) tparams else params,
-        seed=seed,
-        probes=probes,
-        datval=datval,
-        rho=parent.env(parent.env(environment()))
-      ),
-      error = function (e) {
-        stop(ep,"applying probes to simulated data: ",conditionMessage(e),call.=FALSE)
-      }
-    )
-
-    ll <- tryCatch(
-      .Call(synth_loglik,simval,datval),
-      error = function (e) {
-        stop(ep,"in synthetic likelihood computation: ",conditionMessage(e),call.=FALSE)
-      }
-    )
-    pompUnload(object)
-    if (is.finite(ll)||is.na(fail.value)) -ll else fail.value  # nocov
-  }
 }
 
+probe.eval <- function (object) {
+
+  ## apply probes to model simulations
+  simvals <- tryCatch(
+    freeze(
+      .Call(P_apply_probe_sim,object=object,nsim=object@nsim,params=object@params,
+        probes=object@probes,datval=object@datvals,.gnsi=TRUE),
+      seed=object@seed
+    ),
+    error = function (e) pStop_("applying probes to simulated data: ",conditionMessage(e))
+  )
+
+  tryCatch(
+    .Call(P_synth_loglik,simvals,object@datvals),
+    error = function (e) pStop_("in synthetic likelihood computation: ",conditionMessage(e))
+  )
+
+}
+
+##' @name probe-probe_match_obfjun
+##' @rdname probe
+##' @aliases probe,probe_match_objfun-method
+##'
+##' @details
+##' When \code{probe} operates on a probe-matching objective function (a \sQuote{probe_match_objfun} object), by default, the
+##' random-number generator seed is fixed at the value given when the objective function was constructed.
+##' Specifying \code{NULL} or an integer for \code{seed} overrides this behavior.
+##'
+##' @export
 setMethod(
-  "probe.match.objfun",
-  signature=signature(object="pomp"),
-  function (object, params, est, probes,
-    nsim, seed = NULL, fail.value = NA,
-    transform = FALSE, ...)
-    pmof.internal(
-      object=object,
-      params=params,
-      est=est,
-      probes=probes,
-      nsim=nsim,
+  "probe",
+  signature=signature(data="probe_match_objfun"),
+  definition=function (data, seed,
+    ..., verbose = getOption("verbose", FALSE)) {
+
+    if (missing(seed)) seed <- data@env$seed
+
+    probe(
+      data@env$object,
       seed=seed,
-      fail.value=fail.value,
-      transform=transform,
-      ...
+      ...,
+      verbose=verbose
     )
-)
 
-setMethod(
-  "probe.match.objfun",
-  signature=signature(object="probed.pomp"),
-  function (object, probes, nsim, seed, ...) {
-
-    if (missing(probes)) probes <- object@probes
-    if (missing(nsim)) nsim <- nrow(object@simvals)
-    if (missing(seed)) seed <- object@seed
-
-    probe.match.objfun(
-      object=as(object,"pomp"),
-      probes=probes,
-      nsim=nsim,
-      seed=seed,
-      ...
-    )
   }
 )
 
-setMethod(
-  "probe.match",
-  signature=signature(object="pomp"),
-  function(object, start, est = character(0),
-    probes, nsim, seed = NULL,
-    method = c("subplex","Nelder-Mead","SANN","BFGS",
-      "sannbox","nloptr"),
-    verbose = getOption("verbose"),
-    fail.value = NA,
-    transform = FALSE,
-    ...) {
-
-    ep <- paste0("in ",sQuote("probe.match"),": ")
-
-    pompLoad(object,verbose=verbose)
-
-    if (missing(start)) start <- coef(object)
-    if (missing(probes)) stop(ep,sQuote("probes")," must be supplied",call.=FALSE)
-    if (missing(nsim)) stop(ep,sQuote("nsim")," must be supplied",call.=FALSE)
-
-    method <- match.arg(method)
-    est <- as.character(est)
-    transform <- as.logical(transform)
-    fail.value <- as.numeric(fail.value)
-
-    m <- minim.internal(
-      objfun=probe.match.objfun(
-        object=object,
-        params=start,
-        est=est,
-        probes=probes,
-        nsim=nsim,
-        seed=seed,
-        fail.value=fail.value,
-        transform=transform
-      ),
-      start=start,
-      est=est,
-      object=object,
-      method=method,
-      transform=transform,
-      verbose=verbose,
-      ...
-    )
-
-    coef(object) <- m$params
-
-    pb <- tryCatch(
-      probe(
-        object,
-        probes=probes,
-        nsim=nsim,
-        seed=seed
-      ),
-      error = function (e) {
-        stop(ep,conditionMessage(e),call.=FALSE)
-      }
-    )
-
-    pompUnload(object,verbose=verbose)
-
-    new(
-      "probe.matched.pomp",
-      pb,
-      transform=transform,
-      est=est,
-      fail.value=fail.value,
-      value=m$value,
-      evals=m$evals,
-      convergence=m$convergence,
-      msg=m$msg
-    )
-  }
-)
-
-setMethod(
-  "probe.match",
-  signature=signature(object="probed.pomp"),
-  function(object, probes, nsim, seed, ...,
-    verbose = getOption("verbose"))
-  {
-    if (missing(probes)) probes <- object@probes
-    if (missing(nsim)) nsim <- nrow(object@simvals)
-    if (missing(seed)) seed <- object@seed
-
-    f <- selectMethod("probe.match","pomp")
-
-    f(object=object,probes=probes,nsim=nsim,seed=seed,
-      verbose=verbose,...)
-  }
-)
-
-setMethod(
-  "probe.match",
-  signature=signature(object="probe.matched.pomp"),
-  function(object, est, probes, nsim, seed, transform,
-    fail.value, ..., verbose = getOption("verbose"))
-  {
-    if (missing(est)) est <- object@est
-    if (missing(probes)) probes <- object@probes
-    if (missing(nsim)) nsim <- nrow(object@simvals)
-    if (missing(seed)) seed <- object@seed
-    if (missing(transform)) transform <- object@transform
-    if (missing(fail.value)) fail.value <- object@fail.value
-
-    f <- selectMethod("probe.match","pomp")
-
-    f(object=object,est=est,probes=probes,nsim=nsim,seed=seed,
-      transform=transform,fail.value=fail.value,verbose=verbose,...)
+##' @name coerce-probe_match_objfun-probed_pomp
+##' @aliases coerce,probe_match_objfun,probed_pomp-method
+##' @rdname probe
+##'
+setAs(
+  from="probe_match_objfun",
+  to="probed_pomp",
+  def = function (from) {
+    from@env$object
   }
 )
