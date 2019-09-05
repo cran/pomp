@@ -1,5 +1,15 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 2.3}{
+  \itemize{
+    \item The C API for \pkg{pomp} is no longer explained only in comments in the \dQuote{pomp.h} header file.
+    It is now described and explained in the new \href{https://kingaa.github.io/pomp/vignettes/C_API.html}{C API vignette}.
+    \item The new \code{pomp_cdir} global option allows one to set the directory holding C snippet files globally.
+    \item A bug caused by re-use of the \code{cfile} argument has been fixed.
+    Re-use now triggers an error, with an informative message.
+    \item Some documentation improvements.
+  }
+}
 \section{Changes in \pkg{pomp} version 2.2}{
   \itemize{
     \item A bug in \code{runifDesign} (and therefore \code{profileDesign} when \code{type="runif"}) has been fixed.
