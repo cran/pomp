@@ -12,45 +12,57 @@
 
 static R_INLINE SEXP add_args (SEXP args, SEXP Snames, SEXP Pnames, SEXP Cnames)
 {
-  int nprotect = 0;
+
   SEXP var;
   int v;
+
+  PROTECT(args);
 
   // we construct the call from end to beginning
   // covariates, parameter, states, then time and 'j'
 
   // Covariates
   for (v = LENGTH(Cnames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Cnames,v))));
+    var = NEW_NUMERIC(1);
+    args = LCONS(var,args);
+    UNPROTECT(1);
+    PROTECT(args);
+    SET_TAG(args,installChar(STRING_ELT(Cnames,v)));
   }
 
   // Parameters
   for (v = LENGTH(Pnames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Pnames,v))));
+    var = NEW_NUMERIC(1);
+    args = LCONS(var,args);
+    UNPROTECT(1);
+    PROTECT(args);
+    SET_TAG(args,installChar(STRING_ELT(Pnames,v)));
   }
 
   // Latent state variables
   for (v = LENGTH(Snames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Snames,v))));
+    var = NEW_NUMERIC(1);
+    args = LCONS(var,args);
+    UNPROTECT(1);
+    PROTECT(args);
+    SET_TAG(args,installChar(STRING_ELT(Snames,v)));
   }
 
   // Time
-  PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-  PROTECT(args = LCONS(var,args)); nprotect++;
+  var = NEW_NUMERIC(1);
+  args = LCONS(var,args);
+  UNPROTECT(1);
+  PROTECT(args);
   SET_TAG(args,install("t"));
 
   // 'j'
-  PROTECT(var = NEW_INTEGER(1)); nprotect++;
-  PROTECT(args = LCONS(var,args)); nprotect++;
+  var = NEW_INTEGER(1);
+  args = LCONS(var,args);
+  UNPROTECT(1);
+  PROTECT(args);
   SET_TAG(args,install("j"));
 
-  UNPROTECT(nprotect);
+  UNPROTECT(1);
   return args;
 
 }
@@ -218,7 +230,7 @@ static double __pomp_Rfun_ssa_ratefn (int j, double t, const double *x, const do
 SEXP SSA_simulator (SEXP func, SEXP xstart, SEXP tstart, SEXP times, SEXP params,
 		    SEXP vmatrix, SEXP covar, SEXP accumvars, SEXP hmax, SEXP args, SEXP gnsi)
 {
-  int nprotect = 0;
+
   int *dim, xdim[3];
   int nvar, nvarv, nevent, npar, nrep, ntimes;
   SEXP statenames, paramnames, covarnames;
@@ -241,28 +253,30 @@ SEXP SSA_simulator (SEXP func, SEXP xstart, SEXP tstart, SEXP times, SEXP params
 
   ntimes = LENGTH(times);
 
-  PROTECT(tstart = AS_NUMERIC(tstart)); nprotect++;
-  PROTECT(times = AS_NUMERIC(times)); nprotect++;
+  PROTECT(tstart = AS_NUMERIC(tstart));
+  PROTECT(times = AS_NUMERIC(times));
   t0 = *(REAL(tstart));
   if (t0 > *(REAL(times))) errorcall(R_NilValue,"'t0' must be no later than 'times[1]'.");
 
-  PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(xstart))); nprotect++;
-  PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
-  PROTECT(Cnames = get_covariate_names(covar)); nprotect++;
-  PROTECT(Vnames = GET_ROWNAMES(GET_DIMNAMES(vmatrix))); nprotect++;
+  PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(xstart)));
+  PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params)));
+  PROTECT(Cnames = get_covariate_names(covar));
+  PROTECT(Vnames = GET_ROWNAMES(GET_DIMNAMES(vmatrix)));
 
   covariate_table = make_covariate_table(covar,&covdim);
 
-  PROTECT(statenames = GET_SLOT(func,install("statenames"))); nprotect++;
-  PROTECT(paramnames = GET_SLOT(func,install("paramnames"))); nprotect++;
-  PROTECT(covarnames = GET_SLOT(func,install("covarnames"))); nprotect++;
+  PROTECT(statenames = GET_SLOT(func,install("statenames")));
+  PROTECT(paramnames = GET_SLOT(func,install("paramnames")));
+  PROTECT(covarnames = GET_SLOT(func,install("covarnames")));
 
   ncovars = LENGTH(covarnames);
   hasvnames = !isNull(Vnames);
 
-  PROTECT(hmax = AS_NUMERIC(hmax)); nprotect++;
+  PROTECT(hmax = AS_NUMERIC(hmax));
 
-  PROTECT(fn = pomp_fun_handler(func,gnsi,&mode,Snames,Pnames,NA_STRING,Cnames)); nprotect++;
+  PROTECT(fn = pomp_fun_handler(func,gnsi,&mode,Snames,Pnames,NA_STRING,Cnames));
+
+  int nprotect = 11;
 
   switch (mode) {
 
@@ -284,8 +298,9 @@ SEXP SSA_simulator (SEXP func, SEXP xstart, SEXP tstart, SEXP times, SEXP params
     NVAR = nvar;
     NPAR = npar;
     NCOV = covdim;
-    PROTECT(ARGS = add_args(args,Snames,Pnames,Cnames)); nprotect++;
-    PROTECT(RATEFN = fn); nprotect++;
+    PROTECT(ARGS = add_args(args,Snames,Pnames,Cnames));
+    PROTECT(RATEFN = fn);
+    nprotect += 2;
     FIRST = 1;
 
     break;

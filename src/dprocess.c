@@ -11,47 +11,65 @@
 
 static R_INLINE SEXP add_args (SEXP args, SEXP Snames, SEXP Pnames, SEXP Cnames)
 {
-  int nprotect = 0;
+
   SEXP S1names, S2names;
   SEXP var;
   int v;
 
-  PROTECT(S1names = paste0(Snames,mkString("_1"))); nprotect++;
-  PROTECT(S2names = paste0(Snames,mkString("_2"))); nprotect++;
+  PROTECT(S1names = paste0(Snames,mkString("_1")));
+  PROTECT(S2names = paste0(Snames,mkString("_2")));
+
+  PROTECT(args);
 
   // Covariates
   for (v = LENGTH(Cnames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Cnames,v))));
+    var = NEW_NUMERIC(1);
+    args = LCONS(var,args);
+    UNPROTECT(1);
+    PROTECT(args);
+    SET_TAG(args,installChar(STRING_ELT(Cnames,v)));
   }
 
   // Parameters
   for (v = LENGTH(Pnames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Pnames,v))));
+    var = NEW_NUMERIC(1);
+    args = LCONS(var,args);
+    UNPROTECT(1);
+    PROTECT(args);
+    SET_TAG(args,installChar(STRING_ELT(Pnames,v)));
   }
 
   // Latent state variables
   for (v = LENGTH(Snames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(S2names,v))));
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(S1names,v))));
+
+    var = NEW_NUMERIC(1);
+    args = LCONS(var,args);
+    UNPROTECT(1);
+    PROTECT(args);
+    SET_TAG(args,installChar(STRING_ELT(S2names,v)));
+
+    var = NEW_NUMERIC(1);
+    args = LCONS(var,args);
+    UNPROTECT(1);
+    PROTECT(args);
+    SET_TAG(args,installChar(STRING_ELT(S1names,v)));
+
   }
 
   // Time
-  PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-  PROTECT(args = LCONS(var,args)); nprotect++;
+  var = NEW_NUMERIC(1);
+  args = LCONS(var,args);
+  UNPROTECT(1);
+  PROTECT(args);
   SET_TAG(args,install("t_2"));
-  PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-  PROTECT(args = LCONS(var,args)); nprotect++;
+
+  var = NEW_NUMERIC(1);
+  args = LCONS(var,args);
+  UNPROTECT(1);
+  PROTECT(args);
   SET_TAG(args,install("t_1"));
 
-  UNPROTECT(nprotect);
+  UNPROTECT(3);
   return args;
 
 }
@@ -99,7 +117,7 @@ static R_INLINE SEXP ret_array (int nreps, int ntimes)
 static SEXP onestep_density (SEXP func, SEXP x, SEXP times, SEXP params, SEXP covar,
   SEXP log, SEXP args, SEXP gnsi)
 {
-  int nprotect = 0;
+
   pompfunmode mode = undef;
   int give_log;
   int nvars, npars, nreps, ntimes, ncovars;
@@ -113,20 +131,22 @@ static SEXP onestep_density (SEXP func, SEXP x, SEXP times, SEXP params, SEXP co
   dim = INTEGER(GET_DIM(params)); npars = dim[0];
   ntimes = LENGTH(times);
 
-  PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
-  PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
-  PROTECT(Cnames = get_covariate_names(covar)); nprotect++;
+  PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x)));
+  PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params)));
+  PROTECT(Cnames = get_covariate_names(covar));
 
-  PROTECT(F = ret_array(nreps,ntimes-1)); nprotect++;
+  PROTECT(F = ret_array(nreps,ntimes-1));
 
   // set up the covariate table
   lookup_table_t covariate_table = make_covariate_table(covar,&ncovars);
-  PROTECT(cvec = NEW_NUMERIC(ncovars)); nprotect++;
+  PROTECT(cvec = NEW_NUMERIC(ncovars));
   cov = REAL(cvec);
 
-  PROTECT(fn = pomp_fun_handler(func,gnsi,&mode,Snames,Pnames,NA_STRING,Cnames)); nprotect++;
+  PROTECT(fn = pomp_fun_handler(func,gnsi,&mode,Snames,Pnames,NA_STRING,Cnames));
 
   give_log = *(INTEGER(log));
+
+  int nprotect = 6;
 
   switch (mode) {
 
@@ -229,24 +249,26 @@ static SEXP onestep_density (SEXP func, SEXP x, SEXP times, SEXP params, SEXP co
 
 SEXP do_dprocess (SEXP object, SEXP x, SEXP times, SEXP params, SEXP log, SEXP gnsi)
 {
-  int nprotect = 0;
+
   int *xdim, npars, nvars, nreps, nrepsx, ntimes;
   SEXP X, fn, args, covar;
 
-  PROTECT(times=AS_NUMERIC(times)); nprotect++;
+  PROTECT(times=AS_NUMERIC(times));
   ntimes = length(times);
   if (ntimes < 2)
     errorcall(R_NilValue,"length(times)<2: with no transitions, there is no work to do.");
 
-  PROTECT(x = as_state_array(x)); nprotect++;
+  PROTECT(x = as_state_array(x));
   xdim = INTEGER(GET_DIM(x));
   nvars = xdim[0]; nrepsx = xdim[1];
   if (ntimes != xdim[2])
     errorcall(R_NilValue,"the length of 'times' and 3rd dimension of 'x' do not agree.");
 
-  PROTECT(params = as_matrix(params)); nprotect++;
+  PROTECT(params = as_matrix(params));
   xdim = INTEGER(GET_DIM(params));
   npars = xdim[0]; nreps = xdim[1];
+
+  int nprotect = 3;
 
   if (nrepsx > nreps) {         // more states than parameters
     if (nrepsx % nreps != 0) {
@@ -257,8 +279,9 @@ SEXP do_dprocess (SEXP object, SEXP x, SEXP times, SEXP params, SEXP log, SEXP g
       int dims[2];
       int j, k;
       dims[0] = npars; dims[1] = nrepsx;
-      PROTECT(copy = duplicate(params)); nprotect++;
-      PROTECT(params = makearray(2,dims)); nprotect++;
+      PROTECT(copy = duplicate(params));
+      PROTECT(params = makearray(2,dims));
+      nprotect += 2;
       setrownames(params,GET_ROWNAMES(GET_DIMNAMES(copy)),2);
       src = REAL(copy);
       tgt = REAL(params);
@@ -278,8 +301,9 @@ SEXP do_dprocess (SEXP object, SEXP x, SEXP times, SEXP params, SEXP log, SEXP g
       int dims[3];
       int i, j, k;
       dims[0] = nvars; dims[1] = nreps; dims[2] = ntimes;
-      PROTECT(copy = duplicate(x)); nprotect++;
-      PROTECT(x = makearray(3,dims)); nprotect++;
+      PROTECT(copy = duplicate(x));
+      PROTECT(x = makearray(3,dims));
+      nprotect += 2;
       setrownames(x,GET_ROWNAMES(GET_DIMNAMES(copy)),3);
       src = REAL(copy);
       tgt = REAL(x);
@@ -294,12 +318,14 @@ SEXP do_dprocess (SEXP object, SEXP x, SEXP times, SEXP params, SEXP log, SEXP g
   }
 
   // extract the process function
-  PROTECT(fn = GET_SLOT(object,install("dprocess"))); nprotect++;
+  PROTECT(fn = GET_SLOT(object,install("dprocess")));
   // extract other arguments
-  PROTECT(args = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;
-  PROTECT(covar = GET_SLOT(object,install("covar"))); nprotect++;
+  PROTECT(args = VectorToPairList(GET_SLOT(object,install("userdata"))));
+  PROTECT(covar = GET_SLOT(object,install("covar")));
+  // evaluate the density
+  PROTECT(X = onestep_density(fn,x,times,params,covar,log,args,gnsi));
 
-  PROTECT(X = onestep_density(fn,x,times,params,covar,log,args,gnsi)); nprotect++;
+  nprotect += 4;
 
   UNPROTECT(nprotect);
   return X;

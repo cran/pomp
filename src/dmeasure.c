@@ -12,7 +12,6 @@
 static R_INLINE SEXP dmeas_args (SEXP args, SEXP Onames, SEXP Snames,
   SEXP Pnames, SEXP Cnames, SEXP log)
 {
-  int nprotect = 0;
   SEXP var;
   int v;
 
@@ -20,43 +19,53 @@ static R_INLINE SEXP dmeas_args (SEXP args, SEXP Onames, SEXP Snames,
   // 'log', covariates, parameter, states, observables, then time
 
   // 'log' is a needed argument
-  PROTECT(args = LCONS(AS_LOGICAL(log),args)); nprotect++;
+  PROTECT(args = LCONS(AS_LOGICAL(log),args));
   SET_TAG(args,install("log"));
 
   // Covariates
   for (v = LENGTH(Cnames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Cnames,v))));
+    var = NEW_NUMERIC(1);
+    args = LCONS(var,args);
+    UNPROTECT(1);
+    PROTECT(args);
+    SET_TAG(args,installChar(STRING_ELT(Cnames,v)));
   }
 
   // Parameters
   for (v = LENGTH(Pnames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Pnames,v))));
+    var = NEW_NUMERIC(1);
+    args = LCONS(var,args);
+    UNPROTECT(1);
+    PROTECT(args);
+    SET_TAG(args,installChar(STRING_ELT(Pnames,v)));
   }
 
   // Latent state variables
   for (v = LENGTH(Snames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Snames,v))));
+    var = NEW_NUMERIC(1);
+    args = LCONS(var,args);
+    UNPROTECT(1);
+    PROTECT(args);
+    SET_TAG(args,installChar(STRING_ELT(Snames,v)));
   }
 
   // Observables
   for (v = LENGTH(Onames)-1; v >= 0; v--) {
-    PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-    PROTECT(args = LCONS(var,args)); nprotect++;
-    SET_TAG(args,install(CHAR(STRING_ELT(Onames,v))));
+    var = NEW_NUMERIC(1);
+    args = LCONS(var,args);
+    UNPROTECT(1);
+    PROTECT(args);
+    SET_TAG(args,installChar(STRING_ELT(Onames,v)));
   }
 
   // Time
-  PROTECT(var = NEW_NUMERIC(1)); nprotect++;
-  PROTECT(args = LCONS(var,args)); nprotect++;
+  var = NEW_NUMERIC(1);
+  args = LCONS(var,args);
+  UNPROTECT(1);
+  PROTECT(args);
   SET_TAG(args,install("t"));
 
-  UNPROTECT(nprotect);
+  UNPROTECT(1);
   return args;
 
 }
@@ -99,7 +108,7 @@ static R_INLINE SEXP ret_array (int nreps, int ntimes) {
 
 SEXP do_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP params, SEXP log, SEXP gnsi)
 {
-  int nprotect = 0;
+
   pompfunmode mode = undef;
   int ntimes, nvars, npars, ncovars, nreps, nrepsx, nrepsp, nobs;
   SEXP Snames, Pnames, Cnames, Onames;
@@ -110,24 +119,25 @@ SEXP do_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP params, SEXP log
   lookup_table_t covariate_table;
   double *cov;
 
-  PROTECT(times = AS_NUMERIC(times)); nprotect++;
+  PROTECT(times = AS_NUMERIC(times));
   ntimes = length(times);
   if (ntimes < 1) errorcall(R_NilValue,"length('times') = 0, no work to do.");
 
-  PROTECT(y = as_matrix(y)); nprotect++;
+  PROTECT(y = as_matrix(y));
   dim = INTEGER(GET_DIM(y));
   nobs = dim[0];
 
-  if (ntimes != dim[1]) errorcall(R_NilValue,"length of 'times' and 2nd dimension of 'y' do not agree.");
+  if (ntimes != dim[1])
+    errorcall(R_NilValue,"length of 'times' and 2nd dimension of 'y' do not agree.");
 
-  PROTECT(x = as_state_array(x)); nprotect++;
+  PROTECT(x = as_state_array(x));
   dim = INTEGER(GET_DIM(x));
   nvars = dim[0]; nrepsx = dim[1];
 
   if (ntimes != dim[2])
     errorcall(R_NilValue,"length of 'times' and 3rd dimension of 'x' do not agree.");
 
-  PROTECT(params = as_matrix(params)); nprotect++;
+  PROTECT(params = as_matrix(params));
   dim = INTEGER(GET_DIM(params));
   npars = dim[0]; nrepsp = dim[1];
 
@@ -136,29 +146,32 @@ SEXP do_dmeasure (SEXP object, SEXP y, SEXP x, SEXP times, SEXP params, SEXP log
   if ((nreps % nrepsp != 0) || (nreps % nrepsx != 0))
     errorcall(R_NilValue,"larger number of replicates is not a multiple of smaller.");
 
-  PROTECT(Onames = GET_ROWNAMES(GET_DIMNAMES(y))); nprotect++;
-  PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
-  PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
-  PROTECT(Cnames = get_covariate_names(GET_SLOT(object,install("covar")))); nprotect++;
+  PROTECT(Onames = GET_ROWNAMES(GET_DIMNAMES(y)));
+  PROTECT(Snames = GET_ROWNAMES(GET_DIMNAMES(x)));
+  PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params)));
+  PROTECT(Cnames = get_covariate_names(GET_SLOT(object,install("covar"))));
 
   // set up the covariate table
   covariate_table = make_covariate_table(GET_SLOT(object,install("covar")),&ncovars);
-  PROTECT(cvec = NEW_NUMERIC(ncovars)); nprotect++;
+  PROTECT(cvec = NEW_NUMERIC(ncovars));
   cov = REAL(cvec);
 
   // extract the user-defined function
-  PROTECT(pompfun = GET_SLOT(object,install("dmeasure"))); nprotect++;
-  PROTECT(fn = pomp_fun_handler(pompfun,gnsi,&mode,Snames,Pnames,Onames,Cnames)); nprotect++;
+  PROTECT(pompfun = GET_SLOT(object,install("dmeasure")));
+  PROTECT(fn = pomp_fun_handler(pompfun,gnsi,&mode,Snames,Pnames,Onames,Cnames));
 
   // extract 'userdata' as pairlist
-  PROTECT(args = VectorToPairList(GET_SLOT(object,install("userdata")))); nprotect++;
+  PROTECT(args = VectorToPairList(GET_SLOT(object,install("userdata"))));
 
   // create array to store results
-  PROTECT(F = ret_array(nreps,ntimes)); nprotect++;
+  PROTECT(F = ret_array(nreps,ntimes));
+
+  int nprotect = 13;
 
   switch (mode) {
 
   case Rfun: {
+
     double *ys = REAL(y), *xs = REAL(x), *ps = REAL(params), *time = REAL(times);
     double *ft = REAL(F);
     int j, k;
