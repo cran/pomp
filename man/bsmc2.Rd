@@ -11,12 +11,31 @@
 \alias{bsmc2,pomp-method}
 \title{The Liu and West Bayesian particle filter}
 \usage{
-\S4method{bsmc2}{data.frame}(data, Np, smooth = 0.1, tol = 1e-17,
-  max.fail = 0, params, rprior, rinit, rprocess, dmeasure, partrans, ...,
-  verbose = getOption("verbose", FALSE))
+\S4method{bsmc2}{data.frame}(
+  data,
+  Np,
+  smooth = 0.1,
+  tol = 1e-17,
+  max.fail = 0,
+  params,
+  rprior,
+  rinit,
+  rprocess,
+  dmeasure,
+  partrans,
+  ...,
+  verbose = getOption("verbose", FALSE)
+)
 
-\S4method{bsmc2}{pomp}(data, Np, smooth = 0.1, tol = 1e-17,
-  max.fail = 0, ..., verbose = getOption("verbose", FALSE))
+\S4method{bsmc2}{pomp}(
+  data,
+  Np,
+  smooth = 0.1,
+  tol = 1e-17,
+  max.fail = 0,
+  ...,
+  verbose = getOption("verbose", FALSE)
+)
 }
 \arguments{
 \item{data}{either a data frame holding the time series data,
@@ -30,13 +49,15 @@ The compensating shrinkage factor will be \code{sqrt(1-smooth^2)}.
 Thus, \code{smooth=0} means that no noise will be added to parameters.
 The general recommendation is that the value of \code{smooth} should be chosen close to 0 (e.g., \code{shrink} ~ 0.1).}
 
-\item{tol}{positive numeric scalar;
+\item{tol}{non-negative numeric scalar;
 particles with likelihood less than \code{tol} are considered to be incompatible with the data.
-See the section on \emph{Filtering Failures} for more information.}
+See the section on \emph{Filtering Failures} for more information.
+In a future release, this argument will be removed.}
 
 \item{max.fail}{integer; the maximum number of filtering failures allowed (see below).
 If the number of filtering failures exceeds this number, execution will terminate with an error.
-By default, \code{max.fail} is set to infinity, so no error can be triggered.}
+By default, \code{max.fail} is set to infinity, so no error can be triggered.
+In a future release, this argument will be removed.}
 
 \item{params}{optional; named numeric vector of parameters.
 This will be coerced internally to storage mode \code{double}.}
@@ -111,17 +132,26 @@ Sequential Monte Carlo Methods in Practice, pages 197-224.
 Springer, New York, 2001.
 }
 \seealso{
-Other particle filter methods: \code{\link{cond.logLik}},
-  \code{\link{eff.sample.size}}, \code{\link{filter.mean}},
-  \code{\link{filter.traj}}, \code{\link{mif2}},
-  \code{\link{pfilter}}, \code{\link{pmcmc}},
-  \code{\link{pred.mean}}, \code{\link{pred.var}}
+Other particle filter methods: 
+\code{\link{cond.logLik}()},
+\code{\link{eff.sample.size}()},
+\code{\link{filter.mean}()},
+\code{\link{filter.traj}()},
+\code{\link{mif2}()},
+\code{\link{pfilter}()},
+\code{\link{pmcmc}()},
+\code{\link{pred.mean}()},
+\code{\link{pred.var}()}
 
-Other pomp parameter estimation methods: \code{\link{abc}},
-  \code{\link{kalman}}, \code{\link{mif2}},
-  \code{\link{nlf}}, \code{\link{pmcmc}},
-  \code{\link{pomp-package}}, \code{\link{probe.match}},
-  \code{\link{spect.match}}
+Other pomp parameter estimation methods: 
+\code{\link{abc}()},
+\code{\link{kalman}},
+\code{\link{mif2}()},
+\code{\link{nlf}},
+\code{\link{pmcmc}()},
+\code{\link{pomp-package}},
+\code{\link{probe.match}},
+\code{\link{spect.match}}
 }
 \author{
 Michael Lavine, Matthew Ferrari, Aaron A. King, Edward L. Ionides

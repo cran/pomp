@@ -25,13 +25,15 @@
 ##' and so on,
 ##' while when \code{T=length(time(object,t0=TRUE))}, \code{Np(T)} is the number of particles to sample at the end of the time-series.
 ##'
-##' @param tol positive numeric scalar;
+##' @param tol non-negative numeric scalar;
 ##' particles with likelihood less than \code{tol} are considered to be incompatible with the data.
 ##' See the section on \emph{Filtering Failures} for more information.
+##' In a future release, this argument will be removed.
 ##'
 ##' @param max.fail integer; the maximum number of filtering failures allowed (see below).
 ##' If the number of filtering failures exceeds this number, execution will terminate with an error.
 ##' By default, \code{max.fail} is set to infinity, so no error can be triggered.
+##' In a future release, this argument will be removed.
 ##'
 ##' @param pred.mean logical; if \code{TRUE}, the prediction means are calculated for the state variables and parameters.
 ##'
@@ -71,9 +73,8 @@
 ##' A warning is generated when this occurs unless the cumulative number of failures exceeds \code{max.fail}, in which case an error is generated.
 ##'
 ##' @references
-##' M. S. Arulampalam, S. Maskell, N. Gordon, & T. Clapp.
-##' A Tutorial on Particle Filters for Online Nonlinear, Non-Gaussian Bayesian Tracking.
-##' IEEE Trans. Sig. Proc. 50:174--188, 2002.
+##'
+##' \Arulampalam2002
 ##'
 ##' @example examples/pfilter.R
 ##'
@@ -285,7 +286,16 @@ pfilter.internal <- function (object, Np, tol, max.fail,
   Np <- as.integer(Np)
 
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
-    pStop_(sQuote("tol")," should be a small positive number.")
+    pStop_(sQuote("tol")," should be a small nonnegative number.")
+
+  if (tol != 0) {
+    pWarn(
+      "pfilter",
+      "the ",sQuote("tol")," argument is deprecated and will be removed in a future release.\n",
+      "Currently, the default value of ",sQuote("tol")," is 1e-17;\n",
+      "in future releases, the value will be 0, and the option to choose otherwise will be removed."
+    )
+  }
 
   pompLoad(object,verbose=verbose)
   on.exit(pompUnload(object,verbose=verbose))
@@ -354,16 +364,6 @@ pfilter.internal <- function (object, Np, tol, max.fail,
     weights <- dmeasure(object,y=object@data[,nt,drop=FALSE],x=X,
       times=times[nt+1],params=params,log=FALSE,.gnsi=gnsi)
 
-    if (!all(is.finite(weights))) {
-      first <- which(!is.finite(weights))[1L]
-      datvals <- object@data[,nt]
-      weight <- weights[first]
-      states <- X[,first,1L]
-      msg <- nonfinite_dmeasure_error(time=times[nt+1],lik=weight,
-        datvals,states,params)
-      pStop_(msg)
-    }
-
     gnsi <- FALSE
 
     ## compute prediction mean, prediction variance, filtering mean,
@@ -371,7 +371,19 @@ pfilter.internal <- function (object, Np, tol, max.fail,
     ## also do resampling if filtering has not failed
     xx <- .Call(P_pfilter_computations,x=X,params=params,Np=Np[nt+1],
       predmean=pred.mean,predvar=pred.var,filtmean=filter.mean,
-      trackancestry=filter.traj,doparRS=FALSE,weights=weights,tol=tol)
+      trackancestry=filter.traj,doparRS=FALSE,weights=weights,
+      wave=FALSE,tol=tol)
+
+    ## the following is triggered by the first illegal weight value
+    if (is.integer(xx)) {
+      illegal_dmeasure_error(
+        time=times[nt+1],
+        lik=weights[xx],
+        datvals=object@data[,nt],
+        states=X[,xx,1L],
+        params=params
+      )
+    }
 
     all.fail <- xx$fail
     loglik[nt] <- xx$loglik
@@ -440,13 +452,13 @@ pfilter.internal <- function (object, Np, tol, max.fail,
   )
 }
 
-nonfinite_dmeasure_error <- function (time, lik, datvals, states, params) {
+illegal_dmeasure_error <- function (time, lik, datvals, states, params) {
   showvals <- c(time=time,lik=lik,datvals,states,params)
   m1 <- formatC(names(showvals),preserve.width="common")
   m2 <- formatC(showvals,digits=6,width=12,format="g",preserve.width="common")
-  paste0(
-    sQuote("dmeasure")," returns non-finite value.\n",
-    "likelihood, data, states, and parameters are:\n",
+  pStop_(
+    sQuote("dmeasure")," returns illegal value.\n",
+    "Likelihood, data, states, and parameters are:\n",
     paste0(m1,": ",m2,collapse="\n")
   )
 }

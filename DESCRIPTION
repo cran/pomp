@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 2.4
-Date: 2019-10-21
+Version: 2.5
+Date: 2020-01-27
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -49,14 +49,14 @@ Collate: 'pomp-package.R' 'aaa.R' 'pstop.R' 'undefined.R' 'csnippet.R'
         'spect_match.R' 'summary.R' 'nlf.R' 'trajectory.R'
         'traj_match.R' 'objfun.R' 'loglik.R' 'logmeanexp.R' 'lookup.R'
         'measles.R' 'melt.R' 'obs.R' 'ou2.R' 'parmat.R' 'parus.R'
-        'pipe.R' 'pred_mean.R' 'pred_var.R' 'show.R' 'print.R'
-        'profile_design.R' 'resample.R' 'ricker.R' 'runif_design.R'
-        'rw2.R' 'sannbox.R' 'sir.R' 'slice_design.R' 'sobol.R' 'spy.R'
-        'states.R' 'time.R' 'timezero.R' 'transformations.R'
-        'userdata.R' 'verhulst.R' 'window.R'
-RoxygenNote: 6.1.1
+        'pipe.R' 'pomp_examp.R' 'pred_mean.R' 'pred_var.R' 'show.R'
+        'print.R' 'profile_design.R' 'resample.R' 'ricker.R'
+        'runif_design.R' 'rw2.R' 'sannbox.R' 'sir.R' 'slice_design.R'
+        'sobol.R' 'spy.R' 'states.R' 'time.R' 'timezero.R'
+        'transformations.R' 'userdata.R' 'verhulst.R' 'window.R'
+RoxygenNote: 7.0.2
 NeedsCompilation: yes
-Packaged: 2019-10-21 20:16:54 UTC; kingaa
+Packaged: 2020-01-27 22:55:11 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -73,4 +73,4 @@ Author: Aaron A. King [aut, cre],
   Eamon O'Dea [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2019-10-21 21:00:02 UTC
+Date/Publication: 2020-01-28 06:10:08 UTC

@@ -37,13 +37,11 @@
 ##' @inheritSection pfilter Filtering failures
 ##'
 ##' @references
-##' C. Andrieu, A. Doucet, and R. Holenstein (2010)
-##' Particle Markov chain Monte Carlo methods.
-##' Journal of the Royal Statistical Society, Series B, 72: 269–342.
 ##'
-##' C. Andrieu and G.O. Roberts (2009)
-##' The pseudo-marginal approach for computation
-##' Annals of Statistics, 37:697-725.
+##' \Andrieu2010
+##'
+##' \Andrieu2009
+##' 
 NULL
 
 setClass(
@@ -271,6 +269,10 @@ pmcmc.internal <- function (object, Nmcmc, proposal, Np, tol, max.fail, ...,
       pStop_(sQuote("proposal")," must be a function: ",conditionMessage(e))
     }
   )
+
+  tol <- as.numeric(tol)
+  if (length(tol) != 1 || !is.finite(tol) || tol < 0)
+    pStop_(sQuote("tol")," should be a small nonnegative number.")
 
   pompLoad(object,verbose=verbose)
   on.exit(pompUnload(object,verbose=verbose))

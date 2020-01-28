@@ -207,7 +207,16 @@ bsmc2.internal <- function (object, Np, smooth, tol, max.fail,
 
   tol <- as.numeric(tol)
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
-    pStop_(sQuote("tol")," should be a small positive number.")
+    pStop_(sQuote("tol")," should be a small nonnegative number.")
+
+  if (tol != 0) {
+    pWarn(
+      "bsmc2",
+      "the ",sQuote("tol")," argument is deprecated and will be removed in a future release.\n",
+      "Currently, the default value of ",sQuote("tol")," is 1e-17;\n",
+      "in future releases, the value will be 0, and the option to choose otherwise will be removed."
+    )
+  }
 
   hsq <- smooth^2             #  see Liu & West eq(10.3.12)
   shrink <- sqrt(1-hsq)       #  'a' parameter of Liu & West

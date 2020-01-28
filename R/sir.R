@@ -10,7 +10,6 @@
 ##' This and similar examples are discussed and constructed in tutorials
 ##' available on the \href{https://kingaa.github.io/pomp/}{package website}.
 ##'
-##'
 ##' @name sir_models
 ##' @rdname sir
 ##' @aliases sir sir2
@@ -205,7 +204,6 @@ sir <- function (
 
 ##' @name sir2
 ##' @rdname sir
-##' @inheritParams sir
 ##' @export
 sir2 <- function (
   gamma = 24, mu = 1/70, iota = 0.1,

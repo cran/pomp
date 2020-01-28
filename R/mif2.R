@@ -81,9 +81,9 @@
 ##' @inheritSection pfilter Filtering failures
 ##'
 ##' @references
-##' E. L. Ionides, D. Nguyen, Y. Atchad\'e, S. Stoev, and A. A. King.
-##' Inference for dynamic and latent variable models via iterated, perturbed Bayes maps.
-##' Proc. Natl. Acad. Sci. U.S.A., 112:719--724, 2015.
+##'
+##' \Ionides2015
+##' 
 NULL
 
 setClass(
@@ -452,7 +452,16 @@ mif2.pfilter <- function (object, params, Np, mifiter, rw.sd, cooling.fn,
   Np <- as.integer(Np)
 
   if (length(tol) != 1 || !is.finite(tol) || tol < 0)
-    pStop_(sQuote("tol")," should be a small positive number.")
+    pStop_(sQuote("tol")," should be a small nonnegative number.")
+
+  if (tol != 0) {
+    pWarn(
+      "mif2",
+      "the ",sQuote("tol")," argument is deprecated and will be removed in a future release.\n",
+      "Currently, the default value of ",sQuote("tol")," is 1e-17;\n",
+      "in future releases, the value will be 0, and the option to choose otherwise will be removed."
+    )
+  }
 
   do_ta <- length(.indices)>0L
   if (do_ta && length(.indices)!=Np[1L])
@@ -499,34 +508,27 @@ mif2.pfilter <- function (object, params, Np, mifiter, rw.sd, cooling.fn,
       .gnsi=gnsi
     )
 
-    if (!all(is.finite(weights))) {
-      first <- which(!is.finite(weights))[1L]
-      datvals <- object@data[,nt]
-      weight <- weights[first]
-      states <- X[,first,1L]
-      params <- tparams[,first]
-      msg <- nonfinite_dmeasure_error(time=times[nt+1],lik=weight,datvals,
-        states,params)
-      pStop_(msg)
-    }
     gnsi <- FALSE
-
-    ## compute weighted mean at last timestep
-    if (nt == ntimes) {
-      if (any(weights>0)) {
-        coef(object,transform=TRUE) <- apply(params,1L,weighted.mean,w=weights)
-      } else {
-        pWarn("mif2","filtering failure at last filter iteration; using ",
-          "unweighted mean for point estimate.")
-        coef(object,transform=TRUE) <- apply(params,1L,mean)
-      }
-    }
 
     ## compute effective sample size, log-likelihood
     ## also do resampling if filtering has not failed
     xx <- .Call(P_pfilter_computations,x=X,params=params,Np=Np[nt+1],
       predmean=FALSE,predvar=FALSE,filtmean=FALSE,trackancestry=do_ta,
-      doparRS=TRUE,weights=weights,tol=tol)
+      doparRS=TRUE,weights=weights,wave=(nt==ntimes),tol=tol)
+
+    ## the following is triggered by the first illegal weight value
+    if (is.integer(xx)) {
+      illegal_dmeasure_error(
+        time=times[nt+1],
+        lik=weights[xx],
+        datvals=object@data[,nt],
+        states=X[,xx,1L],
+        params=tparams[,xx]
+      )
+    }
+
+    ## compute weighted mean at last timestep
+    if (nt == ntimes) coef(object,transform=TRUE) <- xx$wmean
 
     all.fail <- xx$fail
     loglik[nt] <- xx$loglik
