@@ -1,4 +1,4 @@
-97c5253cde74534dfa21951324a32b3c *DESCRIPTION
+b17944296e9e0a3633293453b0f48ab2 *DESCRIPTION
 ccdf8853205162e3a0e4b01e364f6310 *NAMESPACE
 40dff1536655eab06f07cadfc7b27189 *R/aaa.R
 2e1a9f95757e4c9b66557b29bfbc3317 *R/abc.R
@@ -44,7 +44,7 @@ d61ea3eeacbfb3bbb15c22af6c644b3c *R/lookup.R
 ce269bf22802a130e71e084eb29dd3c2 *R/melt.R
 c8a2c60b1bc517020cbed73c711a371c *R/mif2.R
 54b97e15eaa1c87e8ff4fedab2b1b904 *R/nlf.R
-aaec8800dfcbe11aad68666c9acb79fb *R/objfun.R
+c18c1f3c74dfd168762b4fba2e091d73 *R/objfun.R
 bd7835652e8d70b0e92f4b289fe96d5b *R/obs.R
 d289aa3122c81c148b89344d78a202e4 *R/ou2.R
 cb0ab25e13047d9d4593de9d7e349b98 *R/parameter_trans.R
@@ -63,7 +63,7 @@ bf5004c611f44dd4d148049924ac8a4d *R/pred_mean.R
 c4bcd2f81464b8229a3705fad40b8359 *R/pred_var.R
 dae134f8507c7428ce16c6c9ddfb7b7e *R/print.R
 b3e82cbd09a19a3cc0abe713b18bd77c *R/prior_spec.R
-2eae72aa90bac65a71eba4bc2eb94011 *R/probe.R
+c74b0f81170639eaddaacbd22d914ca1 *R/probe.R
 28ea348df77b26f928f0bb640df72d2f *R/probe_match.R
 0e9e3c409f4899164cbd46da1f6fdd35 *R/profile_design.R
 19ca5c158b658fa4fa0367920868d6b9 *R/proposals.R
@@ -83,7 +83,7 @@ d26b09f844d9bbe33b79a6dd3cb7ee9e *R/show.R
 ce1401fe9caa46f0493804f495bb254e *R/skeleton_spec.R
 f504cd3db4017826c65a715f3a594965 *R/slice_design.R
 66bd8b64c50a3a25218d054afeaf1232 *R/sobol.R
-58e56c2b7cb261a021f3aebe3366e3e9 *R/spect.R
+6b795884146674850dcbd37d74b7c963 *R/spect.R
 b7e66a53a5d0bbad7a8322f978704349 *R/spect_match.R
 8a5367677da72f7b17a6adc592b2c4df *R/spy.R
 5db4d8f78a01a7540b2fbec8b5b774bc *R/states.R
@@ -109,8 +109,8 @@ be1f8ddde492eef665afd1534e69dfcf *data/ewmeas.rda
 0e0eda4824bc68535da32d9aa065fae7 *data/parus.csv.gz
 143111e3cd7a6bfc211dd50cb5cceec2 *inst/CITATION
 d32239bcb673463ab874e80d47fae504 *inst/GPL
-fd1e10188f6f3085c255467d5d9de92d *inst/NEWS
-2e430786616733c3ee6c9d254a01a72a *inst/NEWS.Rd
+3526a2ecc9447e98daa33b0affb12122 *inst/NEWS
+da9f2a6fd8ee754736f9636eeb495c58 *inst/NEWS.Rd
 fefd3cd86b0eb1c754b30031a640d954 *inst/doc/index.html
 91952cedc763bb80701cd41f3beb1b79 *inst/include/pomp.h
 a625fc8ccb4977858afe39e3945ce8c3 *inst/include/pomp_defines.h
@@ -154,7 +154,7 @@ d61bf61fc1b70c8d0e4276be1090d249 *man/load.Rd
 d494aa540298713047f1451d1ee281a8 *man/loglik.Rd
 d90867a79d6ba482aad756c3a28eac41 *man/logmeanexp.Rd
 64fb9a0e8fd53969a538fb2b8bb2cb23 *man/lookup.Rd
-403ab7449cc6e1e34af644e9f76b8f51 *man/macros/citations.Rd
+2872e073f886a0bc64cffa14291f47ec *man/macros/citations.Rd
 e36d14c073f020fb319dfa99eaa759a3 *man/measles.Rd
 93ca59865c4d224fa6407c9c2105fdc5 *man/mif2.Rd
 d9912ea72e777ee669999ea23d72b75d *man/nlf.Rd
@@ -162,7 +162,7 @@ d9912ea72e777ee669999ea23d72b75d *man/nlf.Rd
 a4910acebc864fa2b21f9649fd970b9b *man/obs.Rd
 bc6ee6e6cf4d6b0bc7d5cd67e241fb03 *man/ou2.Rd
 4ce6fbdd639a03282714738c9e0cb1dc *man/pStop.Rd
-728d46b6cf9a356b418c8ff6bcd6302c *man/parameter_trans.Rd
+9cf31fea08a7180c3e3a034388f7fd4d *man/parameter_trans.Rd
 56e68fa94c4ae55199e955eee2d9dff6 *man/parmat.Rd
 fd38fbac3585e1118487fe866629beaa *man/partrans.Rd
 34134505f4bb864dd631c7a419e6a4e7 *man/parus.Rd
@@ -203,7 +203,7 @@ f760337de1f0ed3e2b985fbe4f8036b7 *man/spect.Rd
 8e5692294816ebf99c1b11eaf23e25a3 *man/spect_match.Rd
 f7d9ff3c0aa3daeb1046192b4bdfd460 *man/spy.Rd
 1d53495b4bd9fc83998eb95975cca8bb *man/states.Rd
-3701c118c5a016244ea7f5cfb3baee90 *man/summary.Rd
+cf950e2bcc8cc913a04fd267a51adad7 *man/summary.Rd
 100825eb9037b9cefa8d6f9c89ef9b24 *man/time.Rd
 d49d15989282b373fd21c1b3ea01271f *man/timezero.Rd
 eddb4cb1e3ddfe27b4a3c52f27ecb89f *man/traces.Rd
