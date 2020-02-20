@@ -1,4 +1,4 @@
-b17944296e9e0a3633293453b0f48ab2 *DESCRIPTION
+ad7445d38f3ce04dbcd530cd365a248d *DESCRIPTION
 ccdf8853205162e3a0e4b01e364f6310 *NAMESPACE
 40dff1536655eab06f07cadfc7b27189 *R/aaa.R
 2e1a9f95757e4c9b66557b29bfbc3317 *R/abc.R
@@ -109,8 +109,8 @@ be1f8ddde492eef665afd1534e69dfcf *data/ewmeas.rda
 0e0eda4824bc68535da32d9aa065fae7 *data/parus.csv.gz
 143111e3cd7a6bfc211dd50cb5cceec2 *inst/CITATION
 d32239bcb673463ab874e80d47fae504 *inst/GPL
-3526a2ecc9447e98daa33b0affb12122 *inst/NEWS
-da9f2a6fd8ee754736f9636eeb495c58 *inst/NEWS.Rd
+9519aabcd07aa315b3cce3e40a2a3727 *inst/NEWS
+cf51dec0fad45139ac6030777a2d29a4 *inst/NEWS.Rd
 fefd3cd86b0eb1c754b30031a640d954 *inst/doc/index.html
 91952cedc763bb80701cd41f3beb1b79 *inst/include/pomp.h
 a625fc8ccb4977858afe39e3945ce8c3 *inst/include/pomp_defines.h
@@ -154,7 +154,7 @@ d61bf61fc1b70c8d0e4276be1090d249 *man/load.Rd
 d494aa540298713047f1451d1ee281a8 *man/loglik.Rd
 d90867a79d6ba482aad756c3a28eac41 *man/logmeanexp.Rd
 64fb9a0e8fd53969a538fb2b8bb2cb23 *man/lookup.Rd
-2872e073f886a0bc64cffa14291f47ec *man/macros/citations.Rd
+c56bfb61771d4b3126d796c97156d2e7 *man/macros/citations.Rd
 e36d14c073f020fb319dfa99eaa759a3 *man/measles.Rd
 93ca59865c4d224fa6407c9c2105fdc5 *man/mif2.Rd
 d9912ea72e777ee669999ea23d72b75d *man/nlf.Rd
