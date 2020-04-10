@@ -1,5 +1,14 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 2.8}{
+  \itemize{
+    \item As promised, the default value of \code{tol} in the particle-filtering algorithms \code{pfilter}, \code{pmcmc}, \code{mif2}, and \code{bsmc2} has been changed to zero.
+    A warning continues to be issued if \code{tol} is set to anything other than 0.
+    In a future release, the option to choose a nonzero tolerance will be removed entirely.
+    \item The Euler step size in \code{sir} is now adjustable.
+    \item In traces and diagnostic plotting methods, the \code{nfail} variable (tracking numbers of filtering failures) has been dropped.
+  }
+}
 \section{Changes in \pkg{pomp} version 2.7}{
   \itemize{
     \item Another documentation bug was fixed.

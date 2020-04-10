@@ -38,6 +38,8 @@
 ##' \item{\code{\link{as.data.frame}}}{puts the prior and posterior samples into a data frame}
 ##' }
 ##'
+##' @inheritSection pfilter Change in default tolerance
+##' 
 ##' @inheritSection pfilter Filtering failures
 ##'
 ##' @author Michael Lavine, Matthew Ferrari, Aaron A. King, Edward L. Ionides
@@ -66,7 +68,6 @@ setClass(
     est="character",
     eff.sample.size="numeric",
     smooth="numeric",
-    nfail="integer",
     cond.log.evidence="numeric",
     log.evidence="numeric"
   )
@@ -102,7 +103,7 @@ setMethod(
   "bsmc2",
   signature=signature(data="data.frame"),
   definition = function (data,
-    Np, smooth = 0.1, tol = 1e-17, max.fail = 0,
+    Np, smooth = 0.1, tol = 0, max.fail = 0,
     params, rprior, rinit, rprocess, dmeasure, partrans,
     ..., verbose = getOption("verbose", FALSE)) {
 
@@ -136,7 +137,7 @@ setMethod(
   "bsmc2",
   signature=signature(data="pomp"),
   definition = function (data,
-    Np, smooth = 0.1, tol = 1e-17, max.fail = 0,
+    Np, smooth = 0.1, tol = 0, max.fail = 0,
     ..., verbose = getOption("verbose", FALSE)) {
 
     tryCatch(
@@ -213,8 +214,8 @@ bsmc2.internal <- function (object, Np, smooth, tol, max.fail,
     pWarn(
       "bsmc2",
       "the ",sQuote("tol")," argument is deprecated and will be removed in a future release.\n",
-      "Currently, the default value of ",sQuote("tol")," is 1e-17;\n",
-      "in future releases, the value will be 0, and the option to choose otherwise will be removed."
+      "Currently, the default value of ",sQuote("tol")," is 0;\n",
+      "in future releases, the option to choose otherwise will be removed."
     )
   }
 
@@ -288,11 +289,9 @@ bsmc2.internal <- function (object, Np, smooth, tol, max.fail,
 
     ## evaluate likelihood of observation given xpred (from L&W AGM (4))
     weights <- dmeasure(object,y=object@data[,nt,drop=FALSE],x=xpred,
-      times=times[nt+1],params=tparams,.gnsi=gnsi)
+      times=times[nt+1],params=tparams,log=FALSE,.gnsi=gnsi)
 
     gnsi <- FALSE  ## all native symbols have been looked up
-
-    ## evaluate weights as per L&W AGM (5)
 
     storeForEvidence <- log(mean(weights))
 
@@ -346,7 +345,6 @@ bsmc2.internal <- function (object, Np, smooth, tol, max.fail,
     est=as.character(est),
     eff.sample.size=eff.sample.size,
     smooth=smooth,
-    nfail=as.integer(nfail),
     cond.log.evidence=evidence,
     log.evidence=sum(evidence)
   )

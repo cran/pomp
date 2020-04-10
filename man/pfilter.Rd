@@ -19,7 +19,7 @@
 \S4method{pfilter}{data.frame}(
   data,
   Np,
-  tol = 1e-17,
+  tol = 0,
   max.fail = Inf,
   params,
   rinit,
@@ -37,7 +37,7 @@
 \S4method{pfilter}{pomp}(
   data,
   Np,
-  tol = 1e-17,
+  tol = 0,
   max.fail = Inf,
   pred.mean = FALSE,
   pred.var = FALSE,
@@ -136,6 +136,13 @@ the (time-dependent) estimated effective sample size }
 \item{\code{\link{as.data.frame}}}{ coerce to a data frame }
 \item{\code{\link{plot}}}{diagnostic plots}
 }
+}
+
+\section{Change in default tolerance}{
+
+From \pkg{pomp} version 2.4.1, warnings have been issued whenever the value of \code{tol} is set to anything other than zero.
+As of version 2.7.1, the default value of \code{tol} is zero and warnings will be generated whenever it is set by the user to anything else.
+This behavior is in anticipation of a forthcoming release, which will remove the \code{tol} and \code{max.fail} arguments altogether.
 }
 
 \section{Filtering failures}{
