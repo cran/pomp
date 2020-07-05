@@ -42,6 +42,8 @@ Other particle filter methods:
 \code{\link{mif2}()},
 \code{\link{pfilter}()},
 \code{\link{pmcmc}()},
-\code{\link{pred.var}()}
+\code{\link{pred.var}()},
+\code{\link{saved.states}()},
+\code{\link{wpfilter}()}
 }
 \concept{particle filter methods}

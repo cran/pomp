@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 2.8
-Date: 2020-04-10
+Version: 3.1
+Date: 2020-07-05
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -21,10 +21,10 @@ Authors@R: c(person(given=c("Aaron","A."),family="King",
 	  )
 URL: https://kingaa.github.io/pomp/
 Description: Tools for data analysis with partially observed Markov process (POMP) models (also known as stochastic dynamical systems, hidden Markov models, and nonlinear, non-Gaussian, state-space models).  The package provides facilities for implementing POMP models, simulating them, and fitting them to time series data by a variety of frequentist and Bayesian methods.  It is also a versatile platform for implementation of inference methods for general POMP models.
-Depends: R(>= 3.5.0), methods
+Depends: R(>= 4.0.0), methods
 Imports: stats, graphics, digest, mvtnorm, deSolve, coda, reshape2,
         magrittr, plyr
-Suggests: ggplot2, knitr, tidyr, dplyr, subplex
+Suggests: ggplot2, knitr, tidyr, dplyr, subplex, nloptr
 SystemRequirements: For Windows users, Rtools (see
         https://cran.r-project.org/bin/windows/Rtools/).
 License: GPL-3
@@ -38,12 +38,12 @@ Collate: 'pomp-package.R' 'aaa.R' 'pstop.R' 'undefined.R' 'csnippet.R'
         'load.R' 'workhorses.R' 'continue.R' 'prior_spec.R'
         'dmeasure_spec.R' 'dprocess_spec.R' 'rmeasure_spec.R'
         'rinit_spec.R' 'templates.R' 'builder.R' 'pomp.R' 'probe.R'
-        'abc.R' 'accumulators.R' 'kalman.R' 'proposals.R' 'pfilter.R'
-        'pmcmc.R' 'mif2.R' 'listie.R' 'simulate.R' 'spect.R' 'plot.R'
-        'bsmc2.R' 'as_data_frame.R' 'as_pomp.R' 'authors.R' 'bake.R'
-        'basic_probes.R' 'blowflies.R' 'bsflu.R' 'bsplines.R' 'coef.R'
-        'concat.R' 'cond_logLik.R' 'covmat.R' 'dacca.R' 'traces.R'
-        'deprecated.R' 'design.R' 'distributions.R' 'ebola.R'
+        'abc.R' 'accumulators.R' 'kalman.R' 'pfilter.R' 'wpfilter.R'
+        'proposals.R' 'pmcmc.R' 'mif2.R' 'listie.R' 'simulate.R'
+        'spect.R' 'plot.R' 'bsmc2.R' 'as_data_frame.R' 'as_pomp.R'
+        'authors.R' 'bake.R' 'basic_probes.R' 'blowflies.R' 'bsflu.R'
+        'bsplines.R' 'coef.R' 'concat.R' 'cond_logLik.R' 'covmat.R'
+        'dacca.R' 'design.R' 'distributions.R' 'ebola.R'
         'eff_sample_size.R' 'extract.R' 'filter_mean.R' 'filter_traj.R'
         'flow.R' 'forecast.R' 'gompertz.R' 'probe_match.R'
         'spect_match.R' 'summary.R' 'nlf.R' 'trajectory.R'
@@ -51,12 +51,13 @@ Collate: 'pomp-package.R' 'aaa.R' 'pstop.R' 'undefined.R' 'csnippet.R'
         'measles.R' 'melt.R' 'obs.R' 'ou2.R' 'parmat.R' 'parus.R'
         'pipe.R' 'pomp_examp.R' 'pred_mean.R' 'pred_var.R' 'show.R'
         'print.R' 'profile_design.R' 'resample.R' 'ricker.R'
-        'runif_design.R' 'rw2.R' 'sannbox.R' 'sir.R' 'slice_design.R'
-        'sobol.R' 'spy.R' 'states.R' 'time.R' 'timezero.R'
-        'transformations.R' 'userdata.R' 'verhulst.R' 'window.R'
-RoxygenNote: 7.1.0
+        'runif_design.R' 'rw2.R' 'sannbox.R' 'saved_states.R' 'sir.R'
+        'slice_design.R' 'sobol.R' 'spy.R' 'states.R' 'time.R'
+        'timezero.R' 'traces.R' 'transformations.R' 'userdata.R'
+        'verhulst.R' 'window.R'
+RoxygenNote: 7.1.1
 NeedsCompilation: yes
-Packaged: 2020-04-10 18:22:40 UTC; kingaa
+Packaged: 2020-07-05 18:23:14 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -73,4 +74,4 @@ Author: Aaron A. King [aut, cre],
   Eamon O'Dea [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2020-04-10 20:10:02 UTC
+Date/Publication: 2020-07-05 19:00:03 UTC

@@ -4,7 +4,7 @@
 static const R_CallMethodDef callMethods[] = {
   {"bspline_basis", (DL_FUNC) &bspline_basis, 4},
   {"periodic_bspline_basis", (DL_FUNC) &periodic_bspline_basis, 5},
-  {"systematic_resampling", (DL_FUNC) &systematic_resampling, 1},
+  {"systematic_resampling", (DL_FUNC) &systematic_resampling, 2},
   {"euler_model_simulator", (DL_FUNC) &euler_model_simulator, 11},
   {"lookup_in_table", (DL_FUNC) &lookup_in_table, 2},
   {"load_stack_incr", (DL_FUNC) &load_stack_incr, 1},
@@ -13,7 +13,8 @@ static const R_CallMethodDef callMethods[] = {
   {"R_Euler_Multinom", (DL_FUNC) &R_Euler_Multinom, 4},
   {"D_Euler_Multinom", (DL_FUNC) &D_Euler_Multinom, 5},
   {"R_GammaWN", (DL_FUNC) &R_GammaWN, 3},
-  {"pfilter_computations", (DL_FUNC) &pfilter_computations, 11},
+  {"pfilter_computations", (DL_FUNC) &pfilter, 10},
+  {"wpfilter_comps", (DL_FUNC) &wpfilter, 7},
   {"randwalk_perturbation", (DL_FUNC) &randwalk_perturbation, 2},
   {"do_simulate", (DL_FUNC) &do_simulate, 5},
   {"iterate_map", (DL_FUNC) &iterate_map, 6},

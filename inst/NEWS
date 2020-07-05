@@ -1,5 +1,64 @@
 _N_e_w_s _f_o_r _p_a_c_k_a_g_e '_p_o_m_p'
 
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _3._1:
+
+        • A new ‘saved.states’ method allows one to extract the saved
+          states from a particle filter computation.
+
+        • All instances of ‘cond.loglik’ have been changed to
+          ‘cond.logLik’, to remove a common source of typographical
+          error.
+
+        • A new sequential importance sampling algorithm has been
+          implemented as ‘wpfilter’.  This is a generalization of the
+          algorithm in ‘pfilter’ in that it tracks the weights of the
+          particles and allows the user to customize the resampling
+          scheme.
+
+        • In ‘mif2’, the specification of particle numbers, ‘Np’, has
+          changed.  When ‘Np’ is supplied as a function, ‘Np(0)’ is the
+          requested number of particles at the beginning of the time
+          series.  The previous behavior was that ‘Np(1)’ specified the
+          requested number of particles.  This behavior now matches
+          that of the other particle filtering algorithms, ‘pfilter’,
+          ‘bsmc2’, and ‘pmcmc’.
+
+        • ‘bsmc2’ can now accept a variable number of particles, as do
+          the other particle-filter based algorithms ‘pfilter’,
+          ‘pmcmc’, and ‘mif2’.
+
+        • The internal ‘systematic_resample’ function now allows the
+          user to specify the number of samples desired.  Previously,
+          these were always equal to the number of weights supplied.
+
+        • As promised from version 2.4.1, the ‘tol’ and ‘max.fail’
+          arguments have been removed completely from all
+          particle-filtering algorithms, including ‘pfilter’, ‘pmcmc’,
+          ‘bsmc2’, and ‘mif2’.  See the ‘pomp’ news blog (<URL:
+          https://kingaa.github.io/pomp/blog.html>) for more
+          information.
+
+        • The long-deprecated functions ‘onestep.dens’, ‘onestep.sim’,
+          ‘discrete.time.sim’, ‘euler.sim’, ‘gillespie.sim’,
+          ‘gillespie.hl.sim’, ‘conv.rec’, and ‘values’ have been
+          removed.  These have been replaced as follows
+
+            ‘onestep.dens’       direct specification of ‘dprocess’ component 
+            ‘onestep.sim’        ‘onestep’                                    
+            ‘discrete.time.sim’  ‘discrete_time’                              
+            ‘euler.sim’          ‘euler’                                      
+            ‘gillespie.sim’      ‘gillespie’                                  
+            ‘gillespie.hl.sim’   ‘gillespie_hl’                               
+            ‘conv.rec’           ‘traces’                                     
+            ‘values’             ‘as.data.frame’ or ‘as(x,"data.frame")’      
+           
+        • Trap error from non-finite likelihoods in ‘pmcmc’.
+
+        • New test of ‘pmcmc’ codes in ‘tests/issue109.R’.
+
+        • Trap error from missing accumulator variables in
+          ‘trajectory’.
+
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _2._8:
 
         • As promised, the default value of ‘tol’ in the

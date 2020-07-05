@@ -5,11 +5,11 @@
 ##' @name plot
 ##' @rdname plot
 ##' @include pomp_class.R
-##' @include abc.R mif2.R pmcmc.R pfilter.R spect.R probe.R
+##' @include abc.R mif2.R pmcmc.R pfilter.R spect.R probe.R wpfilter.R
 ##' @include listie.R
 ##' @aliases plot,missing-method
 ##'
-##' @importFrom graphics plot par abline pairs matplot box axis mtext points polygon lines plot.default legend hist rect text title
+##' @importFrom graphics par abline pairs matplot box axis mtext points polygon lines plot.default legend hist rect text title
 ##' @importFrom grDevices rgb dev.interactive
 ##' @importFrom stats quantile cor density
 ##'
@@ -21,12 +21,13 @@ setGeneric(
     standardGeneric("plot")
 )
 
-setClassUnion("pomp_plottable",c("pomp","pfilterd_pomp"))
+setClassUnion("pomp_plottable",c("pomp","pfilterd_pomp","wpfilterd_pomp"))
 
 ##' @name plot-pomp
 ##' @rdname plot
-##' @aliases plot,pomp_plottable-method plot,pomp-method
-##' plot,pfilterd_pomp-method plot-pomp plot-pfilterd_pomp
+##' @aliases plot,pomp_plottable-method plot,pomp-method plot-pomp 
+##' plot,pfilterd_pomp-method plot-pfilterd_pomp
+##' plot,wpfilterd_pomp-method plot-wpfilterd_pomp
 ##'
 ##' @param x the object to plot
 ##' @param variables optional character; names of variables to be displayed
@@ -299,7 +300,7 @@ mif2.diagnostics <- function (z) {
   parnames <- names(coef(xx,transform=TRUE))
   estnames <- parnames
 
-  ## plot ESS and cond.loglik
+  ## plot ESS and cond.logLik
   nplots <- 2
   n.per.page <- 2
   nc <- 1

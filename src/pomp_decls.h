@@ -42,7 +42,7 @@ extern void _ou2_rmeasure(double *y, double *x, double *p, int *obsindex, int *s
 /* src/partrans.c */
 extern SEXP do_partrans(SEXP object, SEXP params, SEXP dir, SEXP gnsi);
 /* src/pfilter.c */
-extern SEXP pfilter_computations(SEXP x, SEXP params, SEXP Np, SEXP predmean, SEXP predvar, SEXP filtmean, SEXP trackancestry, SEXP doparRS, SEXP weights, SEXP wave, SEXP tol);
+extern SEXP pfilter(SEXP x, SEXP params, SEXP Np, SEXP predmean, SEXP predvar, SEXP filtmean, SEXP trackancestry, SEXP doparRS, SEXP weights, SEXP wave);
 /* src/pomp_fun.c */
 extern SEXP pomp_fun_handler(SEXP pfun, SEXP gnsi, pompfunmode *mode, SEXP S, SEXP P, SEXP O, SEXP C);
 extern SEXP load_stack_incr(SEXP pack);
@@ -59,7 +59,7 @@ extern SEXP probe_marginal_solve(SEXP x, SEXP setup, SEXP diff);
 /* src/probe_nlar.c */
 extern SEXP probe_nlar(SEXP x, SEXP lags, SEXP powers);
 /* src/resample.c */
-extern SEXP systematic_resampling(SEXP weights);
+extern SEXP systematic_resampling(SEXP weights, SEXP np);
 extern void nosort_resamp(int nw, double *w, int np, int *p, int offset);
 /* src/rinit.c */
 extern SEXP do_rinit(SEXP object, SEXP params, SEXP t0, SEXP nsim, SEXP gnsi);
@@ -100,3 +100,5 @@ extern const SEXP get_userdata(const char *name);
 extern const int *get_userdata_int(const char *name);
 extern const double *get_userdata_double(const char *name);
 extern void unset_pomp_userdata(void);
+/* src/wpfilter.c */
+extern SEXP wpfilter(SEXP X, SEXP Params, SEXP Weights, SEXP W, SEXP Trigger, SEXP Target, SEXP Np);

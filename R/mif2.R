@@ -20,14 +20,6 @@
 ##' @inheritParams pomp
 ##' @inheritParams pfilter
 ##' @param Nmif The number of filtering iterations to perform.
-##' @param Np the number of particles to use in filtering.
-##' This may be specified as a single positive integer, in which case the same number of particles will be used at each timestep.
-##' Alternatively, if one wishes the number of particles to vary across timestep, one may specify \code{Np} either as a vector of positive integers (of length \code{length(time(object))}) or as a function taking a positive integer argument.
-##' In the latter case, \code{Np(n)} must be a single positive integer,
-##' representing the number of particles to be used at the \code{n}-th timestep:
-##' \code{Np(1)} is the number of particles to use going from \code{timezero(object)} to \code{time(object)[1]},
-##' \code{Np(2)}, from \code{time(object)[1]} to \code{time(object)[2]},
-##' and so on.
 ##' @param rw.sd specification of the magnitude of the random-walk perturbations that will be applied to some or all model parameters.
 ##' Parameters that are to be estimated should have positive perturbations specified here.
 ##' The specification is given using the \code{\link{rw.sd}} function, which creates a list of unevaluated expressions.
@@ -46,6 +38,10 @@
 ##' @return
 ##' Upon successful completion, \code{mif2} returns an object of class
 ##' \sQuote{mif2d_pomp}.
+##'
+##' @section Number of particles:
+##' If \code{Np} is anything other than a constant, the user must take care that the number of particles requested at the end of the time series matches that requested at the beginning.
+##' In particular, if \code{T=length(time(object))}, then one should have \code{Np[1]==Np[T+1]} when \code{Np} is furnished as an integer vector and \code{Np(0)==Np(T)} when \code{Np} is furnished as a function.
 ##'
 ##' @section Methods:
 ##' The following methods are available for such an object:
@@ -77,9 +73,10 @@
 ##' When \code{cooling.type="hyperbolic"}, we have \deqn{c_{m,n}=\frac{s+1}{s+n+(m-1)N},}{c[m,n]=(s+1)/(s+n+(m-1)N),} where \eqn{s} satisfies \deqn{\frac{s+1}{s+50N}=\alpha.}{(s+1)/(s+50N)=alpha.}
 ##' Thus, in either case, the perturbations at the end of 50 IF2 iterations are a fraction \eqn{\alpha}{alpha} smaller than they are at first.
 ##'
-##' @inheritSection pfilter Change in default tolerance
-##' 
-##' @inheritSection pfilter Filtering failures
+##' @section Re-running IF2 iterations:
+##' To re-run a sequence of IF2 iterations, one can use the \code{mif2} method on a \sQuote{mif2d_pomp} object.
+##' By default, the same parameters used for the original IF2 run are re-used (except for \code{verbose}, the default of which is shown above).
+##' If one does specify additional arguments, these will override the defaults.
 ##'
 ##' @references
 ##'
@@ -131,7 +128,7 @@ setMethod(
   definition = function (data,
     Nmif = 1, rw.sd,
     cooling.type = c("geometric", "hyperbolic"), cooling.fraction.50,
-    Np, tol = 0, max.fail = Inf,
+    Np,
     params, rinit, rprocess, dmeasure, partrans,
     ..., verbose = getOption("verbose", FALSE)) {
 
@@ -143,8 +140,6 @@ setMethod(
         cooling.type=match.arg(cooling.type),
         cooling.fraction.50=cooling.fraction.50,
         Np=Np,
-        tol=tol,
-        max.fail=max.fail,
         params=params,
         rinit=rinit,
         rprocess=rprocess,
@@ -169,8 +164,7 @@ setMethod(
   definition = function (data,
     Nmif = 1, rw.sd,
     cooling.type = c("geometric", "hyperbolic"), cooling.fraction.50,
-    Np, tol = 0, max.fail = Inf,
-    ..., verbose = getOption("verbose", FALSE)) {
+    Np, ..., verbose = getOption("verbose", FALSE)) {
 
     tryCatch(
       mif2.internal(
@@ -180,8 +174,6 @@ setMethod(
         cooling.type=match.arg(cooling.type),
         cooling.fraction.50=cooling.fraction.50,
         Np=Np,
-        tol=tol,
-        max.fail=max.fail,
         ...,
         verbose=verbose
       ),
@@ -199,18 +191,15 @@ setMethod(
   "mif2",
   signature=signature(data="pfilterd_pomp"),
   definition = function (data,
-    Nmif = 1, Np, tol, max.fail = Inf,
+    Nmif = 1, Np,
     ..., verbose = getOption("verbose", FALSE)) {
 
     if (missing(Np)) Np <- data@Np
-    if (missing(tol)) tol <- data@tol
 
     mif2(
       as(data,"pomp"),
       Nmif=Nmif,
       Np=Np,
-      tol=tol,
-      max.fail=max.fail,
       ...,
       verbose=verbose
     )
@@ -277,9 +266,7 @@ setMethod(
 )
 
 mif2.internal <- function (object, Nmif, rw.sd,
-  cooling.type, cooling.fraction.50,
-  Np, tol = 0, max.fail = Inf,
-  ..., verbose,
+  cooling.type, cooling.fraction.50, Np, ..., verbose,
   .ndone = 0L, .indices = integer(0), .paramMatrix = NULL,
   .gnsi = TRUE) {
 
@@ -304,38 +291,9 @@ mif2.internal <- function (object, Nmif, rw.sd,
 
   ntimes <- length(time(object))
 
-  if (is.null(Np)) {
-    pStop_(sQuote("Np")," must be specified.")
-  } else if (is.function(Np)) {
-    Np <- tryCatch(
-      vapply(seq_len(ntimes),Np,numeric(1)),
-      error = function (e) {
-        pStop_("if ",sQuote("Np"),
-          " is a function, it must return a single positive integer.")
-      }
-    )
-  } else if (!is.numeric(Np)) {
-    pStop_(sQuote("Np"),
-      " must be a number, a vector of numbers, or a function.")
-  }
-
-  if (length(Np) == 1) {
-    Np <- rep(Np,times=ntimes)
-  } else if (length(Np) > ntimes) {
-    if (Np[1L] != Np[ntimes+1] || length(Np) > ntimes+1) {
-      pWarn("mif2","Np[k] ignored for k > ",sQuote("length(time(object))"),".")
-    }
-    Np <- head(Np,ntimes)
-  } else if (length(Np) < ntimes) {
-    pStop_(sQuote("Np")," must have length 1 or ",
-      sQuote("length(time(object))"),".")
-  }
-
-  if (!all(is.finite(Np)) || any(Np <= 0))
-    pStop_(sQuote("Np")," must be a positive integer.")
-
-  Np <- as.integer(Np)
-  Np <- c(Np,Np[1L])
+  Np <- np_check(Np,ntimes)
+  if (Np[1L] != Np[ntimes+1L])
+    pStop_("Np[1] must equal Np[",ntimes+1L,"].")
 
   if (missing(rw.sd))
     pStop_(sQuote("rw.sd")," must be specified!")
@@ -370,8 +328,7 @@ mif2.internal <- function (object, Nmif, rw.sd,
   pompLoad(object,verbose=verbose)
   on.exit(pompUnload(object,verbose=verbose))
 
-  paramMatrix <- partrans(object,paramMatrix,dir="toEst",
-    .gnsi=gnsi)
+  paramMatrix <- partrans(object,paramMatrix,dir="toEst",.gnsi=gnsi)
 
   ## iterate the filtering
   for (n in seq_len(Nmif)) {
@@ -383,8 +340,6 @@ mif2.internal <- function (object, Nmif, rw.sd,
       mifiter=.ndone+n,
       cooling.fn=cooling.fn,
       rw.sd=rw.sd,
-      tol=tol,
-      max.fail=max.fail,
       verbose=verbose,
       .indices=.indices,
       .gnsi=gnsi
@@ -401,8 +356,7 @@ mif2.internal <- function (object, Nmif, rw.sd,
 
   }
 
-  pfp@paramMatrix <- partrans(object,paramMatrix,dir="fromEst",
-    .gnsi=gnsi)
+  pfp@paramMatrix <- partrans(object,paramMatrix,dir="fromEst",.gnsi=gnsi)
 
   new(
     "mif2d_pomp",
@@ -443,26 +397,12 @@ mif2.cooling <- function (type, fraction, ntimes) {
 }
 
 mif2.pfilter <- function (object, params, Np, mifiter, rw.sd, cooling.fn,
-  tol = 0, max.fail = Inf, verbose, .indices = integer(0),
-  .gnsi = TRUE) {
+  verbose, .indices = integer(0), .gnsi = TRUE) {
 
-  tol <- as.numeric(tol)
   gnsi <- as.logical(.gnsi)
   verbose <- as.logical(verbose)
   mifiter <- as.integer(mifiter)
   Np <- as.integer(Np)
-
-  if (length(tol) != 1 || !is.finite(tol) || tol < 0)
-    pStop_(sQuote("tol")," should be a small nonnegative number.")
-
-  if (tol != 0) {
-    pWarn(
-      "mif2",
-      "the ",sQuote("tol")," argument is deprecated and will be removed in a future release.\n",
-      "Currently, the default value of ",sQuote("tol")," is 0;\n",
-      "in future releases, the option to choose otherwise will be removed."
-    )
-  }
 
   do_ta <- length(.indices)>0L
   if (do_ta && length(.indices)!=Np[1L])
@@ -473,7 +413,6 @@ mif2.pfilter <- function (object, params, Np, mifiter, rw.sd, cooling.fn,
 
   loglik <- rep(NA,ntimes)
   eff.sample.size <- numeric(ntimes)
-  nfail <- 0
 
   for (nt in seq_len(ntimes)) {
 
@@ -505,33 +444,29 @@ mif2.pfilter <- function (object, params, Np, mifiter, rw.sd, cooling.fn,
       x=X,
       times=times[nt+1],
       params=tparams,
-      log=FALSE,
+      log=TRUE,
       .gnsi=gnsi
     )
-
     gnsi <- FALSE
 
     ## compute effective sample size, log-likelihood
     ## also do resampling if filtering has not failed
     xx <- .Call(P_pfilter_computations,x=X,params=params,Np=Np[nt+1],
       predmean=FALSE,predvar=FALSE,filtmean=FALSE,trackancestry=do_ta,
-      doparRS=TRUE,weights=weights,wave=(nt==ntimes),tol=tol)
+      doparRS=TRUE,weights=weights,wave=(nt==ntimes))
 
     ## the following is triggered by the first illegal weight value
     if (is.integer(xx)) {
       illegal_dmeasure_error(
         time=times[nt+1],
-        lik=weights[xx],
+        loglik=weights[xx],
         datvals=object@data[,nt],
         states=X[,xx,1L],
         params=tparams[,xx]
       )
     }
 
-    ## compute weighted mean at last timestep
     if (nt == ntimes) coef(object,transform=TRUE) <- xx$wmean
-
-    all.fail <- xx$fail
     loglik[nt] <- xx$loglik
     eff.sample.size[nt] <- xx$ess
     if (do_ta) .indices <- .indices[xx$ancestry]
@@ -539,32 +474,19 @@ mif2.pfilter <- function (object, params, Np, mifiter, rw.sd, cooling.fn,
     x <- xx$states
     params <- xx$params
 
-    if (all.fail) { ## all particles are lost
-      nfail <- nfail+1
-      if (verbose)
-        message("filtering failure at time t = ",times[nt+1],".")
-      if (nfail>max.fail)
-        pStop_("too many filtering failures.")
-    }
-
     if (verbose && (nt%%5==0))
       cat("mif2 pfilter timestep",nt,"of",ntimes,"finished.\n")
 
   }
-
-  if (nfail>0)
-    pWarn("mif2",nfail," filtering failure",ngettext(nfail,msg1="",msg2="s"),
-      " occurred.")
 
   new(
     "pfilterd_pomp",
     as(object,"pomp"),
     paramMatrix=params,
     eff.sample.size=eff.sample.size,
-    cond.loglik=loglik,
+    cond.logLik=loglik,
     indices=.indices,
     Np=Np,
-    tol=tol,
     loglik=sum(loglik)
   )
 }

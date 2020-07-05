@@ -13,7 +13,7 @@
 ##' @name cond.logLik
 ##' @docType methods
 ##' @rdname cond_logLik
-##' @include pomp_class.R kalman.R pfilter.R
+##' @include pomp_class.R kalman.R pfilter.R wpfilter.R
 ##' @aliases cond.logLik cond.logLik,missing-method cond.logLik,ANY-method
 ##' @family particle filter methods
 ##' @inheritParams filter.mean
@@ -52,7 +52,7 @@ setMethod(
 setMethod(
   "cond.logLik",
   signature=signature(object="kalmand_pomp"),
-  definition=function(object,...)object@cond.loglik
+  definition=function(object,...)object@cond.logLik
 )
 
 ##' @name cond.logLik-pfilterd_pomp
@@ -62,7 +62,17 @@ setMethod(
 setMethod(
   "cond.logLik",
   signature=signature(object="pfilterd_pomp"),
-  definition=function(object,...)object@cond.loglik
+  definition=function(object,...)object@cond.logLik
+)
+
+##' @name cond.logLik-wpfilterd_pomp
+##' @aliases cond.logLik,wpfilterd_pomp-method
+##' @rdname cond_logLik
+##' @export
+setMethod(
+  "cond.logLik",
+  signature=signature(object="wpfilterd_pomp"),
+  definition=function(object,...)object@cond.logLik
 )
 
 ##' @name cond.logLik-bsmcd_pomp
@@ -78,3 +88,12 @@ setMethod(
   signature=signature(object="bsmcd_pomp"),
   definition=function(object,...)object@cond.log.evidence
 )
+
+##' @name cond.loglik
+##' @aliases cond.loglik
+##' @rdname cond_logLik
+##' @export
+cond.loglik <- function (...) {
+  .Deprecated("cond.logLik",package="pomp")
+  cond.logLik(...)
+}

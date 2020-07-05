@@ -5,7 +5,7 @@
 ##'
 ##' @name as.data.frame
 ##' @rdname as_data_frame
-##' @include pomp_class.R pfilter.R bsmc2.R mif2.R pmcmc.R abc.R
+##' @include pomp_class.R pfilter.R bsmc2.R mif2.R pmcmc.R abc.R wpfilter.R
 ##' @include probe.R kalman.R
 NULL
 
@@ -55,7 +55,7 @@ as.data.frame.pomp <- function (x, ...) as(x,"data.frame")
 ##'
 ##' @details When \code{object} is a \sQuote{pfilterd_pomp} object,
 ##' coercion to a data frame results in a data frame with the same content as for a simple \sQuote{pomp},
-##' but with conditional log likelihood and effective sample size estimates included.
+##' but with conditional log likelihood and effective sample size estimates included, as well as filtering means, prediction means, and prediction variances, if these have been computed.
 ##'
 setAs(
   from="pfilterd_pomp",
@@ -67,7 +67,7 @@ setAs(
     out <- cbind(
       as(as(from,"pomp"),"data.frame"),
       ess=eff.sample.size(from),
-      cond.loglik=cond.logLik(from)
+      cond.logLik=cond.logLik(from)
     )
     if (length(pm)>0) {
       pm <- as.data.frame(t(pm))
@@ -133,7 +133,7 @@ setAs(
     fc <- forecast(from)
     out <- cbind(
       as(as(from,"pomp"),"data.frame"),
-      cond.loglik=cond.logLik(from)
+      cond.logLik=cond.logLik(from)
     )
     if (length(pm)>0) {
       pm <- as.data.frame(t(pm))
@@ -243,3 +243,30 @@ as.data.frame.mif2List <- function (x, ...) {
 as.data.frame.pmcmcList <- function (x, ...) {
   as(x,"data.frame")
 }
+
+
+##' @name as,wpfilterd_pomp-method
+##' @aliases coerce,wpfilterd_pomp,data.frame-method
+##' @rdname as_data_frame
+##'
+##' @details When \code{object} is a \sQuote{wpfilterd_pomp} object,
+##' coercion to a data frame results in a data frame with the same content as for a simple \sQuote{pomp},
+##' but with conditional log likelihood and effective sample size estimates included.
+##'
+setAs(
+  from="wpfilterd_pomp",
+  to="data.frame",
+  def = function (from) {
+    cbind(
+      as(as(from,"pomp"),"data.frame"),
+      ess=eff.sample.size(from),
+      cond.logLik=cond.logLik(from)
+    )
+  }
+)
+
+##' @method as.data.frame wpfilterd_pomp
+##' @rdname as_data_frame
+##' @export
+as.data.frame.wpfilterd_pomp <- function (x, ...) as(x,"data.frame")
+

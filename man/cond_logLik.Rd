@@ -9,15 +9,22 @@
 \alias{cond.logLik,kalmand_pomp-method}
 \alias{cond.logLik-pfilterd_pomp}
 \alias{cond.logLik,pfilterd_pomp-method}
+\alias{cond.logLik-wpfilterd_pomp}
+\alias{cond.logLik,wpfilterd_pomp-method}
 \alias{cond.logLik-bsmcd_pomp}
 \alias{cond.logLik,bsmcd_pomp-method}
+\alias{cond.loglik}
 \title{Conditional log likelihood}
 \usage{
 \S4method{cond.logLik}{kalmand_pomp}(object, ...)
 
 \S4method{cond.logLik}{pfilterd_pomp}(object, ...)
 
+\S4method{cond.logLik}{wpfilterd_pomp}(object, ...)
+
 \S4method{cond.logLik}{bsmcd_pomp}(object, ...)
+
+cond.loglik(...)
 }
 \arguments{
 \item{object}{result of a filtering computation}
@@ -53,6 +60,8 @@ Other particle filter methods:
 \code{\link{pfilter}()},
 \code{\link{pmcmc}()},
 \code{\link{pred.mean}()},
-\code{\link{pred.var}()}
+\code{\link{pred.var}()},
+\code{\link{saved.states}()},
+\code{\link{wpfilter}()}
 }
 \concept{particle filter methods}

@@ -23,8 +23,6 @@
 ##' @inheritParams pomp
 ##' @inheritParams pfilter
 ##'
-##' @param Np number of particles
-##'
 ##' @param smooth Kernel density smoothing parameter.
 ##' The compensating shrinkage factor will be \code{sqrt(1-smooth^2)}.
 ##' Thus, \code{smooth=0} means that no noise will be added to parameters.
@@ -37,10 +35,6 @@
 ##' \item{\code{\link[=plot,bsmcd_pomp-method]{plot}}}{produces diagnostic plots}
 ##' \item{\code{\link{as.data.frame}}}{puts the prior and posterior samples into a data frame}
 ##' }
-##'
-##' @inheritSection pfilter Change in default tolerance
-##' 
-##' @inheritSection pfilter Filtering failures
 ##'
 ##' @author Michael Lavine, Matthew Ferrari, Aaron A. King, Edward L. Ionides
 ##'
@@ -103,7 +97,7 @@ setMethod(
   "bsmc2",
   signature=signature(data="data.frame"),
   definition = function (data,
-    Np, smooth = 0.1, tol = 0, max.fail = 0,
+    Np, smooth = 0.1,
     params, rprior, rinit, rprocess, dmeasure, partrans,
     ..., verbose = getOption("verbose", FALSE)) {
 
@@ -112,8 +106,6 @@ setMethod(
         data,
         Np=Np,
         smooth=smooth,
-        tol=tol,
-        max.fail=max.fail,
         params=params,
         rprior=rprior,
         rinit=rinit,
@@ -137,7 +129,7 @@ setMethod(
   "bsmc2",
   signature=signature(data="pomp"),
   definition = function (data,
-    Np, smooth = 0.1, tol = 0, max.fail = 0,
+    Np, smooth = 0.1,
     ..., verbose = getOption("verbose", FALSE)) {
 
     tryCatch(
@@ -145,8 +137,6 @@ setMethod(
         data,
         Np=Np,
         smooth=smooth,
-        tol=tol,
-        max.fail=max.fail,
         ...,
         verbose=verbose
       ),
@@ -182,8 +172,7 @@ setMethod(
   }
 )
 
-bsmc2.internal <- function (object, Np, smooth, tol, max.fail,
-  ..., verbose, .gnsi = TRUE) {
+bsmc2.internal <- function (object, Np, smooth, ..., verbose, .gnsi = TRUE) {
 
   verbose <- as.logical(verbose)
 
@@ -194,30 +183,16 @@ bsmc2.internal <- function (object, Np, smooth, tol, max.fail,
 
   gnsi <- as.logical(.gnsi)
 
-  if (missing(Np)) pStop_(sQuote("Np")," must be specified.")
-  if (!missing(Np) && (length(Np) > 1 || !is.finite(Np) || Np < 1))
-    pStop_(sQuote("Np")," must be a positive integer.")
-  Np <- as.integer(Np)
+  ntimes <- length(time(object))
 
-  params <- parmat(coef(object),Np)
+  Np <- np_check(Np,ntimes+1)
+
+  params <- parmat(coef(object),Np[1L])
 
   if (!is.numeric(smooth) || length(smooth) != 1 || (!is.finite(smooth)) ||
       (smooth>1) || (smooth<=0))
     pStop_(sQuote("smooth")," must be a scalar in (0,1]")
   smooth <- as.numeric(smooth)
-
-  tol <- as.numeric(tol)
-  if (length(tol) != 1 || !is.finite(tol) || tol < 0)
-    pStop_(sQuote("tol")," should be a small nonnegative number.")
-
-  if (tol != 0) {
-    pWarn(
-      "bsmc2",
-      "the ",sQuote("tol")," argument is deprecated and will be removed in a future release.\n",
-      "Currently, the default value of ",sQuote("tol")," is 0;\n",
-      "in future releases, the option to choose otherwise will be removed."
-    )
-  }
 
   hsq <- smooth^2             #  see Liu & West eq(10.3.12)
   shrink <- sqrt(1-hsq)       #  'a' parameter of Liu & West
@@ -227,14 +202,11 @@ bsmc2.internal <- function (object, Np, smooth, tol, max.fail,
 
   params <- rprior(object,params=params,.gnsi=gnsi)
 
-  ntimes <- length(time(object))
-  npars <- nrow(params)
   paramnames <- rownames(params)
   prior <- params
 
   times <- time(object,t0=TRUE)
   x <- rinit(object,params=params,.gnsi=gnsi)
-  nvars <- nrow(x)
 
   params <- partrans(object,params,dir="toEst",.gnsi=gnsi)
 
@@ -245,12 +217,6 @@ bsmc2.internal <- function (object, Np, smooth, tol, max.fail,
 
   evidence <- as.numeric(rep(NA,ntimes))
   eff.sample.size <- as.numeric(rep(NA,ntimes))
-  nfail <- 0L
-
-  mu <- array(data=NA,dim=c(nvars,Np,1L))
-  rownames(mu) <- rownames(x)
-  m  <- array(data=NA,dim=c(npars,Np))
-  rownames(m) <- rownames(params)
 
   for (nt in seq_len(ntimes)) {
 
@@ -269,70 +235,60 @@ bsmc2.internal <- function (object, Np, smooth, tol, max.fail,
       )
     }
 
-    m <- shrink*params+(1-shrink)*params.mean
+    m <- shrink*params[estind,]+(1-shrink)*params.mean[estind]
 
     ## sample new parameter vector as per L&W AGM (3) and Liu & West eq(3.2)
     pert <- tryCatch(
-      rmvnorm(n=Np,mean=rep(0,nest),sigma=hsq*params.var,method="svd"),
+      rmvnorm(n=Np[nt],mean=rep(0,nest),sigma=hsq*params.var,method="svd"),
       error = function (e)
         pStop("rmvnorm",conditionMessage(e))
     )
 
     if (!all(is.finite(pert))) pStop_("extreme particle depletion") #nocov
 
-    params[estind,] <- m[estind,]+t(pert)
+    params[estind,] <- m+t(pert)
 
     tparams <- partrans(object,params,dir="fromEst",.gnsi=gnsi)
 
     xpred <- rprocess(object,x0=x,t0=times[nt],times=times[nt+1],
       params=tparams,.gnsi=gnsi)
 
-    ## evaluate likelihood of observation given xpred (from L&W AGM (4))
+    ## evaluate log likelihood of observation given xpred
     weights <- dmeasure(object,y=object@data[,nt,drop=FALSE],x=xpred,
-      times=times[nt+1],params=tparams,log=FALSE,.gnsi=gnsi)
-
+      times=times[nt+1],params=tparams,log=TRUE,.gnsi=gnsi)
     gnsi <- FALSE  ## all native symbols have been looked up
 
-    storeForEvidence <- log(mean(weights))
+    ## the following is triggered by the first illegal weight value
+    xx <- is.finite(weights) | isTRUE(weights==-Inf)
+    if (!all(xx)) {
+      xx <- which(!xx)[1L]
+      illegal_dmeasure_error(
+        time=times[nt+1],
+        loglik=weights[xx],
+        datvals=object@data[,nt],
+        states=xpred[,xx,1L],
+        params=tparams[,xx]
+      )
+    }
 
     x[,] <- xpred
 
-    ## test for failure to filter
-    dim(weights) <- NULL   ### needed?  FIXME
-    failures <- ((weights<tol) | (!is.finite(weights))) # test for NA weights
-    all.fail <- all(failures)
-    if (all.fail) {                     # all particles are lost
-      if (verbose) {
-        message("filtering failure at time t = ",times[nt+1])
-      }
-      nfail <- nfail+1
-      if (nfail > max.fail) pStop_("too many filtering failures")
-      evidence[nt] <- log(tol)          # worst log-likelihood
-      weights <- rep(1/Np,Np)
-      eff.sample.size[nt] <- 0
-    } else {                  # not all particles are lost
-      ## compute log-likelihood
-      evidence[nt] <- storeForEvidence
-      weights[failures] <- 0
-      weights <- weights/sum(weights)
-      ## compute effective sample-size
-      eff.sample.size[nt] <- 1/crossprod(weights)
-    }
+    dim(weights) <- NULL
+    evidence[nt] <- lmw <- logmeanexp(weights)
+    weights <- exp(weights-lmw)
+    weights <- weights/sum(weights)
+    ## compute effective sample-size
+    eff.sample.size[nt] <- 1/crossprod(weights)
 
     if (verbose)
       cat("effective sample size =",round(eff.sample.size[nt],1),"\n")
 
     ## Matrix with samples (columns) from filtering distribution theta.t | Y.t
-    if (!all.fail) {
-      smp <- .Call(P_systematic_resampling,weights)
-      x <- x[,smp,drop=FALSE]
-      params[estind,] <- params[estind,smp,drop=FALSE]
-    }
+    smp <- systematic_resample(weights,Np[nt+1])
+    x <- x[,smp,drop=FALSE]
+    params <- params[,smp,drop=FALSE]
 
   }
-
-  if (nfail>0)
-    pWarn_(nfail," filtering ",ngettext(nfail,"failure","failures")," occurred.")
 
   ## replace parameters with point estimate (posterior median)
   coef(object,transform=TRUE) <- apply(params,1,median)

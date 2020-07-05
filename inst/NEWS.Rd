@@ -1,5 +1,37 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 3.1}{
+  \itemize{
+    \item A new \code{saved.states} method allows one to extract the saved states from a particle filter computation.
+    \item All instances of \code{cond.loglik} have been changed to \code{cond.logLik}, to remove a common source of typographical error.
+    \item A new sequential importance sampling algorithm has been implemented as \code{wpfilter}.
+    This is a generalization of the algorithm in \code{pfilter} in that it tracks the weights of the particles and allows the user to customize the resampling scheme.
+    \item In \code{mif2}, the specification of particle numbers, \code{Np}, has changed.
+    When \code{Np} is supplied as a function, \code{Np(0)} is the requested number of particles at the beginning of the time series.
+    The previous behavior was that \code{Np(1)} specified the requested number of particles.
+    This behavior now matches that of the other particle filtering algorithms, \code{pfilter}, \code{bsmc2}, and \code{pmcmc}.
+    \item \code{bsmc2} can now accept a variable number of particles, as do the other particle-filter based algorithms \code{pfilter}, \code{pmcmc}, and \code{mif2}.
+    \item The internal \code{systematic_resample} function now allows the user to specify the number of samples desired.
+    Previously, these were always equal to the number of weights supplied.
+    \item As promised from version 2.4.1, the \code{tol} and \code{max.fail} arguments have been removed completely from all particle-filtering algorithms, including \code{pfilter}, \code{pmcmc}, \code{bsmc2}, and \code{mif2}.
+    See the \href{https://kingaa.github.io/pomp/blog.html}{\pkg{pomp} news blog} (\url{https://kingaa.github.io/pomp/blog.html}) for more information.
+    \item The long-deprecated functions \code{onestep.dens}, \code{onestep.sim}, \code{discrete.time.sim}, \code{euler.sim}, \code{gillespie.sim}, \code{gillespie.hl.sim}, \code{conv.rec}, and \code{values}  have been removed.
+    These have been replaced as follows
+    \tabular{ll}{
+      \code{onestep.dens} \tab direct specification of \code{dprocess} component \cr
+      \code{onestep.sim} \tab \code{onestep} \cr
+      \code{discrete.time.sim} \tab \code{discrete_time} \cr
+      \code{euler.sim} \tab \code{euler} \cr
+      \code{gillespie.sim} \tab \code{gillespie} \cr
+      \code{gillespie.hl.sim} \tab \code{gillespie_hl} \cr
+      \code{conv.rec} \tab \code{traces} \cr
+      \code{values} \tab \code{as.data.frame} or \code{as(x,"data.frame")} \cr
+    }
+    \item Trap error from non-finite likelihoods in \code{pmcmc}.
+    \item New test of \code{pmcmc} codes in \file{tests/issue109.R}.
+    \item Trap error from missing accumulator variables in \code{trajectory}.
+  }
+}
 \section{Changes in \pkg{pomp} version 2.8}{
   \itemize{
     \item As promised, the default value of \code{tol} in the particle-filtering algorithms \code{pfilter}, \code{pmcmc}, \code{mif2}, and \code{bsmc2} has been changed to zero.
