@@ -106,23 +106,34 @@ Please explore the function and give feedback via the \pkg{pomp} Issues page.}
 }
 }
 
+\section{Note for Windows users}{
+
+
+Some Windows users report problems when using C snippets in parallel computations.
+These appear to arise when the temporary files created during the C snippet compilation process are not handled properly by the operating system.
+To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=pomp]{(described here)} to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
+}
+
 \references{
 \Arulampalam2002
 }
 \seealso{
-Other elementary POMP methods: 
+More on \pkg{pomp} elementary algorithms: 
+\code{\link{elementary_algorithms}},
 \code{\link{pfilter}()},
 \code{\link{pomp-package}},
 \code{\link{probe}()},
 \code{\link{simulate}()},
-\code{\link{spect}()}
+\code{\link{spect}()},
+\code{\link{trajectory}()}
 
-Other particle filter methods: 
+More on particle-filter based methods in \pkg{pomp}: 
 \code{\link{bsmc2}()},
 \code{\link{cond.logLik}()},
 \code{\link{eff.sample.size}()},
 \code{\link{filter.mean}()},
 \code{\link{filter.traj}()},
+\code{\link{kalman}},
 \code{\link{mif2}()},
 \code{\link{pfilter}()},
 \code{\link{pmcmc}()},
@@ -133,5 +144,5 @@ Other particle filter methods:
 \author{
 Aaron A. King
 }
-\concept{elementary POMP methods}
-\concept{particle filter methods}
+\concept{elementary_algorithms}
+\concept{particle_filter_methods}

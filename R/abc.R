@@ -9,8 +9,8 @@
 ##' @include pomp_class.R probe.R continue.R workhorses.R
 ##' @importFrom stats runif
 ##' @author Edward L. Ionides, Aaron A. King
-##' @family summary statistics methods
-##' @family pomp parameter estimation methods
+##' @family summary_stats_methods
+##' @family estimation_methods
 ##' @seealso \link[=proposals]{MCMC proposals}
 ##'
 ##' @inheritParams pomp
@@ -19,7 +19,9 @@
 ##' @param Nabc the number of ABC iterations to perform.
 ##' @param scale named numeric vector of scales.
 ##' @param epsilon ABC tolerance.
-
+##'
+##' @inheritSection pomp Note for Windows users
+##' 
 ##' @section Running ABC:
 ##'
 ##' \code{abc} returns an object of class \sQuote{abcd_pomp}.

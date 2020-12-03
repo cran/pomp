@@ -10,7 +10,7 @@
 ##' parameter_trans,ANY,ANY-method parameter_trans,ANY,missing-method
 ##' parameter_trans,NULL,NULL-method parameter_trans,function,function-method
 ##' parameter_trans,missing,ANY-method parameter_trans,pomp_fun,pomp_fun-method
-##' @family information on model implementation
+##' @family implementation_info
 ##'
 ##' @param toEst,fromEst procedures that perform transformation of model parameters to and from the estimation scale, respectively.
 ##' These can be furnished using C snippets, \R functions, or via procedures in an external, dynamically loaded library.
@@ -20,9 +20,11 @@
 ##' \strong{Important note:} variables to be log-barycentrically transformed \emph{must be adjacent} in the parameter vector.
 ##' @param \dots ignored.
 ##'
+##' @inheritSection pomp Note for Windows users
+##' 
 ##' @details
 ##' When parameter transformations are desired, they can be integrated into the \sQuote{pomp} object via the \code{partrans} arguments using the \code{parameter_trans} function.
-##' As with the basic model components, these should ordinarily be specified using C snippets.
+##' As with the other \link[=basic_components]{basic model components}, these should ordinarily be specified using C snippets.
 ##' When doing so, note that:
 ##' \enumerate{
 ##'   \item The parameter transformation mapping a parameter vector from the scale used by the model codes to another scale, and the inverse transformation, are specified via a call to \preformatted{parameter_trans(toEst,fromEst)}.

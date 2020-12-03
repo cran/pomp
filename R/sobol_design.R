@@ -1,19 +1,26 @@
 ##' @description
-##' \code{sobolDesign} generates a Latin hypercube design based on the Sobol' low-discrepancy sequence.
+##' \code{sobol_design} generates a Latin hypercube design based on the Sobol' low-discrepancy sequence.
 ##' @rdname design
 ##' 
 ##' @details
-##' The Sobol' sequence generation is performed using codes from the
-##' \href{http://ab-initio.mit.edu/nlopt/}{\pkg{NLopt} library} by S. Johnson.
+##' The Sobol' sequence generation is performed using codes from the \pkg{NLopt} library by S. Johnson.
 ##' @return
-##' \code{sobolDesign} returns a data frame with \code{nseq} rows and one column for each variable named in \code{lower} and \code{upper}.
+##' \code{sobol_design} returns a data frame with \code{nseq} rows and one column for each variable named in \code{lower} and \code{upper}.
 ##' @param lower,upper named numeric vectors giving the lower and upper bounds
 ##' of the ranges, respectively.
 ##' @param nseq Total number of points requested.
+##' @references
+##' \Kucherenko2005
 ##' 
+##' \NLopt
+##'
+##' \Bratley1988
+##'
+##' \Joe2003
+##'
 ##' @export
-sobolDesign <- function (lower = numeric(0), upper = numeric(0), nseq) {
-  ep <- "sobolDesign"
+sobol_design <- function (lower = numeric(0), upper = numeric(0), nseq) {
+  ep <- "sobol_design"
   if (length(lower)!=length(upper))
     pStop(ep,sQuote("lower")," and ",sQuote("upper")," must have same length.")
   lnames <- names(lower)

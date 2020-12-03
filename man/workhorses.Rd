@@ -22,10 +22,11 @@ They include \describe{
 }
 }
 \seealso{
-\code{\link[=simulate-pomp]{simulate}}, \code{\link{trajectory}},
-\code{\link{pfilter}}, \code{\link{probe}}
+\link[=basic_components]{basic model components},
+\link[=elementary_algorithms]{elementary algorithms},
+\link[=estimation_algorithms]{estimation algorithms}
 
-Other pomp workhorses: 
+More on \pkg{pomp} workhorse functions: 
 \code{\link{dmeasure}()},
 \code{\link{dprior}()},
 \code{\link{dprocess}()},
@@ -42,4 +43,4 @@ Aaron A. King
 }
 \concept{extending the pomp package}
 \concept{low-level interface}
-\concept{pomp workhorses}
+\concept{pomp_workhorses}

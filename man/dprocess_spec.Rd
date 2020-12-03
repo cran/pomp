@@ -46,10 +46,19 @@ This functionality is provided only to support future algorithm development.
 By default, \code{dprocess} returns missing values (\code{NA}).
 }
 
+\section{Note for Windows users}{
+
+
+Some Windows users report problems when using C snippets in parallel computations.
+These appear to arise when the temporary files created during the C snippet compilation process are not handled properly by the operating system.
+To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=pomp]{(described here)} to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
+}
+
 \seealso{
-Other information on model implementation: 
+More on implementing POMP models: 
 \code{\link{Csnippet}},
 \code{\link{accumulators}},
+\code{\link{basic_components}},
 \code{\link{covariate_table}()},
 \code{\link{distributions}},
 \code{\link{dmeasure_spec}},
@@ -63,4 +72,4 @@ Other information on model implementation:
 \code{\link{transformations}},
 \code{\link{userdata}}
 }
-\concept{information on model implementation}
+\concept{implementation_info}

@@ -10,8 +10,10 @@
 ##' @importFrom stats simulate
 ##'
 ##' @author Aaron A. King
-##' @family elementary POMP methods
+##' @family elementary_algorithms
 ##'
+##' @inheritSection pomp Note for Windows users
+##' 
 ##' @inheritParams pomp
 ##'
 ##' @param object optional; if present, it should be the output of one of \pkg{pomp}'s methods

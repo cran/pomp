@@ -11,7 +11,7 @@ It can happen that one desires to pass information to one of the \acronym{POMP} 
 \pkg{pomp} provides facilities for this purpose.
 We refer to the objects one wishes to pass in this way as \dfn{user data}.
 
-The following will apply to every \link[=pomp]{basic model component}.
+The following will apply to every \link[=basic_components]{basic model component}.
 For the sake of definiteness, however, we'll use the \code{rmeasure} component as an example.
 To be even more specific, the measurement model we wish to implement is
 \preformatted{
@@ -149,9 +149,10 @@ simulate(times=1:100,t0=0,
 ) -> rick3
 }
 \seealso{
-Other information on model implementation: 
+More on implementing POMP models: 
 \code{\link{Csnippet}},
 \code{\link{accumulators}},
+\code{\link{basic_components}},
 \code{\link{covariate_table}()},
 \code{\link{distributions}},
 \code{\link{dmeasure_spec}},
@@ -165,4 +166,4 @@ Other information on model implementation:
 \code{\link{skeleton_spec}},
 \code{\link{transformations}}
 }
-\concept{information on model implementation}
+\concept{implementation_info}

@@ -88,6 +88,14 @@ An object of class \sQuote{kalmand_pomp}.
 \description{
 The ensemble Kalman filter and ensemble adjustment Kalman filter.
 }
+\section{Note for Windows users}{
+
+
+Some Windows users report problems when using C snippets in parallel computations.
+These appear to arise when the temporary files created during the C snippet compilation process are not handled properly by the operating system.
+To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=pomp]{(described here)} to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
+}
+
 \references{
 \Evensen1994
 
@@ -96,9 +104,24 @@ The ensemble Kalman filter and ensemble adjustment Kalman filter.
 \Evensen2009
 }
 \seealso{
-Other pomp parameter estimation methods: 
+More on particle-filter based methods in \pkg{pomp}: 
+\code{\link{bsmc2}()},
+\code{\link{cond.logLik}()},
+\code{\link{eff.sample.size}()},
+\code{\link{filter.mean}()},
+\code{\link{filter.traj}()},
+\code{\link{mif2}()},
+\code{\link{pfilter}()},
+\code{\link{pmcmc}()},
+\code{\link{pred.mean}()},
+\code{\link{pred.var}()},
+\code{\link{saved.states}()},
+\code{\link{wpfilter}()}
+
+More on \pkg{pomp} estimation algorithms:
 \code{\link{abc}()},
 \code{\link{bsmc2}()},
+\code{\link{estimation_algorithms}},
 \code{\link{mif2}()},
 \code{\link{nlf}},
 \code{\link{pmcmc}()},
@@ -109,5 +132,5 @@ Other pomp parameter estimation methods:
 \author{
 Aaron A. King
 }
-\concept{particle filtering methods}
-\concept{pomp parameter estimation methods}
+\concept{estimation_methods}
+\concept{particle_filter_methods}

@@ -42,9 +42,10 @@ Nor are parameter transformations permitted to depend upon covariates.
 \seealso{
 lookup
 
-Other information on model implementation: 
+More on implementing POMP models: 
 \code{\link{Csnippet}},
 \code{\link{accumulators}},
+\code{\link{basic_components}},
 \code{\link{distributions}},
 \code{\link{dmeasure_spec}},
 \code{\link{dprocess_spec}},
@@ -58,4 +59,4 @@ Other information on model implementation:
 \code{\link{transformations}},
 \code{\link{userdata}}
 }
-\concept{information on model implementation}
+\concept{implementation_info}

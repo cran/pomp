@@ -44,7 +44,7 @@ Equipping models with parameter transformations.
 }
 \details{
 When parameter transformations are desired, they can be integrated into the \sQuote{pomp} object via the \code{partrans} arguments using the \code{parameter_trans} function.
-As with the basic model components, these should ordinarily be specified using C snippets.
+As with the other \link[=basic_components]{basic model components}, these should ordinarily be specified using C snippets.
 When doing so, note that:
 \enumerate{
   \item The parameter transformation mapping a parameter vector from the scale used by the model codes to another scale, and the inverse transformation, are specified via a call to \preformatted{parameter_trans(toEst,fromEst)}.
@@ -80,10 +80,19 @@ The logit transform is defined by
 The log barycentric transformation of variables \eqn{\theta_1,\dots,\theta_n}{theta1,\dots,thetan} is given by
 \deqn{\mathrm{logbarycentric}(\theta_1,\dots,\theta_n)=\left(\log\frac{\theta_1}{\sum_i \theta_i},\dots,\log\frac{\theta_n}{\sum_i \theta_i}\right).}{logbarycentric(theta1,\dots,thetan)=(log(theta1/sum(theta)),\dots,log(thetan/sum(theta))).}
 }
+\section{Note for Windows users}{
+
+
+Some Windows users report problems when using C snippets in parallel computations.
+These appear to arise when the temporary files created during the C snippet compilation process are not handled properly by the operating system.
+To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=pomp]{(described here)} to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
+}
+
 \seealso{
-Other information on model implementation: 
+More on implementing POMP models: 
 \code{\link{Csnippet}},
 \code{\link{accumulators}},
+\code{\link{basic_components}},
 \code{\link{covariate_table}()},
 \code{\link{distributions}},
 \code{\link{dmeasure_spec}},
@@ -97,4 +106,4 @@ Other information on model implementation:
 \code{\link{transformations}},
 \code{\link{userdata}}
 }
-\concept{information on model implementation}
+\concept{implementation_info}

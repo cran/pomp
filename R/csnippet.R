@@ -10,13 +10,15 @@
 ##' @rdname csnippet
 ##' @aliases as,Csnippet-method Csnippet-class
 ##' @include pomp-package.R
-##' @family information on model implementation
+##' @family implementation_info
 ##'
 ##' @section Note to Windows and Mac users:
 ##'
 ##' By default, your \R installation may not support \code{\link[=SHLIB]{R CMD SHLIB}}.
 ##' The \href{https://kingaa.github.io/pomp/install.html}{package website contains installation instructions} that explain how to enable this powerful feature of \R.
 ##'
+##' @inheritSection pomp Note for Windows users
+##' 
 ##' @section General rules for writing C snippets:
 ##'
 ##'   In writing a C snippet one must bear in mind both the \emph{goal} of the snippet, i.e., what computation it is intended to perform, and the \emph{context} in which it will be executed.  These are explained here in the form of general rules.

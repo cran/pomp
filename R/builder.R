@@ -1,7 +1,6 @@
 ##' Hitching C snippets and R functions to pomp_fun objects
 ##'
-##' The algorithms in \pkg{pomp} are formulated in terms of elementary functions
-##' that access the basic model components
+##' The algorithms in \pkg{pomp} are formulated using \R functions that access the \link[=basic_components]{basic model components}
 ##' (\code{rprocess}, \code{dprocess}, \code{rmeasure}, \code{dmeasure}, etc.).
 ##' For short, we refer to these elementary functions as \dQuote{\link{workhorses}}.
 ##' In implementing a model, the user specifies basic model components
@@ -44,7 +43,7 @@
 ##' @param cdir optional character variable.
 ##' \code{cdir} specifies the name of the directory within which C snippet code will be compiled.
 ##' By default, this is in a temporary directory specific to the \R session.
-##' One can also set this directory using the \code{pomp_cdir} option.
+##' One can also set this directory using the \code{pomp_cdir} global option.
 ##'
 ##' @param cfile optional character variable.
 ##' \code{cfile} gives the name of the file (in directory \code{cdir}) into which C snippet codes will be written.
@@ -315,8 +314,8 @@ pompCompile <- function (fname, direc, src, shlib.args = NULL,
   cflags <- Sys.getenv("PKG_CPPFLAGS")
   cflags <- paste0("PKG_CPPFLAGS=\"",
     if (nchar(cflags)>0) paste0(cflags," ") else "",
-    "-I",system.file("include",package="pomp"),
-    " -I",getwd(),"\"")
+    "-I",shQuote(system.file("include",package="pomp")),
+    " -I",shQuote(getwd()),"\"")
 
   shlib.args <- as.character(shlib.args)
 

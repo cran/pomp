@@ -141,6 +141,14 @@ The following can be applied to the output of an \code{abc} operation:
 }
 }
 
+\section{Note for Windows users}{
+
+
+Some Windows users report problems when using C snippets in parallel computations.
+These appear to arise when the temporary files created during the C snippet compilation process are not handled properly by the operating system.
+To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=pomp]{(described here)} to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
+}
+
 \references{
 \Marin2012
 
@@ -151,14 +159,15 @@ The following can be applied to the output of an \code{abc} operation:
 \seealso{
 \link[=proposals]{MCMC proposals}
 
-Other summary statistics methods: 
+More on \pkg{pomp} methods based on summary statistics: 
 \code{\link{basic_probes}},
 \code{\link{probe.match}},
 \code{\link{probe}()},
 \code{\link{spect}()}
 
-Other pomp parameter estimation methods: 
+More on \pkg{pomp} estimation algorithms:
 \code{\link{bsmc2}()},
+\code{\link{estimation_algorithms}},
 \code{\link{kalman}},
 \code{\link{mif2}()},
 \code{\link{nlf}},
@@ -170,5 +179,5 @@ Other pomp parameter estimation methods:
 \author{
 Edward L. Ionides, Aaron A. King
 }
-\concept{pomp parameter estimation methods}
-\concept{summary statistics methods}
+\concept{estimation_methods}
+\concept{summary_stats_methods}

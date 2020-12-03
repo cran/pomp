@@ -67,4 +67,14 @@ In particular, it is not possible to modify the model structure in a call to \co
 }
 \seealso{
 \code{\link{skeleton}}, \code{\link{flow}}
+
+More on \pkg{pomp} elementary algorithms: 
+\code{\link{elementary_algorithms}},
+\code{\link{pfilter}()},
+\code{\link{pomp-package}},
+\code{\link{probe}()},
+\code{\link{simulate}()},
+\code{\link{spect}()},
+\code{\link{wpfilter}()}
 }
+\concept{elementary_algorithms}

@@ -10,7 +10,7 @@
 ##' @name spect.match
 ##' @docType methods
 ##' @rdname spect_match
-##' @family pomp parameter estimation methods
+##' @family estimation_methods
 ##' @aliases spect_objfun spect_objfun,missing-method spect_objfun,ANY-method
 ##' @example examples/spect_match.R
 ##'
@@ -34,6 +34,8 @@
 ##' It is a stateful function:
 ##' Each time it is called, it will remember the values of the parameters and the discrepancy measure.
 ##'
+##' @inheritSection pomp Note for Windows users
+##' 
 ##' @inheritSection objfun Important Note
 ##'
 ##' @seealso \code{\link{spect}} \code{\link{optim}}

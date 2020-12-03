@@ -1,5 +1,16 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 3.2}{
+  \itemize{
+    \item The help pages have been improved, with an description of the overall package structure and pages on basic model components, elementary algorithms, and estimation algorithms.
+    \item A note to Windows users on avoiding certain C snippet compilation errors has been added to the help pages.
+    \item The behavior of \code{profile_design} has changed.
+    Previously, the same random (or sub-random) sequence was used for all non-profile parameters.
+    Now, for each profile slice, a distinct set of points is generated.
+    \item \code{profileDesign}, \code{sliceDesign}, \code{runifDesign}, and \code{sobolDesign} have been deprecated and will be removed in a future release.
+    They are replaced by \code{profile_design}, \code{slice_design}, \code{runif_design}, and \code{sobol_design}, respectively.
+  }
+}
 \section{Changes in \pkg{pomp} version 3.1}{
   \itemize{
     \item A new \code{saved.states} method allows one to extract the saved states from a particle filter computation.

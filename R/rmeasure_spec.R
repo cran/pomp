@@ -2,9 +2,11 @@
 ##'
 ##' Specification of rmeasure
 ##'
+##' @inheritSection pomp Note for Windows users
+##'
 ##' @name rmeasure_spec
 ##' @rdname rmeasure_spec
-##' @family information on model implementation
+##' @family implementation_info
 ##'
 ##' @details
 ##' The measurement model is the link between the data and the unobserved state process.

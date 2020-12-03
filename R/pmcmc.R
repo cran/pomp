@@ -11,8 +11,8 @@
 ##' @aliases pmcmc pmcmc,ANY-method pmcmc,missing-method
 ##' @author Edward L. Ionides, Aaron A. King, Sebastian Funk
 ##' @seealso \link[=proposals]{MCMC proposals}
-##' @family particle filter methods
-##' @family pomp parameter estimation methods
+##' @family particle_filter_methods
+##' @family estimation_methods
 ##'
 ##' @importFrom stats runif
 ##' @inheritParams pomp
@@ -26,6 +26,8 @@
 ##'
 ##' @return An object of class \sQuote{pmcmcd_pomp}.
 ##'
+##' @inheritSection pomp Note for Windows users
+##' 
 ##' @section Re-running PMCMC Iterations:
 ##' To re-run a sequence of PMCMC
 ##' iterations, one can use the \code{pmcmc} method on a \sQuote{pmcmc} object.

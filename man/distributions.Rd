@@ -113,9 +113,10 @@ print(dn <- reulermultinom(5,size=100,rate=c(a=1,b=2,c=3),dt=dW))
 \He2010
 }
 \seealso{
-Other information on model implementation: 
+More on implementing POMP models: 
 \code{\link{Csnippet}},
 \code{\link{accumulators}},
+\code{\link{basic_components}},
 \code{\link{covariate_table}()},
 \code{\link{dmeasure_spec}},
 \code{\link{dprocess_spec}},
@@ -132,6 +133,6 @@ Other information on model implementation:
 \author{
 Aaron A. King
 }
-\concept{information on model implementation}
+\concept{implementation_info}
 \concept{probability distributions}
 \keyword{distribution}

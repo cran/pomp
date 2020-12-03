@@ -142,27 +142,37 @@ When \code{spect} operates on a spectrum-matching objective function (a \sQuote{
 random-number generator seed is fixed at the value given when the objective function was constructed.
 Specifying \code{NULL} or an integer for \code{seed} overrides this behavior.
 }
+\section{Note for Windows users}{
+
+
+Some Windows users report problems when using C snippets in parallel computations.
+These appear to arise when the temporary files created during the C snippet compilation process are not handled properly by the operating system.
+To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=pomp]{(described here)} to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
+}
+
 \references{
 \Reuman2006
 
 \Reuman2008
 }
 \seealso{
-Other summary statistics methods: 
+More on \pkg{pomp} methods based on summary statistics: 
 \code{\link{abc}()},
 \code{\link{basic_probes}},
 \code{\link{probe.match}},
 \code{\link{probe}()}
 
-Other elementary POMP methods: 
+More on \pkg{pomp} elementary algorithms: 
+\code{\link{elementary_algorithms}},
 \code{\link{pfilter}()},
 \code{\link{pomp-package}},
 \code{\link{probe}()},
 \code{\link{simulate}()},
+\code{\link{trajectory}()},
 \code{\link{wpfilter}()}
 }
 \author{
 Daniel C. Reuman, Cai GoGwilt, Aaron A. King
 }
-\concept{elementary POMP methods}
-\concept{summary statistics methods}
+\concept{elementary_algorithms}
+\concept{summary_stats_methods}

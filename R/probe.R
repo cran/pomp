@@ -20,9 +20,11 @@
 ##' @rdname probe
 ##' @aliases probe probe,missing-method probe,ANY-method
 ##' @author Daniel C. Reuman, Aaron A. King
-##' @family elementary POMP methods
-##' @family summary statistics methods
+##' @family elementary_algorithms
+##' @family summary_stats_methods
 ##'
+##' @inheritSection pomp Note for Windows users
+##' 
 ##' @include pomp_class.R pomp_fun.R pomp.R
 ##' @importFrom stats quantile
 ##'

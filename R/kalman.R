@@ -9,9 +9,11 @@
 ##' @aliases enkf eakf enkf,ANY-method enkf,missing-method
 ##' eakf,ANY-method eakf,missing-method
 ##' @author Aaron A. King
-##' @family particle filtering methods
-##' @family pomp parameter estimation methods
+##' @family particle_filter_methods
+##' @family estimation_methods
 ##'
+##' @inheritSection pomp Note for Windows users
+##' 
 ##' @inheritParams pomp
 ##' @param Np the number of particles to use.
 ##' @param h function returning the expected value of the observation given the

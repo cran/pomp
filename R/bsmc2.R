@@ -14,8 +14,8 @@
 ##' @rdname bsmc2
 ##' @include pomp_class.R workhorses.R pomp.R plot.R
 ##' @aliases bsmc2 bsmc2,missing-method bsmc2,ANY-method
-##' @family particle filter methods
-##' @family pomp parameter estimation methods
+##' @family particle_filter_methods
+##' @family estimation_methods
 ##'
 ##' @importFrom mvtnorm rmvnorm
 ##' @importFrom stats median cov setNames
@@ -36,6 +36,8 @@
 ##' \item{\code{\link{as.data.frame}}}{puts the prior and posterior samples into a data frame}
 ##' }
 ##'
+##' @inheritSection pomp Note for Windows users
+##' 
 ##' @author Michael Lavine, Matthew Ferrari, Aaron A. King, Edward L. Ionides
 ##'
 ##' @references

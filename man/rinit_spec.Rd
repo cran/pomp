@@ -40,6 +40,14 @@ When the state process is initialized, these are simply copied over as initial c
 The names of the resulting state variables are obtained by dropping the suffix.
 }
 
+\section{Note for Windows users}{
+
+
+Some Windows users report problems when using C snippets in parallel computations.
+These appear to arise when the temporary files created during the C snippet compilation process are not handled properly by the operating system.
+To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=pomp]{(described here)} to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
+}
+
 \examples{
 ## We set up a trivial process model:
 
@@ -70,9 +78,10 @@ plot(simulate(times=1:5,t0=0,params=c(X0=3,Y0=-7),
   rinit=g,rprocess=onestep(trivial)))
 }
 \seealso{
-Other information on model implementation: 
+More on implementing POMP models: 
 \code{\link{Csnippet}},
 \code{\link{accumulators}},
+\code{\link{basic_components}},
 \code{\link{covariate_table}()},
 \code{\link{distributions}},
 \code{\link{dmeasure_spec}},
@@ -86,4 +95,4 @@ Other information on model implementation:
 \code{\link{transformations}},
 \code{\link{userdata}}
 }
-\concept{information on model implementation}
+\concept{implementation_info}

@@ -138,20 +138,30 @@ The variable \code{.id} indicates whether the probes are from the data or simula
 }
 }
 
+\section{Note for Windows users}{
+
+
+Some Windows users report problems when using C snippets in parallel computations.
+These appear to arise when the temporary files created during the C snippet compilation process are not handled properly by the operating system.
+To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=pomp]{(described here)} to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
+}
+
 \references{
 \Kendall1999
 
 \Wood2010
 }
 \seealso{
-Other elementary POMP methods: 
+More on \pkg{pomp} elementary algorithms: 
+\code{\link{elementary_algorithms}},
 \code{\link{pfilter}()},
 \code{\link{pomp-package}},
 \code{\link{simulate}()},
 \code{\link{spect}()},
+\code{\link{trajectory}()},
 \code{\link{wpfilter}()}
 
-Other summary statistics methods: 
+More on \pkg{pomp} methods based on summary statistics: 
 \code{\link{abc}()},
 \code{\link{basic_probes}},
 \code{\link{probe.match}},
@@ -160,5 +170,5 @@ Other summary statistics methods:
 \author{
 Daniel C. Reuman, Aaron A. King
 }
-\concept{elementary POMP methods}
-\concept{summary statistics methods}
+\concept{elementary_algorithms}
+\concept{summary_stats_methods}

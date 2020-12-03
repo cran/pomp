@@ -13,7 +13,6 @@
 \alias{cond.logLik,wpfilterd_pomp-method}
 \alias{cond.logLik-bsmcd_pomp}
 \alias{cond.logLik,bsmcd_pomp-method}
-\alias{cond.loglik}
 \title{Conditional log likelihood}
 \usage{
 \S4method{cond.logLik}{kalmand_pomp}(object, ...)
@@ -23,8 +22,6 @@
 \S4method{cond.logLik}{wpfilterd_pomp}(object, ...)
 
 \S4method{cond.logLik}{bsmcd_pomp}(object, ...)
-
-cond.loglik(...)
 }
 \arguments{
 \item{object}{result of a filtering computation}
@@ -51,11 +48,12 @@ Thus the conditional log likelihood at time \eqn{t_k} is
 where \eqn{f} is the probability density above.
 }
 \seealso{
-Other particle filter methods: 
+More on particle-filter based methods in \pkg{pomp}: 
 \code{\link{bsmc2}()},
 \code{\link{eff.sample.size}()},
 \code{\link{filter.mean}()},
 \code{\link{filter.traj}()},
+\code{\link{kalman}},
 \code{\link{mif2}()},
 \code{\link{pfilter}()},
 \code{\link{pmcmc}()},
@@ -64,4 +62,4 @@ Other particle filter methods:
 \code{\link{saved.states}()},
 \code{\link{wpfilter}()}
 }
-\concept{particle filter methods}
+\concept{particle_filter_methods}

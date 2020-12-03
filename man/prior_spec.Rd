@@ -8,7 +8,7 @@ Specify the prior distribution
 }
 \details{
 A prior distribution on parameters is specified by means of the \code{rprior} and/or \code{dprior} arguments to \code{pomp}.
-As with the other basic model components, it is preferable to specify these using C snippets.
+As with the other \link[=basic_components]{basic model components}, it is preferable to specify these using C snippets.
 In writing a C snippet for the prior sampler (\code{rprior}), keep in mind that:
 \enumerate{
   \item Within the context in which the snippet will be evaluated, only the parameters will be defined.
@@ -41,10 +41,19 @@ In particular, \code{dprior} returns \code{1} (\code{0} if \code{log = TRUE}) fo
 Since it is impossible to simulate from a flat improper prior, \code{rprocess} returns missing values (\code{NA}s).
 }
 
+\section{Note for Windows users}{
+
+
+Some Windows users report problems when using C snippets in parallel computations.
+These appear to arise when the temporary files created during the C snippet compilation process are not handled properly by the operating system.
+To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=pomp]{(described here)} to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
+}
+
 \seealso{
-Other information on model implementation: 
+More on implementing POMP models: 
 \code{\link{Csnippet}},
 \code{\link{accumulators}},
+\code{\link{basic_components}},
 \code{\link{covariate_table}()},
 \code{\link{distributions}},
 \code{\link{dmeasure_spec}},
@@ -58,4 +67,4 @@ Other information on model implementation:
 \code{\link{transformations}},
 \code{\link{userdata}}
 }
-\concept{information on model implementation}
+\concept{implementation_info}

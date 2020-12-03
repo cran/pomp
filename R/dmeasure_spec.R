@@ -4,8 +4,10 @@
 ##'
 ##' @name dmeasure_spec
 ##' @rdname dmeasure_spec
-##' @family information on model implementation
+##' @family implementation_info
 ##'
+##' @inheritSection pomp Note for Windows users
+##' 
 ##' @details
 ##' The measurement model is the link between the data and the unobserved state process.
 ##' It can be specified either by using one or both of the \code{rmeasure} and \code{dmeasure} arguments.

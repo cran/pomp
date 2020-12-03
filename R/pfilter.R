@@ -8,12 +8,14 @@
 ##' @aliases pfilter pfilter,ANY-method pfilter,missing-method
 ##' pfilterd_pomp-class pfilterd_pomp
 ##' @author Aaron A. King
-##' @family elementary POMP methods
-##' @family particle filter methods
+##' @family elementary_algorithms
+##' @family particle_filter_methods
 ##'
 ##' @include pomp_class.R pomp.R rprocess_spec.R dmeasure_spec.R
 ##' @importFrom stats setNames
 ##'
+##' @inheritSection pomp Note for Windows users
+##' 
 ##' @inheritParams pomp
 ##'
 ##' @param Np the number of particles to use.
@@ -61,6 +63,8 @@
 ##' @references
 ##'
 ##' \Arulampalam2002
+##'
+##' \Bhadra2016
 ##'
 ##' @example examples/pfilter.R
 ##'
