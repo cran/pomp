@@ -1,4 +1,4 @@
-d28ca4420947056167fa3783c27481f8 *DESCRIPTION
+b22845df5234da6cd7f5d17695f4185b *DESCRIPTION
 770fd133e51ff9f277f32b2be02859fe *NAMESPACE
 9a15be116f29e5008022c2e327ae246b *R/aaa.R
 11871a7d84cb5db8fd7fae34747b8ea6 *R/abc.R
@@ -109,7 +109,7 @@ c369332d24955c3ee6b6bed87680c963 *R/trajectory.R
 0beef76021df736b40a9ae3ef0085a69 *R/window.R
 465b59f448a301a6bbc3c65b8490d90c *R/workhorses.R
 7356a196bee4ae0e3e43f6303ac1d305 *R/wpfilter.R
-cb01cf6e8af83d4d8500829a9d07eff8 *build/partial.rdb
+f005148cc5a5d4ccebac299bfca7b14e *build/partial.rdb
 abb114c050fe32f277f81838141b890b *data/LondonYorke.rda
 2a64eb5b24a40b76cccee3208529b3ca *data/blowflies.csv
 9bd03dbc2818d68096fb7b9abf64062d *data/bsflu.rda
@@ -119,8 +119,8 @@ ee70f58813b6a3d290e030ddeee50729 *data/ewcitmeas.rda
 47e7670f74816829efb8bd6b72b02bf9 *data/parus.csv
 143111e3cd7a6bfc211dd50cb5cceec2 *inst/CITATION
 d32239bcb673463ab874e80d47fae504 *inst/GPL
-3c45fca1e15df935168e4b879ff45a0b *inst/NEWS
-615418132192b2d3929cdba9287edfb0 *inst/NEWS.Rd
+3547057c52c72c9477e1374851783c51 *inst/NEWS
+c73a1f36e198e13b26ee3b1db7a53029 *inst/NEWS.Rd
 fefd3cd86b0eb1c754b30031a640d954 *inst/doc/index.html
 91952cedc763bb80701cd41f3beb1b79 *inst/include/pomp.h
 e737f89d0df125ce91a67d626f697534 *inst/include/pomp_defines.h
@@ -239,7 +239,7 @@ f10a3d0ad6eec2c966ca47c270693870 *src/dmeasure.c
 7e30be76aa520712baf9f091789cbcfd *src/dprocess.c
 60ef6e92dc22064fec70329fd06532ac *src/euler.c
 f493d4249f4b405d2948f200852d5db0 *src/gompertz.c
-f464ed1dcbd63325ce1f7a107d069c11 *src/init.c
+c76c3d80f8fd7c028f378e827b3afebf *src/init.c
 d79bd0aac31268bbebebf4d7ad173fb0 *src/lookup_table.c
 4a0696501ea8fa83fb8d576cc747ec41 *src/mif2.c
 fd5b952a01ad04a7687e966cea8ebc79 *src/ou2.c
