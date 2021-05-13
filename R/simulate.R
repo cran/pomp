@@ -8,28 +8,20 @@
 ##' @rdname simulate
 ##' @include workhorses.R pomp_class.R pomp.R
 ##' @importFrom stats simulate
-##'
 ##' @author Aaron A. King
 ##' @family elementary_algorithms
-##'
 ##' @inheritSection pomp Note for Windows users
-##' 
 ##' @inheritParams pomp
-##'
 ##' @param object optional; if present, it should be the output of one of \pkg{pomp}'s methods
-##'
 ##' @param params a named numeric vector or a matrix with rownames
 ##' containing the parameters at which the simulations are to be performed.
-##'
 ##' @param nsim The number of simulations to perform.
 ##' Note that the number of replicates will be \code{nsim} times \code{ncol(params)}.
-##'
 ##' @param seed optional;
 ##' if set, the pseudorandom number generator (RNG) will be initialized with \code{seed}.  the random seed to use.
 ##' The RNG will be restored to its original state afterward.
-##'
 ##' @param format the format in which to return the results.
-##'
+##' 
 ##' \code{format = "pomps"} causes the results to be returned as a single \dQuote{pomp} object,
 ##' identical to \code{object} except for the latent states and observations,
 ##' which have been replaced by the simulated values.
@@ -70,14 +62,8 @@
 ##'
 NULL
 
-setGeneric(
-  "simulate",
-  function (object, nsim=1, seed=NULL, ...)
-    standardGeneric("simulate")
-)
+setGeneric("simulate")
 
-##' @name simulate-missing
-##' @aliases simulate,missing-method
 ##' @rdname simulate
 ##' @export
 setMethod(
@@ -112,8 +98,6 @@ setMethod(
   }
 )
 
-##' @name simulate-data.frame
-##' @aliases simulate simulate,data.frame-method
 ##' @rdname simulate
 ##' @export
 setMethod(
@@ -149,8 +133,6 @@ setMethod(
   }
 )
 
-##' @name simulate-pomp
-##' @aliases simulate simulate,pomp-method
 ##' @rdname simulate
 ##' @export
 setMethod(

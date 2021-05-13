@@ -1,4 +1,4 @@
-##' Plotting
+##' pomp plotting facilities
 ##'
 ##' Diagnostic plots.
 ##'
@@ -8,27 +8,17 @@
 ##' @include abc.R mif2.R pmcmc.R pfilter.R spect.R probe.R wpfilter.R
 ##' @include listie.R
 ##' @aliases plot,missing-method
-##'
 ##' @importFrom graphics par abline pairs matplot box axis mtext points polygon lines plot.default legend hist rect text title
 ##' @importFrom grDevices rgb dev.interactive
 ##' @importFrom stats quantile cor density
 ##'
 NULL
 
-setGeneric(
-  "plot",
-  function (x, y, ...)
-    standardGeneric("plot")
-)
+setGeneric("plot")
 
 setClassUnion("pomp_plottable",c("pomp","pfilterd_pomp","wpfilterd_pomp"))
 
-##' @name plot-pomp
 ##' @rdname plot
-##' @aliases plot,pomp_plottable-method plot,pomp-method plot-pomp 
-##' plot,pfilterd_pomp-method plot-pfilterd_pomp
-##' plot,wpfilterd_pomp-method plot-wpfilterd_pomp
-##'
 ##' @param x the object to plot
 ##' @param variables optional character; names of variables to be displayed
 ##' @param panel function of prototype \code{panel(x, col, bg, pch, type, ...)} which gives the action to be carried out in each panel of the display.
@@ -40,8 +30,6 @@ setClassUnion("pomp_plottable",c("pomp","pfilterd_pomp","wpfilterd_pomp"))
 ##' Modify with care!
 ##' @param axes logical; indicates if x- and y- axes should be drawn
 ##' @param \dots ignored or passed to low-level plotting functions
-##'
-
 ##' @export
 setMethod(
   "plot",
@@ -58,12 +46,8 @@ setMethod(
   }
 )
 
-##' @name plot-Pmcmc
-##' @aliases plot,Pmcmc-method plot,pmcmcd_pomp-method plot,pmcmcList-method
 ##' @rdname plot
-##'
 ##' @param pars names of parameters.
-##'
 ##' @export
 setMethod(
   "plot",
@@ -73,13 +57,9 @@ setMethod(
   }
 )
 
-##' @name plot-Abc
-##' @aliases plot,Abc-method plot,abcd_pomp-method plot,abcList-method
 ##' @rdname plot
-##'
 ##' @param scatter logical; if \code{FALSE}, traces of the parameters named in \code{pars} will be plotted against ABC iteration number.
 ##' If \code{TRUE}, the traces will be displayed or as a scatterplot.
-##'
 ##' @export
 setMethod(
   "plot",
@@ -89,23 +69,19 @@ setMethod(
   }
 )
 
-##' @name plot-Mif2
-##' @aliases plot,Mif2-method plot,mif2d_pomp-method plot,mif2List-method
 ##' @rdname plot
-##' @param y ignored
-##'
+##' @param transform logical; should the parameter be transformed onto the estimation scale?
 ##' @export
 setMethod(
   "plot",
   signature=signature(x="Mif2"),
-  definition=function (x, ...) {
-    mif2.diagnostics(x)
+  definition=function (x, ..., pars, transform = FALSE) {
+    mif2.diagnostics(x,pars,transform=as.logical(transform))
   }
 )
 
-##' @name plot-probed_pomp
-##' @aliases plot,probed_pomp-method
 ##' @rdname plot
+##' @param y ignored
 ##' @export
 setMethod(
   "plot",
@@ -115,16 +91,12 @@ setMethod(
   }
 )
 
-##' @name plot-spectd_pomp
-##' @aliases plot,spectd_pomp-method
 ##' @rdname plot
-##'
 ##' @param max.plots.per.page positive integer; maximum number of plots on a page
 ##' @param plot.data logical; should the data spectrum be included?
 ##' @param quantiles numeric; quantiles to display
 ##' @param quantile.styles list; plot styles to use for quantiles
 ##' @param data.styles list; plot styles to use for data
-##'
 ##' @export
 setMethod(
   "plot",
@@ -291,14 +263,13 @@ abc.diagnostics <- function (z, pars, scatter = FALSE, ...) {
   invisible(NULL)
 }
 
-mif2.diagnostics <- function (z) {
+mif2.diagnostics <- function (z, pars, transform) {
   if (!is.list(z)) z <- list(z)
   ## assumes that z is a list of mif2d_pomps with identical structure
   mar.multi <- c(0,5.1,0,2.1)
   oma.multi <- c(6,0,5,0)
   xx <- z[[1]]
-  parnames <- names(coef(xx,transform=TRUE))
-  estnames <- parnames
+  estnames <- names(coef(xx,pars=pars,transform=transform))
 
   ## plot ESS and cond.logLik
   nplots <- 2
@@ -349,9 +320,17 @@ mif2.diagnostics <- function (z) {
     hi <- min(low+n.per.page-1,nplots)
     for (i in seq(from=low,to=hi,by=1)) {
       n <- i-low+1
-      dat <- sapply(z,function(po,label) traces(po,label),label=plotnames[i])
       matplot(
-        y=dat,
+        y=sapply(
+          z,
+          function (po, label) {
+            traces(
+              po,label,
+              transform=(transform && label %in% estnames)
+            )
+          },
+          label=plotnames[i]
+        ),
         x=iteration,
         axes = FALSE,
         xlab = "",

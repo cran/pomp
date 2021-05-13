@@ -7,11 +7,12 @@
 ##' \code{spect_objfun} constructs an objective function that measures the discrepancy.
 ##' It can be passed to any one of a variety of numerical optimization routines, which will adjust model parameters to minimize the discrepancies between the power spectrum of model simulations and that of the data.
 ##'
-##' @name spect.match
+##' @name spectrum_matching
 ##' @docType methods
 ##' @rdname spect_match
 ##' @family estimation_methods
 ##' @aliases spect_objfun spect_objfun,missing-method spect_objfun,ANY-method
+##' 
 ##' @example examples/spect_match.R
 ##'
 ##' @include spect.R probe_match.R loglik.R plot.R
@@ -22,7 +23,7 @@
 ##' \code{weights} can be specified either as a vector (which must have length equal to the number of frequencies) or as a function of frequency.
 ##' If the latter, \code{weights(freq)} must return a nonnegative weight for each frequency.
 ##'
-##' @inheritParams probe.match
+##' @inheritParams probe_matching
 ##' @inheritParams spect
 ##' @inheritParams pomp
 ##'
@@ -74,8 +75,6 @@ setMethod(
   }
 )
 
-##' @name spect_objfun-data.frame
-##' @aliases spect_objfun,data.frame-method
 ##' @rdname spect_match
 ##' @export
 setMethod(
@@ -114,8 +113,6 @@ setMethod(
   }
 )
 
-##' @name spect_objfun-pomp
-##' @aliases spect_objfun,pomp-method
 ##' @rdname spect_match
 ##' @export
 setMethod(
@@ -148,8 +145,6 @@ setMethod(
   }
 )
 
-##' @name spect_objfun-spectd_pomp
-##' @aliases spect_objfun,spectd_pomp-method
 ##' @rdname spect_match
 ##' @export
 setMethod(
@@ -185,8 +180,6 @@ setMethod(
   }
 )
 
-##' @name spect_objfun-spect_match_objfun
-##' @aliases spect_objfun,spect_match_objfun-method
 ##' @rdname spect_match
 ##' @export
 setMethod(
@@ -311,15 +304,11 @@ spect.discrep <- function (object, ker, weights) {
 
 }
 
-##' @name spect-spect_match_objfun
 ##' @rdname spect
-##' @aliases spect,spect_match_objfun-method
-##'
 ##' @details
 ##' When \code{spect} operates on a spectrum-matching objective function (a \sQuote{spect_match_objfun} object), by default, the
 ##' random-number generator seed is fixed at the value given when the objective function was constructed.
 ##' Specifying \code{NULL} or an integer for \code{seed} overrides this behavior.
-##'
 ##' @export
 setMethod(
   "spect",
@@ -339,10 +328,6 @@ setMethod(
   }
 )
 
-##' @name coerce-spect_match_objfun-spectd_pomp
-##' @aliases coerce,spect_match_objfun,spectd_pomp-method
-##' @rdname spect
-##'
 setAs(
   from="spect_match_objfun",
   to="spectd_pomp",
@@ -351,8 +336,6 @@ setAs(
   }
 )
 
-##' @name plot-spect_match_objfun
-##' @aliases plot,spect_match_objfun-method
 ##' @rdname plot
 ##' @export
 setMethod(

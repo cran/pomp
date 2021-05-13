@@ -4,18 +4,13 @@
 ##'
 ##' @name coef
 ##' @rdname coef
+##' @aliases coef<- coef<-,missing-method
 ##' @docType methods
-##' @aliases coef,missing-method
-##' coef<-,missing-method
 ##' @include pomp_class.R listie.R
 ##' @importFrom stats coef
 NULL
 
-setGeneric(
-  "coef",
-  function (object, ...)
-    standardGeneric("coef")
-)
+setGeneric("coef")
 
 setGeneric(
   "coef<-",
@@ -31,8 +26,6 @@ setMethod(
   }
 )
 
-##' @name coef-listie
-##' @aliases coef,listie-method
 ##' @rdname coef
 ##' @export
 setMethod(
@@ -45,10 +38,7 @@ setMethod(
   }
 )
 
-##' @name coef-pomp
-##' @aliases coef coef,pomp-method
 ##' @rdname coef
-##'
 ##' @param object an object of class \sQuote{pomp}, or of a class extending \sQuote{pomp}
 ##' @param pars optional character; names of parameters to be retrieved or set.
 ##' @param transform logical; perform parameter transformation?
@@ -59,7 +49,6 @@ setMethod(
 ##'
 ##' \code{coef(object,transform=TRUE)} returns the parameters transformed onto
 ##' the estimation scale.
-##'
 ##' @export
 setMethod(
   "coef",
@@ -89,13 +78,9 @@ setMethod(
   }
 )
 
-##' @name coef<--pomp
-##' @aliases coef<- coef<-,pomp-method
 ##' @rdname coef
-##'
 ##' @param value numeric vector or list; values to be assigned.
 ##' If \code{value = NULL}, the parameters are unset.
-##'
 ##' @details
 ##' \code{coef(object) <- value} sets or alters the coefficients of a
 ##' \sQuote{pomp} object.
@@ -104,7 +89,6 @@ setMethod(
 ##' the estimation scale, and applies the \dQuote{from estimation scale}
 ##' parameter transformation from \code{object} before altering the
 ##' coefficients.
-##'
 ##' @export
 setMethod(
   "coef<-",

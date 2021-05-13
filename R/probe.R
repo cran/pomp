@@ -10,7 +10,7 @@
 ##'
 ##' A call to \code{probe} results in the evaluation of the probe(s) in
 ##' \code{probes} on the data.  Additionally, \code{nsim} simulated data sets
-##' are generated (via a call to \code{\link[=simulate-pomp]{simulate}}) and
+##' are generated (via a call to \code{\link{simulate}}) and
 ##' the probe(s) are applied to each of these.  The results of the probe
 ##' computations on real and simulated data are stored in an object of class
 ##' \sQuote{probed_pomp}.
@@ -18,7 +18,7 @@
 ##' @name probe
 ##' @docType methods
 ##' @rdname probe
-##' @aliases probe probe,missing-method probe,ANY-method
+##' @aliases probe,missing-method probe,ANY-method synthetic_likelihood
 ##' @author Daniel C. Reuman, Aaron A. King
 ##' @family elementary_algorithms
 ##' @family summary_stats_methods
@@ -36,7 +36,7 @@
 ##' @param nsim the number of model simulations to be computed.
 ##' @param seed optional integer;
 ##' if non-\code{NULL}, the random number generator will be initialized with this seed for simulations.
-##' See \code{\link[=simulate-pomp]{simulate}}.
+##' See \code{\link{simulate}}.
 ##' @inheritParams pomp
 ##'
 ##' @return
@@ -103,8 +103,6 @@ setMethod(
   }
 )
 
-##' @name probe-data.frame
-##' @aliases probe,data.frame-method
 ##' @rdname probe
 ##' @export
 setMethod(
@@ -126,8 +124,6 @@ setMethod(
   }
 )
 
-##' @name probe-pomp
-##' @aliases probe,pomp-method
 ##' @rdname probe
 ##' @export
 setMethod(
@@ -147,8 +143,6 @@ setMethod(
   }
 )
 
-##' @name probe-probed_pomp
-##' @aliases probe,probed_pomp-method
 ##' @rdname probe
 ##' @export
 setMethod(
@@ -257,9 +251,9 @@ probe.internal <- function (object, probes, nsim, seed, ...,
   )
 }
 
-##' @name summary-probed_pomp
-##' @aliases summary,probed_pomp-method
 ##' @rdname summary
+##' @include summary.R
+##' @export
 setMethod(
   "summary",
   signature=signature(object="probed_pomp"),

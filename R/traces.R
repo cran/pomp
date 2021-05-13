@@ -30,12 +30,8 @@ setMethod(
   }
 )
 
-##' @name traces-mif2d_pomp
-##' @aliases traces,mif2d_pomp-method
 ##' @rdname traces
-##'
 ##' @importFrom coda mcmc mcmc.list
-##'
 ##' @param object an object of class extending \sQuote{pomp}, the result of the application of a parameter estimation algorithm
 ##' @param pars names of parameters
 ##' @param transform logical; should the traces be transformed back onto the natural scale?
@@ -43,10 +39,9 @@ setMethod(
 ##'
 ##' @return
 ##' When \code{object} is the result of a \code{\link{mif2}} calculation,
-##' \code{traces(object, pars, transform = FALSE)} returns the traces of the parameters named in \code{pars}.
+##' \code{traces(object, pars)} returns the traces of the parameters named in \code{pars}.
 ##' By default, the traces of all parameters are returned.
-##' Note that, if the computation was performed with transformed parameters, the traces are on the estimation scale.
-##' If \code{transform=TRUE}, the parameters are transformed from the estimation scale onto the natural scale.
+##' If \code{transform=TRUE}, the parameters are transformed from the natural scale to the estimation scale.
 ##'
 ##' @export
 setMethod(
@@ -57,8 +52,6 @@ setMethod(
   }
 )
 
-##' @name traces-mif2List
-##' @aliases traces,mif2List-method traces-Mif2 traces,Mif2-method
 ##' @rdname traces
 ##' @export
 setMethod(
@@ -69,8 +62,6 @@ setMethod(
   }
 )
 
-##' @name traces-abcd_pomp
-##' @aliases traces,abcd_pomp-method
 ##' @rdname traces
 ##' @return
 ##' When \code{object} is a \sQuote{abcd_pomp}, \code{traces(object)}
@@ -85,8 +76,6 @@ setMethod(
   }
 )
 
-##' @name traces-abcList
-##' @aliases traces,abcList-method traces-Abc traces,Abc-method
 ##' @rdname traces
 ##' @return
 ##' When \code{object} is a \sQuote{abcList}, \code{traces(object)}
@@ -100,8 +89,6 @@ setMethod(
   }
 )
 
-##' @name traces-pmcmcd_pomp
-##' @aliases traces,pmcmcd_pomp-method
 ##' @rdname traces
 ##' @return
 ##' When \code{object} is a \sQuote{pmcmcd_pomp}, \code{traces(object)}
@@ -118,8 +105,6 @@ setMethod(
   }
 )
 
-##' @name traces-pmcmcList
-##' @aliases traces,pmcmcList-method traces-Pmcmc traces,Pmcmc-method
 ##' @rdname traces
 ##' @return
 ##' When \code{object} is a \sQuote{pmcmcList}, \code{traces(object)}
@@ -142,7 +127,7 @@ traces.internal <- function (object, pars, transform = FALSE, ...) {
         partrans(
           object,
           params=t(object@traces)[-1L,,drop=FALSE],
-          dir="fromEst"
+          dir="toEst"
         )
       )
     )

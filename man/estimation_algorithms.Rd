@@ -9,9 +9,9 @@
 \item \link[=mif2]{iterated filtering (IF2)}
 \item \link[=pmcmc]{particle Markov chain Monte Carlo (PMCMC)}
 \item \link[=abc]{approximate Bayesian computation (ABC)}
-\item \link[=probe.match]{probe-matching via synthetic likelihood}
-\item \link[=nlf]{nonlinear forecasting}
-\item \link[=spect.match]{power-spectrum matching}
+\item \link[=probe_matching]{probe-matching via synthetic likelihood}
+\item \link[=nonlinear_forecasting]{nonlinear forecasting}
+\item \link[=spectrum_matching]{power-spectrum matching}
 \item \link[=bsmc2]{Liu-West Bayesian sequential Monte Carlo}
 \item \link[=kalman]{Ensemble and ensemble-adjusted Kalman filters}
 }
@@ -29,10 +29,10 @@ More on \pkg{pomp} estimation algorithms:
 \code{\link{bsmc2}()},
 \code{\link{kalman}},
 \code{\link{mif2}()},
-\code{\link{nlf}},
+\code{\link{nonlinear_forecasting}},
 \code{\link{pmcmc}()},
 \code{\link{pomp-package}},
-\code{\link{probe.match}},
-\code{\link{spect.match}}
+\code{\link{probe_matching}},
+\code{\link{spectrum_matching}}
 }
 \concept{estimation_methods}

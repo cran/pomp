@@ -4,16 +4,12 @@
 ##'
 ##' @name time
 ##' @rdname time
-##' @aliases time time<- time,missing-method
+##' @aliases time<- time,missing-method
 ##'
 ##' @importFrom stats time
 NULL
 
-setGeneric(
-  "time",
-  function (x, ...)
-    standardGeneric("time")
-)
+setGeneric("time")
 
 setGeneric(
   "time<-",
@@ -21,19 +17,15 @@ setGeneric(
     standardGeneric("time<-")
 )
 
-##' @name time-pomp
-##' @aliases time,pomp-method
 ##' @rdname time
 ##' @param x  a \sQuote{pomp} object
 ##' @param t0 logical; should the zero time be included?
 ##' @param \dots ignored
-##'
 ##' @details
 ##' \code{time(object)} returns the vector of observation times.
 ##' \code{time(object,t0=TRUE)} returns the vector of observation
 ##' times with the zero-time \code{t0} prepended.
 ##' @export
-
 setMethod(
   "time",
   signature=signature(x="pomp"),
@@ -42,12 +34,9 @@ setMethod(
   }
 )
 
-##' @name time<--pomp
-##' @aliases time<-,pomp-method
 ##' @rdname time
 ##' @param object  a \sQuote{pomp} object
 ##' @param value numeric vector; the new vector of times
-##'
 ##' @details
 ##' \code{time(object) <- value} replaces the observation times slot (\code{times}) of \code{object} with \code{value}.
 ##' \code{time(object,t0=TRUE) <- value} has the same effect, but the first element in \code{value} is taken to be the initial time.

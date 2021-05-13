@@ -5,9 +5,7 @@
 \alias{covariate_table,missing-method}
 \alias{covariate_table,ANY-method}
 \alias{covariate_table,numeric-method}
-\alias{covariate_table-numeric,covariate_table,numeric-method}
 \alias{covariate_table,character-method}
-\alias{covariate_table-character,covariate_table,character-method}
 \title{Covariates}
 \usage{
 \S4method{covariate_table}{numeric}(..., order = c("linear", "constant"), times)
@@ -40,7 +38,7 @@ covariate-dependent priors are not allowed.
 Nor are parameter transformations permitted to depend upon covariates.
 }
 \seealso{
-lookup
+\code{\link{lookup}}
 
 More on implementing POMP models: 
 \code{\link{Csnippet}},

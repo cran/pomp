@@ -16,7 +16,7 @@
 ##' @name spect
 ##' @docType methods
 ##' @rdname spect
-##' @aliases spect spect,missing-method spect,ANY-method
+##' @aliases spect,missing-method spect,ANY-method
 ##' @family summary_stats_methods
 ##' @family elementary_algorithms
 ##'
@@ -32,7 +32,7 @@
 ##' @param nsim number of model simulations to be computed.
 ##' @param seed optional; if non-\code{NULL}, the random number generator will
 ##' be initialized with this seed for simulations.
-##' See \code{\link[=simulate-pomp]{simulate}}.
+##' See \code{\link{simulate}}.
 ##' @param transform.data function; this transformation will be applied to the
 ##' observables prior to estimation of the spectrum, and prior to any
 ##' detrending.
@@ -100,8 +100,6 @@ setMethod(
   }
 )
 
-##' @name spect-data.frame
-##' @aliases spect spect,data.frame-method
 ##' @rdname spect
 ##' @export
 setMethod(
@@ -134,8 +132,6 @@ setMethod(
 
   }
 )
-##' @name spect-pomp
-##' @aliases spect spect,pomp-method
 ##' @rdname spect
 ##' @export
 setMethod(
@@ -164,8 +160,6 @@ setMethod(
   }
 )
 
-##' @name spect-spectd_pomp
-##' @aliases spect,spectd_pomp-method
 ##' @rdname spect
 ##' @export
 setMethod(
@@ -381,8 +375,6 @@ reuman.kernel <- function (kernel.width) {
   ker
 }
 
-##' @name summary-spectd_pomp
-##' @aliases summary,spectd_pomp-method
 ##' @rdname summary
 ##' @export
 setMethod(

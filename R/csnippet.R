@@ -8,8 +8,7 @@
 ##'
 ##' @name Csnippet
 ##' @rdname csnippet
-##' @aliases as,Csnippet-method Csnippet-class
-##' @include pomp-package.R
+##' @include package.R
 ##' @family implementation_info
 ##'
 ##' @section Note to Windows and Mac users:
@@ -68,9 +67,6 @@ Csnippet <- function (text) {
   new("Csnippet",text=as.character(text))
 }
 
-##' @name as-csnippet
-##' @rdname csnippet
-##' @aliases coerce,Csnippet,character-method
 setAs(
   from="Csnippet",
   to="character",

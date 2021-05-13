@@ -4,13 +4,9 @@
 \alias{pmcmc}
 \alias{pmcmc,ANY-method}
 \alias{pmcmc,missing-method}
-\alias{pmcmc-data.frame}
 \alias{pmcmc,data.frame-method}
-\alias{pmcmc-pomp}
 \alias{pmcmc,pomp-method}
-\alias{pmcmc-pfilterd_pomp}
 \alias{pmcmc,pfilterd_pomp-method}
-\alias{pmcmc-pmcmcd_pomp}
 \alias{pmcmc,pmcmcd_pomp-method}
 \title{The particle Markov chain Metropolis-Hastings algorithm}
 \usage{
@@ -151,10 +147,10 @@ More on \pkg{pomp} estimation algorithms:
 \code{\link{estimation_algorithms}},
 \code{\link{kalman}},
 \code{\link{mif2}()},
-\code{\link{nlf}},
+\code{\link{nonlinear_forecasting}},
 \code{\link{pomp-package}},
-\code{\link{probe.match}},
-\code{\link{spect.match}}
+\code{\link{probe_matching}},
+\code{\link{spectrum_matching}}
 }
 \author{
 Edward L. Ionides, Aaron A. King, Sebastian Funk

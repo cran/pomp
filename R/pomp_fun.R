@@ -6,7 +6,7 @@
 ##'
 ##' @name pomp_fun
 ##' @rdname pomp_fun
-##' @include pomp-package.R csnippet.R pstop.R undefined.R
+##' @include package.R csnippet.R pstop.R undefined.R
 ##' @docType methods
 ##' @keywords internal
 ##' @concept extending the pomp package
@@ -178,6 +178,8 @@ setMethod(
   definition=function (f, ...) f
 )
 
+##' @rdname show
+##' @export
 setMethod(
   "show",
   signature=signature("pomp_fun"),

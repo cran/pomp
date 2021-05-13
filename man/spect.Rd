@@ -5,17 +5,10 @@
 \alias{spect}
 \alias{spect,missing-method}
 \alias{spect,ANY-method}
-\alias{spect-data.frame}
 \alias{spect,data.frame-method}
-\alias{spect-pomp}
 \alias{spect,pomp-method}
-\alias{spect-spectd_pomp}
 \alias{spect,spectd_pomp-method}
-\alias{spect-spect_match_objfun}
 \alias{spect,spect_match_objfun-method}
-\alias{coerce-spect_match_objfun-spectd_pomp}
-\alias{coerce,spect_match_objfun,spectd_pomp-method}
-\alias{spect-objfun}
 \alias{spect,objfun-method}
 \title{Power spectrum}
 \usage{
@@ -78,7 +71,7 @@ calculating the estimate of the spectrum.}
 
 \item{seed}{optional; if non-\code{NULL}, the random number generator will
 be initialized with this seed for simulations.
-See \code{\link[=simulate-pomp]{simulate}}.}
+See \code{\link{simulate}}.}
 
 \item{transform.data}{function; this transformation will be applied to the
 observables prior to estimation of the spectrum, and prior to any
@@ -159,7 +152,7 @@ To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=
 More on \pkg{pomp} methods based on summary statistics: 
 \code{\link{abc}()},
 \code{\link{basic_probes}},
-\code{\link{probe.match}},
+\code{\link{probe_matching}},
 \code{\link{probe}()}
 
 More on \pkg{pomp} elementary algorithms: 

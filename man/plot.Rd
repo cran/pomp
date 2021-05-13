@@ -4,36 +4,16 @@
 \name{plot}
 \alias{plot}
 \alias{plot,missing-method}
-\alias{plot-pomp}
 \alias{plot,pomp_plottable-method}
-\alias{plot,pomp-method}
-\alias{plot,pfilterd_pomp-method}
-\alias{plot-pfilterd_pomp}
-\alias{plot,wpfilterd_pomp-method}
-\alias{plot-wpfilterd_pomp}
-\alias{plot-Pmcmc}
 \alias{plot,Pmcmc-method}
-\alias{plot,pmcmcd_pomp-method}
-\alias{plot,pmcmcList-method}
-\alias{plot-Abc}
 \alias{plot,Abc-method}
-\alias{plot,abcd_pomp-method}
-\alias{plot,abcList-method}
-\alias{plot-Mif2}
 \alias{plot,Mif2-method}
-\alias{plot,mif2d_pomp-method}
-\alias{plot,mif2List-method}
-\alias{plot-probed_pomp}
 \alias{plot,probed_pomp-method}
-\alias{plot-spectd_pomp}
 \alias{plot,spectd_pomp-method}
-\alias{plot-bsmcd_pomp}
 \alias{plot,bsmcd_pomp-method}
-\alias{plot-probe_match_objfun}
 \alias{plot,probe_match_objfun-method}
-\alias{plot-spect_match_objfun}
 \alias{plot,spect_match_objfun-method}
-\title{Plotting}
+\title{pomp plotting facilities}
 \usage{
 \S4method{plot}{pomp_plottable}(
   x,
@@ -51,7 +31,7 @@
 
 \S4method{plot}{Abc}(x, ..., pars, scatter = FALSE)
 
-\S4method{plot}{Mif2}(x, y, ...)
+\S4method{plot}{Mif2}(x, ..., pars, transform = FALSE)
 
 \S4method{plot}{probed_pomp}(x, y, ...)
 
@@ -95,6 +75,8 @@ Modify with care!}
 
 \item{scatter}{logical; if \code{FALSE}, traces of the parameters named in \code{pars} will be plotted against ABC iteration number.
 If \code{TRUE}, the traces will be displayed or as a scatterplot.}
+
+\item{transform}{logical; should the parameter be transformed onto the estimation scale?}
 
 \item{y}{ignored}
 

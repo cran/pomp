@@ -13,7 +13,7 @@
 ##' @details
 ##' The skeleton is a dynamical system that expresses the central tendency of the unobserved Markov state process.
 ##' As such, it is not uniquely defined, but can be both interesting in itself and useful in practice.
-##' In \pkg{pomp}, the skeleton is used by \code{\link{trajectory}} and \code{\link{traj.match}}.
+##' In \pkg{pomp}, the skeleton is used by \code{\link{trajectory}} and \code{\link{traj_objfun}}.
 ##' 
 ##' If the state process is a discrete-time stochastic process, then the skeleton is a discrete-time map.
 ##' To specify it, provide \preformatted{
@@ -93,6 +93,8 @@ setClass(
   )
 )
 
+##' @rdname show
+##' @export
 setMethod(
   "show",
   signature=signature(object="skelPlugin"),
@@ -101,6 +103,8 @@ setMethod(
   }
 )
 
+##' @rdname show
+##' @export
 setMethod(
   "show",
   signature=signature(object="vectorfieldPlugin"),
@@ -110,6 +114,8 @@ setMethod(
   }
 )
 
+##' @rdname show
+##' @export
 setMethod(
   "show",
   signature=signature(object="mapPlugin"),
@@ -130,21 +136,17 @@ skel_plugin <- function (object, skel.fn) {
   }
 }
 
-##' @name vectorfield
 ##' @rdname skeleton_spec
 ##' @param f procedure for evaluating the deterministic skeleton
 ##' This can be a C snippet, an \R function, or the name of a native routine in a dynamically linked library.
 ##' @export
-##'
 vectorfield <- function (f) {
   new("vectorfieldPlugin",skel.fn=f)
 }
 
-##' @name map
 ##' @rdname skeleton_spec
 ##' @param delta.t positive numerical value; the size of the discrete time step corresponding to an application of the map
 ##' @export
-##'
 map <- function (f, delta.t = 1) {
   if (!isTRUE(length(delta.t)==1 && is.finite(delta.t) && delta.t > 0))
     pStop("map",sQuote("delta.t")," must be a positive number.")

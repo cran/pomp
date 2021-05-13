@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 3.3
-Date: 2021-03-18
+Version: 3.4
+Date: 2021-05-12
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -32,10 +32,10 @@ LazyData: true
 Contact: kingaa at umich dot edu
 BugReports: https://github.com/kingaa/pomp/issues/
 Encoding: UTF-8
-Collate: 'pomp-package.R' 'aaa.R' 'pstop.R' 'undefined.R' 'csnippet.R'
+Collate: 'package.R' 'aaa.R' 'pstop.R' 'undefined.R' 'csnippet.R'
         'pomp_fun.R' 'parameter_trans.R' 'covariate_table.R'
         'skeleton_spec.R' 'rprocess_spec.R' 'safecall.R' 'pomp_class.R'
-        'load.R' 'workhorses.R' 'continue.R' 'prior_spec.R'
+        'load.R' 'workhorses.R' 'continue.R' 'summary.R' 'prior_spec.R'
         'dmeasure_spec.R' 'dprocess_spec.R' 'rmeasure_spec.R'
         'rinit_spec.R' 'templates.R' 'builder.R' 'pomp.R' 'probe.R'
         'abc.R' 'accumulators.R' 'kalman.R' 'pfilter.R' 'wpfilter.R'
@@ -43,24 +43,22 @@ Collate: 'pomp-package.R' 'aaa.R' 'pstop.R' 'undefined.R' 'csnippet.R'
         'spect.R' 'plot.R' 'bsmc2.R' 'as_data_frame.R' 'as_pomp.R'
         'authors.R' 'bake.R' 'basic_components.R' 'basic_probes.R'
         'blowflies.R' 'bsflu.R' 'bsplines.R' 'coef.R' 'concat.R'
-        'cond_logLik.R' 'covmat.R' 'dacca.R' 'deprecated.R' 'design.R'
+        'cond_logLik.R' 'covmat.R' 'dacca.R' 'design.R'
         'distributions.R' 'ebola.R' 'eff_sample_size.R'
         'elementary_algorithms.R' 'estimation_algorithms.R' 'extract.R'
         'filter_mean.R' 'filter_traj.R' 'flow.R' 'forecast.R'
-        'gompertz.R' 'probe_match.R' 'spect_match.R' 'summary.R'
-        'nlf.R' 'trajectory.R' 'traj_match.R' 'objfun.R' 'loglik.R'
+        'gompertz.R' 'probe_match.R' 'spect_match.R' 'nlf.R'
+        'trajectory.R' 'traj_match.R' 'objfun.R' 'loglik.R'
         'logmeanexp.R' 'lookup.R' 'measles.R' 'melt.R' 'obs.R' 'ou2.R'
         'parmat.R' 'parus.R' 'pipe.R' 'pomp_examp.R' 'pred_mean.R'
-        'pred_var.R' 'show.R' 'print.R' 'profileDesign.R'
-        'profile_design.R' 'resample.R' 'ricker.R' 'runifDesign.R'
-        'runif_design.R' 'rw2.R' 'sannbox.R' 'saved_states.R' 'sir.R'
-        'sliceDesign.R' 'slice_design.R' 'sobolDesign.R'
-        'sobol_design.R' 'spy.R' 'states.R' 'time.R' 'timezero.R'
-        'traces.R' 'transformations.R' 'userdata.R' 'verhulst.R'
-        'window.R'
-RoxygenNote: 7.1.1
+        'pred_var.R' 'show.R' 'print.R' 'profile_design.R' 'resample.R'
+        'ricker.R' 'runif_design.R' 'rw2.R' 'sannbox.R'
+        'saved_states.R' 'sir.R' 'slice_design.R' 'sobol_design.R'
+        'spy.R' 'states.R' 'time.R' 'timezero.R' 'traces.R'
+        'transformations.R' 'userdata.R' 'verhulst.R' 'window.R'
+RoxygenNote: 7.1.1.9000
 NeedsCompilation: yes
-Packaged: 2021-03-18 19:56:52 UTC; kingaa
+Packaged: 2021-05-13 13:41:12 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -77,4 +75,4 @@ Author: Aaron A. King [aut, cre],
   Eamon B. O'Dea [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2021-03-18 20:50:12 UTC
+Date/Publication: 2021-05-13 14:20:03 UTC

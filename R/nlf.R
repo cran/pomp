@@ -13,14 +13,14 @@
 ##'
 ##' NLF assumes that the observation frequency (equivalently the time between successive observations) is uniform.
 ##'
-##' @name nlf
+##' @name nonlinear_forecasting
 ##' @rdname nlf
 ##' @include pomp.R simulate.R probe_match.R
 ##'
 ##' @importFrom stats .lm.fit optim setNames dnorm .lm.fit sd cov
 ##' @importFrom mvtnorm dmvnorm
 ##'
-##' @aliases nlf nlf_objfun nlf_objfun,missing-method nlf_objfun,ANY-method
+##' @aliases nlf_objfun nlf_objfun,missing-method nlf_objfun,ANY-method
 ##'
 ##' @inheritSection pomp Note for Windows users
 ##' 
@@ -91,7 +91,7 @@
 ##'
 ##' @example examples/nlf.R
 ##'
-##' @inheritParams probe.match
+##' @inheritParams probe_matching
 ##' @inheritParams pomp
 ##'
 NULL
@@ -147,9 +147,8 @@ setMethod(
   }
 )
 
-##' @name nlf_objfun-data.frame
-##' @aliases nlf_objfun,data.frame-method
 ##' @rdname nlf
+##' @export
 setMethod(
   "nlf_objfun",
   signature=signature(data="data.frame"),
@@ -186,9 +185,8 @@ setMethod(
   }
 )
 
-##' @name nlf_objfun-pomp
-##' @aliases nlf_objfun,pomp-method
 ##' @rdname nlf
+##' @export
 setMethod(
   "nlf_objfun",
   signature=signature(data="pomp"),
@@ -220,8 +218,6 @@ setMethod(
   }
 )
 
-##' @name nlf_objfun-nlf_objfun
-##' @aliases nlf_objfun,nlf_objfun-method
 ##' @rdname nlf
 ##' @export
 setMethod(

@@ -4,16 +4,15 @@
 ##'
 ##' @name print
 ##' @rdname print
+##' @keywords internals
+##' @param x object to print
+##' @param ... ignored
 ##' @include show.R
-##' @aliases print,listie-method print,pomp_fun-method print,unshowable-method
 NULL
 
-setGeneric(
-    "print",
-    function (x, ...)
-        standardGeneric("print")
-)
+setGeneric("print")
 
+##' @rdname print
 ##' @export
 setMethod(
   "print",
@@ -24,6 +23,7 @@ setMethod(
   }
 )
 
+##' @rdname print
 ##' @export
 setMethod(
   "print",
@@ -34,9 +34,13 @@ setMethod(
   }
 )
 
+##' @rdname print
 ##' @export
 setMethod(
   "print",
   "pomp_fun",
-  function (x, ...) show(x)
+  function (x, ...) {
+    show(x)
+    invisible(x)
+  }
 )
