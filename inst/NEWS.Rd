@@ -1,5 +1,32 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 3.5}{
+  \itemize{
+    \item \code{bake} takes a new option, \code{timing}, that controls whether information on the timing is returned or merely stored.
+    By default, this is set to \code{TRUE}, though this default behavior may change in future.
+    \item When they encounter an archive produced by an older version, \code{bake} and \code{stew} now update the archive in the new format.
+    Recomputation should never be triggered in this case:
+    If recomputation is desired, delete the archive file.
+    \item \code{bake} and \code{stew} now archive a digest of the code in \code{expr} and on subsequent calls check to see if the archived version matches the current version.
+    Thus, changes to the code automatically trigger recomputation.
+    \item \code{bake} and \code{stew} take the new argument \code{dependson}.
+    Using this argument, the user can specify objects upon which the computation depends.
+    These should be passed as unquoted variables;
+    if there are multiple dependencies, they can be passed using \code{c} or \code{list}.
+    Digests of these objects will be archived and checked against current values on subsequent calls.
+    Thus, changing any dependency will automatically trigger recomputation.
+    \item \code{bake} now archives the information pertinent to the \code{bake} call;
+    this information is no longer returned along with the result of the computation (unless \code{info=TRUE}).
+    Similarly, \code{stew} stores a list, \dQuote{.ingredients}, in the file it creates.
+    In the \code{stew} case, unlike all the other objects that are created by \code{expr}, this list is \emph{not} by default loaded into the calling environment (e.g., the user's workspace).
+    It will be loaded if the \code{info} flag is set to \code{TRUE}.
+    \item \code{freeze} no longer stores the details of the RNG seed and kind as an attribute of the returned object.
+    \item Fix bug in \code{bsmc2} arising when some particles have zero likelihood.
+    This is Issue #152.
+    Thanks to Hola-Kwame Adrakey for reporting it.
+    \item It is now possible to call \code{partrans} directly on an objective function, such as those created by \code{traj_objfun}, \code{nlf_objfun}, \code{probe_objfun}, or \code{spect_objfun}.
+  }
+}
 \section{Changes in \pkg{pomp} version 3.4}{
   \itemize{
     \item The package manual and help pages has been streamlined.

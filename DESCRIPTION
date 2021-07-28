@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 3.4
-Date: 2021-05-12
+Version: 3.5
+Date: 2021-07-28
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -32,10 +32,10 @@ LazyData: true
 Contact: kingaa at umich dot edu
 BugReports: https://github.com/kingaa/pomp/issues/
 Encoding: UTF-8
-Collate: 'package.R' 'aaa.R' 'pstop.R' 'undefined.R' 'csnippet.R'
-        'pomp_fun.R' 'parameter_trans.R' 'covariate_table.R'
-        'skeleton_spec.R' 'rprocess_spec.R' 'safecall.R' 'pomp_class.R'
-        'load.R' 'workhorses.R' 'continue.R' 'summary.R' 'prior_spec.R'
+Collate: 'pstop.R' 'undefined.R' 'package.R' 'csnippet.R' 'pomp_fun.R'
+        'parameter_trans.R' 'covariate_table.R' 'skeleton_spec.R'
+        'rprocess_spec.R' 'safecall.R' 'pomp_class.R' 'load.R'
+        'workhorses.R' 'continue.R' 'summary.R' 'prior_spec.R'
         'dmeasure_spec.R' 'dprocess_spec.R' 'rmeasure_spec.R'
         'rinit_spec.R' 'templates.R' 'builder.R' 'pomp.R' 'probe.R'
         'abc.R' 'accumulators.R' 'kalman.R' 'pfilter.R' 'wpfilter.R'
@@ -56,9 +56,9 @@ Collate: 'package.R' 'aaa.R' 'pstop.R' 'undefined.R' 'csnippet.R'
         'saved_states.R' 'sir.R' 'slice_design.R' 'sobol_design.R'
         'spy.R' 'states.R' 'time.R' 'timezero.R' 'traces.R'
         'transformations.R' 'userdata.R' 'verhulst.R' 'window.R'
-RoxygenNote: 7.1.1.9000
+RoxygenNote: 7.1.1
 NeedsCompilation: yes
-Packaged: 2021-05-13 13:41:12 UTC; kingaa
+Packaged: 2021-07-28 13:15:17 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -75,4 +75,4 @@ Author: Aaron A. King [aut, cre],
   Eamon B. O'Dea [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2021-05-13 14:20:03 UTC
+Date/Publication: 2021-07-28 14:30:02 UTC
