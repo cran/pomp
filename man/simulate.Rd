@@ -60,10 +60,9 @@ Note that the number of replicates will be \code{nsim} times \code{ncol(params)}
 if set, the pseudorandom number generator (RNG) will be initialized with \code{seed}.  the random seed to use.
 The RNG will be restored to its original state afterward.}
 
-\item{times}{the times at which observations are made.
+\item{times}{the sequence of observation times.
 \code{times} must indicate the column of observation times by name or index.
-The time vector must be numeric and non-decreasing.
-Internally, \code{data} will be internally coerced to an array with storage-mode \code{double}.}
+The time vector must be numeric and non-decreasing.}
 
 \item{t0}{The zero-time, i.e., the time of the initial state.
 This must be no later than the time of the first observation, i.e., \code{t0 <= times[1]}.}
@@ -74,15 +73,15 @@ containing the parameters at which the simulations are to be performed.}
 \item{rinit}{simulator of the initial-state distribution.
 This can be furnished either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{rinit=NULL} sets the initial-state simulator to its default.
-For more information, see \link[=rinit_spec]{?rinit_spec}.}
+For more information, see \link[=rinit specification]{rinit specification}.}
 
-\item{rprocess}{simulator of the latent state process, specified using one of the \link[=rprocess_spec]{rprocess plugins}.
+\item{rprocess}{simulator of the latent state process, specified using one of the \link[=rprocess specification]{rprocess plugins}.
 Setting \code{rprocess=NULL} removes the latent-state simulator.
-For more information, \link[=rprocess_spec]{see ?rprocess_spec for the documentation on these plugins}.}
+For more information, see \link[=rprocess specification]{rprocess specification for the documentation on these plugins}.}
 
 \item{rmeasure}{simulator of the measurement model, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{rmeasure=NULL} removes the measurement model simulator.
-For more information, see \link[=rmeasure_spec]{?rmeasure_spec}.}
+For more information, see \link[=rmeasure specification]{rmeasure specification}.}
 
 \item{format}{the format in which to return the results.
 
@@ -102,7 +101,7 @@ Here, \code{nobs} is the number of observables.
 the time, states, and observations.
 An ordered factor variable, \sQuote{.id}, distinguishes one simulation from another.}
 
-\item{include.data}{if \code{TRUE}, the original data are included (with \code{.id = "rep"}).
+\item{include.data}{if \code{TRUE}, the original data and covariates (if any) are included (with \code{.id = "data"}).
 This option is ignored unless \code{format = "data.frame"}.}
 
 \item{...}{additional arguments supply new or modify existing model characteristics or components.
@@ -110,11 +109,12 @@ See \code{\link{pomp}} for a full list of recognized arguments.
 
 When named arguments not recognized by \code{\link{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
 This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[=userdata]{?userdata} for information on how to use this facility.}
+See \link[=userdata]{userdata} for information on how to use this facility.}
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 
-\item{object}{optional; if present, it should be the output of one of \pkg{pomp}'s methods}
+\item{object}{optional;
+if present, it should be a data frame or a \sQuote{pomp} object.}
 }
 \value{
 A single \dQuote{pomp} object,
@@ -144,12 +144,13 @@ processes.
 
 Some Windows users report problems when using C snippets in parallel computations.
 These appear to arise when the temporary files created during the C snippet compilation process are not handled properly by the operating system.
-To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=pomp]{(described here)} to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
+To circumvent this problem, use the \code{\link[=pomp]{cdir}} and \code{\link[=pomp]{cfile}} options to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
 }
 
 \seealso{
 More on \pkg{pomp} elementary algorithms: 
-\code{\link{elementary_algorithms}},
+\code{\link{elementary algorithms}},
+\code{\link{kalman}},
 \code{\link{pfilter}()},
 \code{\link{pomp-package}},
 \code{\link{probe}()},
@@ -160,4 +161,4 @@ More on \pkg{pomp} elementary algorithms:
 \author{
 Aaron A. King
 }
-\concept{elementary_algorithms}
+\concept{elementary algorithms}

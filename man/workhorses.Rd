@@ -22,9 +22,9 @@ They include \describe{
 }
 }
 \seealso{
-\link[=basic_components]{basic model components},
-\link[=elementary_algorithms]{elementary algorithms},
-\link[=estimation_algorithms]{estimation algorithms}
+\link[=basic components]{basic model components},
+\link[=elementary algorithms]{elementary algorithms},
+\link[=estimation algorithms]{estimation algorithms}
 
 More on \pkg{pomp} workhorse functions: 
 \code{\link{dmeasure}()},
@@ -32,6 +32,7 @@ More on \pkg{pomp} workhorse functions:
 \code{\link{dprocess}()},
 \code{\link{flow}()},
 \code{\link{partrans}()},
+\code{\link{pomp-package}},
 \code{\link{rinit}()},
 \code{\link{rmeasure}()},
 \code{\link{rprior}()},
@@ -43,4 +44,4 @@ Aaron A. King
 }
 \concept{extending the pomp package}
 \concept{low-level interface}
-\concept{pomp_workhorses}
+\concept{pomp workhorses}

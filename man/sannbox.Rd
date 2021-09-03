@@ -20,11 +20,16 @@ scalar result.}
 \value{
 \code{sannbox} returns a list with components:
 \describe{
-\item{counts}{ two-element integer vector.  The first number gives the
-number of calls made to \code{fn}.  The second number is provided for
-compatibility with \code{\link{optim}} and will always be NA.  }
-\item{convergence}{provided for compatibility with \code{\link{optim}};
-will always be 0.} \item{final.params}{last tried value of \code{par}.}
+\item{counts}{
+two-element integer vector.
+The first number gives the number of calls made to \code{fn}.
+The second number is provided for compatibility with \code{\link[stats]{optim}} and will always be NA.
+}
+\item{convergence}{
+provided for compatibility with \code{\link[stats]{optim}};
+will always be 0.
+}
+\item{final.params}{last tried value of \code{par}.}
 \item{final.value}{value of \code{fn} corresponding to
 \code{final.params}.}
 \item{par}{best tried value of \code{par}.}
@@ -73,7 +78,7 @@ default, \code{lower=-Inf} and \code{upper=Inf}, i.e., there are no
 constraints.} }
 }
 \seealso{
-\link{trajectory_matching}, \link{probe_matching}.
+\link{trajectory matching}, \link{probe matching}, \link{spectrum matching}, \link{nonlinear forecasting}.
 }
 \author{
 Daniel Reuman, Aaron A. King

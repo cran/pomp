@@ -1,5 +1,19 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 3.6}{
+  \itemize{
+    \item The \code{states} and \code{obs} methods now work for lists of \sQuote{pomp} objects (\sQuote{listies}).
+    \item The workhorse function \code{flow} now has default arguments.
+    \item The stateful objective function created by \code{traj_objfun} has been refactored so that it is independent of \code{trajectory}.
+    This change is invisible to the user, but lays the groundwork for future changes in \code{trajectory}.
+    \item Stateful objective functions created by \code{traj_objfun}, \code{nlf_objfun}, \code{probe_objfun}, and \code{spect_objfun} now have default arguments.
+    In particular, the default is argument is a zero-length numeric vector.
+    Calling such a function with no arguments is valid if and only if the objective function was created with no variables to estimate (empty \code{est}).
+    \item Fixed bug in \code{rprior} arising with integer-valued return vectors.
+    \item Major improvements to the package manual, including richer cross-linking and better organization.
+    \item When \code{simulate} is called with \code{format="data.frame"} and \code{include.data=TRUE}, the interpolated covariates are now included in the data frame that is returned.
+  }
+}
 \section{Changes in \pkg{pomp} version 3.5}{
   \itemize{
     \item \code{bake} takes a new option, \code{timing}, that controls whether information on the timing is returned or merely stored.

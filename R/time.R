@@ -1,10 +1,11 @@
-##' Methods to manipulate the obseration times
+##' Methods to extract and manipulate the obseration times
 ##'
 ##' Get and set the vector of observation times.
 ##'
 ##' @name time
 ##' @rdname time
 ##' @aliases time<- time,missing-method
+##' @family extraction methods
 ##'
 ##' @importFrom stats time
 NULL
@@ -20,7 +21,7 @@ setGeneric(
 ##' @rdname time
 ##' @param x  a \sQuote{pomp} object
 ##' @param t0 logical; should the zero time be included?
-##' @param \dots ignored
+##' @param \dots ignored or passed to the more primitive function
 ##' @details
 ##' \code{time(object)} returns the vector of observation times.
 ##' \code{time(object,t0=TRUE)} returns the vector of observation
@@ -55,8 +56,13 @@ setMethod(
 )
 
 time.repl.internal <- function (object, t0 = FALSE, ..., value) {
-  if (!is.numeric(value)) pStop_(sQuote("value")," must be a numeric vector.")
-  storage.mode(value) <- "double"
+  value <- tryCatch(
+    as.double(value),
+    warning = function (e) NULL,
+    error = function (e) pStop_(conditionMessage(e))
+  )
+  if (length(value)<1L || !all(is.finite(value)))
+    pStop_(" times must be numeric and finite.")
   tt <- object@times
   dd <- object@data
   ss <- object@states
@@ -68,7 +74,7 @@ time.repl.internal <- function (object, t0 = FALSE, ..., value) {
   }
   if (!all(diff(object@times)>=0))
     pStop_("times must be a non-decreasing numeric sequence.")
-  if (object@t0>object@times[1])
+  if (object@t0>object@times[1L])
     pStop_("the zero-time ",sQuote("t0"),
       " must occur no later than the first observation.")
   object@data <- array(

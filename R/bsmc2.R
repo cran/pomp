@@ -14,11 +14,13 @@
 ##' @rdname bsmc2
 ##' @aliases bsmc2,missing-method bsmc2,ANY-method
 ##' @include pomp_class.R workhorses.R pomp.R plot.R
-##' @family particle_filter_methods
-##' @family estimation_methods
+##' @family Bayesian methods
+##' @family full-information methods
+##' @family particle filter methods
+##' @family estimation methods
 ##'
 ##' @importFrom mvtnorm rmvnorm
-##' @importFrom stats median cov setNames
+##' @importFrom stats median cov
 ##'
 ##' @inheritParams pomp
 ##' @inheritParams pfilter

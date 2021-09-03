@@ -45,7 +45,8 @@
 \arguments{
 \item{data}{either a data frame holding the time series data,
 or an object of class \sQuote{pomp},
-i.e., the output of another \pkg{pomp} calculation.}
+i.e., the output of another \pkg{pomp} calculation.
+Internally, \code{data} will be internally coerced to an array with storage-mode \code{double}.}
 
 \item{Np}{the number of particles to use.}
 
@@ -60,18 +61,18 @@ This will be coerced internally to storage mode \code{double}.}
 \item{rinit}{simulator of the initial-state distribution.
 This can be furnished either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{rinit=NULL} sets the initial-state simulator to its default.
-For more information, see \link[=rinit_spec]{?rinit_spec}.}
+For more information, see \link[=rinit specification]{rinit specification}.}
 
-\item{rprocess}{simulator of the latent state process, specified using one of the \link[=rprocess_spec]{rprocess plugins}.
+\item{rprocess}{simulator of the latent state process, specified using one of the \link[=rprocess specification]{rprocess plugins}.
 Setting \code{rprocess=NULL} removes the latent-state simulator.
-For more information, \link[=rprocess_spec]{see ?rprocess_spec for the documentation on these plugins}.}
+For more information, see \link[=rprocess specification]{rprocess specification for the documentation on these plugins}.}
 
 \item{...}{additional arguments supply new or modify existing model characteristics or components.
 See \code{\link{pomp}} for a full list of recognized arguments.
 
 When named arguments not recognized by \code{\link{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
 This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[=userdata]{?userdata} for information on how to use this facility.}
+See \link[=userdata]{userdata} for information on how to use this facility.}
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 
@@ -89,7 +90,7 @@ The ensemble Kalman filter and ensemble adjustment Kalman filter.
 
 Some Windows users report problems when using C snippets in parallel computations.
 These appear to arise when the temporary files created during the C snippet compilation process are not handled properly by the operating system.
-To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=pomp]{(described here)} to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
+To circumvent this problem, use the \code{\link[=pomp]{cdir}} and \code{\link[=pomp]{cfile}} options to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
 }
 
 \references{
@@ -100,7 +101,7 @@ To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=
 \Evensen2009
 }
 \seealso{
-More on particle-filter based methods in \pkg{pomp}: 
+More on sequential Monte Carlo methods: 
 \code{\link{bsmc2}()},
 \code{\link{cond.logLik}()},
 \code{\link{eff.sample.size}()},
@@ -114,19 +115,19 @@ More on particle-filter based methods in \pkg{pomp}:
 \code{\link{saved.states}()},
 \code{\link{wpfilter}()}
 
-More on \pkg{pomp} estimation algorithms:
-\code{\link{abc}()},
-\code{\link{bsmc2}()},
-\code{\link{estimation_algorithms}},
-\code{\link{mif2}()},
-\code{\link{nonlinear_forecasting}},
-\code{\link{pmcmc}()},
+More on \pkg{pomp} elementary algorithms: 
+\code{\link{elementary algorithms}},
+\code{\link{pfilter}()},
 \code{\link{pomp-package}},
-\code{\link{probe_matching}},
-\code{\link{spectrum_matching}}
+\code{\link{probe}()},
+\code{\link{simulate}()},
+\code{\link{spect}()},
+\code{\link{trajectory}()},
+\code{\link{wpfilter}()}
 }
 \author{
 Aaron A. King
 }
-\concept{estimation_methods}
-\concept{particle_filter_methods}
+\concept{Kalman filter}
+\concept{elementary algorithms}
+\concept{particle filter methods}

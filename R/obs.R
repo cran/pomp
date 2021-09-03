@@ -7,6 +7,7 @@
 ##' @rdname obs
 ##' @include pomp_class.R
 ##' @importFrom stats setNames
+##' @family extraction methods
 ##'
 NULL
 
@@ -34,5 +35,15 @@ setMethod(
     y <- object@data[vars,,drop=FALSE]
     dimnames(y) <- setNames(list(vars,NULL),c("variable","time"))
     y
+  }
+)
+
+##' @rdname obs
+##' @export
+setMethod(
+  "obs",
+  signature=signature(object="listie"),
+  definition=function (object, vars, ...) {
+    lapply(object,obs)
   }
 )

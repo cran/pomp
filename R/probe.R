@@ -15,13 +15,14 @@
 ##' computations on real and simulated data are stored in an object of class
 ##' \sQuote{probed_pomp}.
 ##'
-##' @name probe
 ##' @docType methods
+##' @name probe
 ##' @rdname probe
-##' @aliases probe,missing-method probe,ANY-method synthetic_likelihood
+##' @aliases probe,missing-method probe,ANY-method
 ##' @author Daniel C. Reuman, Aaron A. King
-##' @family elementary_algorithms
-##' @family summary_stats_methods
+##' @concept synthetic likelihood
+##' @family elementary algorithms
+##' @family summary statistic-based methods
 ##'
 ##' @inheritSection pomp Note for Windows users
 ##' 
@@ -32,7 +33,7 @@
 ##' A probe is simply a scalar- or vector-valued function of one argument that can be applied to the data array of a \sQuote{pomp}.
 ##' A vector-valued probe must always return a vector of the same size.
 ##' A number of useful probes are provided with the package:
-##' see \link[=basic_probes]{basic probes}.
+##' see \link[=basic probes]{basic probes}.
 ##' @param nsim the number of model simulations to be computed.
 ##' @param seed optional integer;
 ##' if non-\code{NULL}, the random number generator will be initialized with this seed for simulations.

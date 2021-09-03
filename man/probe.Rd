@@ -5,7 +5,6 @@
 \alias{probe}
 \alias{probe,missing-method}
 \alias{probe,ANY-method}
-\alias{synthetic_likelihood}
 \alias{probe,data.frame-method}
 \alias{probe,pomp-method}
 \alias{probe,probed_pomp-method}
@@ -51,13 +50,14 @@
 \arguments{
 \item{data}{either a data frame holding the time series data,
 or an object of class \sQuote{pomp},
-i.e., the output of another \pkg{pomp} calculation.}
+i.e., the output of another \pkg{pomp} calculation.
+Internally, \code{data} will be internally coerced to an array with storage-mode \code{double}.}
 
 \item{probes}{a single probe or a list of one or more probes.
 A probe is simply a scalar- or vector-valued function of one argument that can be applied to the data array of a \sQuote{pomp}.
 A vector-valued probe must always return a vector of the same size.
 A number of useful probes are provided with the package:
-see \link[=basic_probes]{basic probes}.}
+see \link[=basic probes]{basic probes}.}
 
 \item{nsim}{the number of model simulations to be computed.}
 
@@ -71,22 +71,22 @@ This will be coerced internally to storage mode \code{double}.}
 \item{rinit}{simulator of the initial-state distribution.
 This can be furnished either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{rinit=NULL} sets the initial-state simulator to its default.
-For more information, see \link[=rinit_spec]{?rinit_spec}.}
+For more information, see \link[=rinit specification]{rinit specification}.}
 
-\item{rprocess}{simulator of the latent state process, specified using one of the \link[=rprocess_spec]{rprocess plugins}.
+\item{rprocess}{simulator of the latent state process, specified using one of the \link[=rprocess specification]{rprocess plugins}.
 Setting \code{rprocess=NULL} removes the latent-state simulator.
-For more information, \link[=rprocess_spec]{see ?rprocess_spec for the documentation on these plugins}.}
+For more information, see \link[=rprocess specification]{rprocess specification for the documentation on these plugins}.}
 
 \item{rmeasure}{simulator of the measurement model, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 Setting \code{rmeasure=NULL} removes the measurement model simulator.
-For more information, see \link[=rmeasure_spec]{?rmeasure_spec}.}
+For more information, see \link[=rmeasure specification]{rmeasure specification}.}
 
 \item{...}{additional arguments supply new or modify existing model characteristics or components.
 See \code{\link{pomp}} for a full list of recognized arguments.
 
 When named arguments not recognized by \code{\link{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
 This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
-See \link[=userdata]{?userdata} for information on how to use this facility.}
+See \link[=userdata]{userdata} for information on how to use this facility.}
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 }
@@ -137,7 +137,7 @@ The variable \code{.id} indicates whether the probes are from the data or simula
 
 Some Windows users report problems when using C snippets in parallel computations.
 These appear to arise when the temporary files created during the C snippet compilation process are not handled properly by the operating system.
-To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=pomp]{(described here)} to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
+To circumvent this problem, use the \code{\link[=pomp]{cdir}} and \code{\link[=pomp]{cfile}} options to cause the C snippets to be written to a file of your choice, thus avoiding the use of temporary files altogether.
 }
 
 \references{
@@ -147,7 +147,8 @@ To circumvent this problem, use the \code{cdir} and \code{cfile} options \link[=
 }
 \seealso{
 More on \pkg{pomp} elementary algorithms: 
-\code{\link{elementary_algorithms}},
+\code{\link{elementary algorithms}},
+\code{\link{kalman}},
 \code{\link{pfilter}()},
 \code{\link{pomp-package}},
 \code{\link{simulate}()},
@@ -155,14 +156,17 @@ More on \pkg{pomp} elementary algorithms:
 \code{\link{trajectory}()},
 \code{\link{wpfilter}()}
 
-More on \pkg{pomp} methods based on summary statistics: 
-\code{\link{abc}()},
-\code{\link{basic_probes}},
-\code{\link{probe_matching}},
+More on methods based on summary statistics: 
+\code{\link{approximate Bayesian computation}},
+\code{\link{basic probes}},
+\code{\link{nonlinear forecasting}},
+\code{\link{probe matching}},
+\code{\link{spectrum matching}},
 \code{\link{spect}()}
 }
 \author{
 Daniel C. Reuman, Aaron A. King
 }
-\concept{elementary_algorithms}
-\concept{summary_stats_methods}
+\concept{elementary algorithms}
+\concept{summary statistic-based methods}
+\concept{synthetic likelihood}

@@ -1,12 +1,14 @@
 ##' The deterministic skeleton of a model
 ##'
-##' Specification of \dfn{skeleton}.
+##' Specification of the deterministic skeleton.
 ##'
-##' @name skeleton_spec
+##' @name skeleton specification
 ##' @rdname skeleton_spec
 ##' @docType methods
 ##' @include pomp_fun.R csnippet.R
-##' @family implementation_info
+##' @family implementation information
+##' @family deterministic methods
+##' @seealso \code{\link{skeleton}}
 ##'
 ##' @inheritSection pomp Note for Windows users
 ##'
@@ -45,6 +47,8 @@
 ##' @section Default behavior:
 ##' The default \code{skeleton} is undefined.
 ##' It will yield missing values (\code{NA}) for all state variables.
+##'
+##' @example examples/skeleton_spec.R
 ##'
 NULL
 

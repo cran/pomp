@@ -29,7 +29,7 @@ Effective sample size is computed as
 where \eqn{w_{it}}{w_it} is the normalized weight of particle \eqn{i} at time \eqn{t}.
 }
 \seealso{
-More on particle-filter based methods in \pkg{pomp}: 
+More on sequential Monte Carlo methods: 
 \code{\link{bsmc2}()},
 \code{\link{cond.logLik}()},
 \code{\link{filter.mean}()},
@@ -42,5 +42,25 @@ More on particle-filter based methods in \pkg{pomp}:
 \code{\link{pred.var}()},
 \code{\link{saved.states}()},
 \code{\link{wpfilter}()}
+
+Other extraction methods: 
+\code{\link{coef}()},
+\code{\link{cond.logLik}()},
+\code{\link{covmat}()},
+\code{\link{filter.mean}()},
+\code{\link{filter.traj}()},
+\code{\link{forecast}()},
+\code{\link{logLik}},
+\code{\link{obs}()},
+\code{\link{pred.mean}()},
+\code{\link{pred.var}()},
+\code{\link{saved.states}()},
+\code{\link{spy}()},
+\code{\link{states}()},
+\code{\link{summary}()},
+\code{\link{timezero}()},
+\code{\link{time}()},
+\code{\link{traces}()}
 }
-\concept{particle_filter_methods}
+\concept{extraction methods}
+\concept{particle filter methods}

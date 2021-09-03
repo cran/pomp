@@ -10,12 +10,12 @@
 ##' This and similar examples are discussed and constructed in tutorials
 ##' available on the \href{https://kingaa.github.io/pomp/}{package website}.
 ##'
-##' @name sir_models
+##' @name SIR models
 ##' @rdname sir
 ##' @aliases sir sir2
 ##' @docType data
-##' @keywords pomp_datasets models
-##' @family pomp_examples
+##' @keywords models
+##' @family pomp examples
 ##'
 ##' @return
 ##' These functions return \sQuote{pomp} objects containing simulated data.

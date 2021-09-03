@@ -13,7 +13,8 @@
 ##' @aliases pred.mean,ANY-method pred.mean,missing-method
 ##' @include pfilter.R kalman.R
 ##' @rdname pred_mean
-##' @family particle_filter_methods
+##' @family particle filter methods
+##' @family extraction methods
 ##' @inheritParams filter.mean
 ##'
 NULL

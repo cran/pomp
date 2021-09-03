@@ -1,13 +1,12 @@
 ##' The measurement-model simulator
 ##'
-##' Specification of rmeasure
+##' Specification of the measurement-model simulator, rmeasure.
 ##'
-##' @inheritSection pomp Note for Windows users
-##'
-##' @name rmeasure_spec
+##' @name rmeasure specification
 ##' @rdname rmeasure_spec
-##' @family implementation_info
-##'
+##' @family implementation information
+##' @seealso \code{\link{rmeasure}}
+##' 
 ##' @details
 ##' The measurement model is the link between the data and the unobserved state process.
 ##' It can be specified either by using one or both of the \code{rmeasure} and \code{dmeasure} arguments.
@@ -41,4 +40,9 @@
 ##' @section Default behavior:
 ##' The default \code{rmeasure} is undefined.
 ##' It will yield missing values (\code{NA}).
+##' 
+##' @inheritSection pomp Note for Windows users
+##'
+##' @example examples/rmeasure_spec.R
+##'
 NULL

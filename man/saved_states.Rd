@@ -29,7 +29,7 @@ When one calls \code{\link{pfilter}} with \code{save.states=TRUE}, the latent st
 This can be extracted by calling \code{saved.states} on the \sQuote{pfilterd.pomp} object.
 }
 \seealso{
-More on particle-filter based methods in \pkg{pomp}: 
+More on sequential Monte Carlo methods: 
 \code{\link{bsmc2}()},
 \code{\link{cond.logLik}()},
 \code{\link{eff.sample.size}()},
@@ -42,5 +42,25 @@ More on particle-filter based methods in \pkg{pomp}:
 \code{\link{pred.mean}()},
 \code{\link{pred.var}()},
 \code{\link{wpfilter}()}
+
+Other extraction methods: 
+\code{\link{coef}()},
+\code{\link{cond.logLik}()},
+\code{\link{covmat}()},
+\code{\link{eff.sample.size}()},
+\code{\link{filter.mean}()},
+\code{\link{filter.traj}()},
+\code{\link{forecast}()},
+\code{\link{logLik}},
+\code{\link{obs}()},
+\code{\link{pred.mean}()},
+\code{\link{pred.var}()},
+\code{\link{spy}()},
+\code{\link{states}()},
+\code{\link{summary}()},
+\code{\link{timezero}()},
+\code{\link{time}()},
+\code{\link{traces}()}
 }
-\concept{particle_filter_methods}
+\concept{extraction methods}
+\concept{particle filter methods}

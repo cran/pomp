@@ -28,9 +28,11 @@ This will typically be the output of \code{pomp}, \code{simulate}, or one of the
 Each column is treated as an independent parameter set, in correspondence with the corresponding column of \code{x}.}
 
 \item{times}{a numeric vector (length \code{ntimes}) containing times at which the itineraries are desired.
-These must be in non-decreasing order with \code{times[1]>t0}.}
+These must be in non-decreasing order with \code{times[1]>t0}.
+By default, this is the full set of observation times (see \code{\link{time}}).}
 
-\item{t0}{the time at which the initial conditions are assumed to hold.}
+\item{t0}{the time at which the initial conditions are assumed to hold.
+By default, this is the zero-time (see \code{\link{timezero}}).}
 
 \item{format}{the format in which to return the results.
 
@@ -44,7 +46,8 @@ the time and states.
 An ordered factor variable, \sQuote{.id}, distinguishes the trajectories from one another.}
 
 \item{...}{Additional arguments are passed to the ODE integrator (if the skeleton is a vectorfield) and are ignored if it is a map.
-See \code{\link[deSolve]{ode}} for a description of the additional arguments accepted by the ODE integrator.}
+See \code{\link[deSolve]{ode}} for a description of the additional arguments accepted by the ODE integrator.
+By default, this is the parameter vector stored in \code{object} (see \code{\link[pomp]{coef}}).}
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 }
@@ -64,15 +67,21 @@ Note that the handling of \code{\dots} in \code{trajectory} differs from that of
 In particular, it is not possible to modify the model structure in a call to \code{trajectory}.
 }
 \seealso{
-\code{\link{skeleton}}, \code{\link{flow}}
-
 More on \pkg{pomp} elementary algorithms: 
-\code{\link{elementary_algorithms}},
+\code{\link{elementary algorithms}},
+\code{\link{kalman}},
 \code{\link{pfilter}()},
 \code{\link{pomp-package}},
 \code{\link{probe}()},
 \code{\link{simulate}()},
 \code{\link{spect}()},
 \code{\link{wpfilter}()}
+
+More on methods for deterministic process models: 
+\code{\link{flow}()},
+\code{\link{skeleton specification}},
+\code{\link{skeleton}()},
+\code{\link{trajectory matching}}
 }
-\concept{elementary_algorithms}
+\concept{deterministic methods}
+\concept{elementary algorithms}

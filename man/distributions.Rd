@@ -115,24 +115,25 @@ print(dn <- reulermultinom(5,size=100,rate=c(a=1,b=2,c=3),dt=dW))
 \seealso{
 More on implementing POMP models: 
 \code{\link{Csnippet}},
-\code{\link{accumulators}},
-\code{\link{basic_components}},
-\code{\link{covariate_table}()},
-\code{\link{dmeasure_spec}},
-\code{\link{dprocess_spec}},
-\code{\link{parameter_trans}()},
+\code{\link{accumulator variables}},
+\code{\link{basic components}},
+\code{\link{covariates}},
+\code{\link{dmeasure specification}},
+\code{\link{dprocess specification}},
+\code{\link{parameter transformations}},
 \code{\link{pomp-package}},
-\code{\link{prior_spec}},
-\code{\link{rinit_spec}},
-\code{\link{rmeasure_spec}},
-\code{\link{rprocess_spec}},
-\code{\link{skeleton_spec}},
+\code{\link{pomp}},
+\code{\link{prior specification}},
+\code{\link{rinit specification}},
+\code{\link{rmeasure specification}},
+\code{\link{rprocess specification}},
+\code{\link{skeleton specification}},
 \code{\link{transformations}},
 \code{\link{userdata}}
 }
 \author{
 Aaron A. King
 }
-\concept{implementation_info}
+\concept{implementation information}
 \concept{probability distributions}
 \keyword{distribution}

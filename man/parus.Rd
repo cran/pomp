@@ -15,31 +15,31 @@ The Global Population Dynamics Database Version 2.
 Original source: McCleer and Perrins (1991).
 }
 \examples{
+\dontrun{
+  parus \%>\%
+    pfilter(Np=1000,times="year",t0=1960,
+      params=c(K=190,r=2.7,sigma=0.2,theta=0.05,N.0=148),
+      rprocess=discrete_time(
+        function (r, K, sigma, N, ...) {
+          e <- rnorm(n=1,mean=0,sd=sigma)
+          c(N = exp(log(N)+r*(1-N/K)+e))
+        },
+        delta.t=1
+      ),
+      rmeasure=function (N, theta, ...) {
+        c(pop=rnbinom(n=1,size=1/theta,mu=N+1e-10))
+      },
+      dmeasure=function (pop, N, theta, ..., log) {
+        dnbinom(x=pop,mu=N+1e-10,size=1/theta,log=log)
+      },
+      partrans=parameter_trans(log=c("sigma","theta","N_0","r","K")),
+      paramnames=c("sigma","theta","N_0","r","K")
+    ) -> pf
 
-parus \%>\%
-  pfilter(Np=1000,times="year",t0=1960,
-  params=c(K=190,r=2.7,sigma=0.2,theta=0.05,N.0=148),
-  rprocess=discrete_time(
-     function (r, K, sigma, N, ...) {
-       e <- rnorm(n=1,mean=0,sd=sigma)
-       c(N = exp(log(N)+r*(1-N/K)+e))
-     },
-     delta.t=1
-  ),
-  rmeasure=function (N, theta, ...) {
-     c(pop=rnbinom(n=1,size=1/theta,mu=N+1e-10))
-  },
-  dmeasure=function (pop, N, theta, ..., log) {
-     dnbinom(x=pop,mu=N+1e-10,size=1/theta,log=log)
-  },
-  partrans=parameter_trans(log=c("sigma","theta","N_0","r","K")),
-  paramnames=c("sigma","theta","N_0","r","K")
-) -> pf
+  pf \%>\% logLik()
 
-pf \%>\% logLik()
-
-pf \%>\% simulate() \%>\% plot()
-
+  pf \%>\% simulate() \%>\% plot()
+}
 }
 \references{
 \McCleery1991
@@ -48,23 +48,23 @@ pf \%>\% simulate() \%>\% plot()
 More data sets provided with \pkg{pomp}: 
 \code{\link{blowflies}},
 \code{\link{bsflu}},
+\code{\link{childhood disease data}},
 \code{\link{dacca}()},
-\code{\link{ebola}},
-\code{\link{measles}}
+\code{\link{ebola}}
 
 More examples provided with \pkg{pomp}: 
+\code{\link{SIR models}},
 \code{\link{blowflies}},
 \code{\link{bsflu}},
+\code{\link{childhood disease data}},
 \code{\link{dacca}()},
 \code{\link{ebola}},
 \code{\link{gompertz}()},
-\code{\link{measles}},
 \code{\link{ou2}()},
-\code{\link{pomp_examples}},
+\code{\link{pomp examples}},
 \code{\link{ricker}()},
 \code{\link{rw2}()},
-\code{\link{sir_models}},
 \code{\link{verhulst}()}
 }
-\concept{pomp_datasets}
-\concept{pomp_examples}
+\concept{pomp datasets}
+\concept{pomp examples}

@@ -6,7 +6,7 @@
 \alias{time,missing-method}
 \alias{time,pomp-method}
 \alias{time<-,pomp-method}
-\title{Methods to manipulate the obseration times}
+\title{Methods to extract and manipulate the obseration times}
 \usage{
 \S4method{time}{pomp}(x, t0 = FALSE, ...)
 
@@ -17,7 +17,7 @@
 
 \item{t0}{logical; should the zero time be included?}
 
-\item{\dots}{ignored}
+\item{\dots}{ignored or passed to the more primitive function}
 
 \item{object}{a \sQuote{pomp} object}
 
@@ -36,3 +36,24 @@ times with the zero-time \code{t0} prepended.
 The second and subsequent elements of \code{value} are taken to be the observation times.
 Those data and states (if they exist) corresponding to the new times are retained.
 }
+\seealso{
+Other extraction methods: 
+\code{\link{coef}()},
+\code{\link{cond.logLik}()},
+\code{\link{covmat}()},
+\code{\link{eff.sample.size}()},
+\code{\link{filter.mean}()},
+\code{\link{filter.traj}()},
+\code{\link{forecast}()},
+\code{\link{logLik}},
+\code{\link{obs}()},
+\code{\link{pred.mean}()},
+\code{\link{pred.var}()},
+\code{\link{saved.states}()},
+\code{\link{spy}()},
+\code{\link{states}()},
+\code{\link{summary}()},
+\code{\link{timezero}()},
+\code{\link{traces}()}
+}
+\concept{extraction methods}

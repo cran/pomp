@@ -11,17 +11,17 @@
 ##' \dQuote{Most of these data have been manually entered from published records by various people, and are prone to errors at several levels.
 ##' All data are provided as is; use at your own risk.}
 ##'
-##' @name measles
-##' @rdname measles
+##' @name childhood disease data
+##' @rdname childhood
 ##' @aliases LondonYorke ewmeas ewcitmeas
 ##' @docType data
+##' @seealso \link{SIR models}, \code{\link{bsflu}}
 ##' @references
 ##'
 ##' \London1973
 ##' 
-##' @keywords pomp_datasets
-##' @family pomp_datasets
-##' @family pomp_examples
+##' @family pomp datasets
+##' @family pomp examples
 ##'
 ##' @examples
 ##'

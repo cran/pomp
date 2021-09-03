@@ -8,6 +8,7 @@
 ##' @docType methods
 ##' @include pomp_class.R listie.R
 ##' @importFrom stats coef
+##' @family extraction methods
 NULL
 
 setGeneric("coef")
@@ -42,7 +43,7 @@ setMethod(
 ##' @param object an object of class \sQuote{pomp}, or of a class extending \sQuote{pomp}
 ##' @param pars optional character; names of parameters to be retrieved or set.
 ##' @param transform logical; perform parameter transformation?
-##' @param \dots ignored
+##' @param \dots ignored or passed to the more primitive function
 ##'
 ##' @details
 ##' \code{coef} allows one to extract the parameters from a fitted model.

@@ -57,19 +57,18 @@ plot(gompertz(K=2,r=0.01))
 }
 \seealso{
 More examples provided with \pkg{pomp}: 
+\code{\link{SIR models}},
 \code{\link{blowflies}},
 \code{\link{bsflu}},
+\code{\link{childhood disease data}},
 \code{\link{dacca}()},
 \code{\link{ebola}},
-\code{\link{measles}},
 \code{\link{ou2}()},
 \code{\link{parus}},
-\code{\link{pomp_examples}},
+\code{\link{pomp examples}},
 \code{\link{ricker}()},
 \code{\link{rw2}()},
-\code{\link{sir_models}},
 \code{\link{verhulst}()}
 }
-\concept{pomp_examples}
+\concept{pomp examples}
 \keyword{models}
-\keyword{pomp_datasets}

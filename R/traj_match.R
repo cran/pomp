@@ -1,6 +1,6 @@
 ##' Trajectory matching
 ##'
-##' Estimation of parameters for deterministic \acronym{POMP} models
+##' Estimation of parameters for deterministic \acronym{POMP} models via trajectory matching.
 ##'
 ##' In trajectory matching, one attempts to minimize the discrepancy between a \acronym{POMP} model's predictions and data under the assumption that the latent state process is deterministic and all discrepancies between model and data are due to measurement error.
 ##' The measurement model likelihood (\code{dmeasure}), or rather its negative, is the natural measure of the discrepancy.
@@ -11,13 +11,16 @@
 ##' \code{traj_objfun} constructs an objective function that evaluates the likelihood function.
 ##' It can be passed to any one of a variety of numerical optimization routines, which will adjust model parameters to minimize the discrepancies between the power spectrum of model simulations and that of the data.
 ##'
-##' @name trajectory_matching
-##' @docType methods
+##' @name trajectory matching
 ##' @rdname traj_match
+##' @docType methods
 ##' @include trajectory.R pomp_class.R workhorses.R
 ##' @aliases traj_objfun traj_objfun,missing-method traj_objfun,ANY-method
+##' @concept trajectory matching
+##' @family deterministic methods
+##' @family methods based on maximization
 ##'
-##' @inheritParams probe_matching
+##' @inheritParams probe matching
 ##' @inheritParams trajectory
 ##' @inheritParams pomp
 ##'
@@ -29,15 +32,14 @@
 ##'
 ##' @return
 ##' \code{traj_objfun} constructs a stateful objective function for spectrum matching.
-##' Specifically, \code{traj_objfun} returns an object of class \sQuote{traj_match_objfun}, which is a function suitable for use in an \code{\link{optim}}-like optimizer.
+##' Specifically, \code{traj_objfun} returns an object of class \sQuote{traj_match_objfun}, which is a function suitable for use in an \code{\link[stats]{optim}}-like optimizer.
 ##' In particular, this function takes a single numeric-vector argument that is assumed to contain the parameters named in \code{est}, in that order.
 ##' When called, it will return the negative log likelihood.
 ##' It is a stateful function:
 ##' Each time it is called, it will remember the values of the parameters and its estimate of the log likelihood.
 ##'
 ##' @inheritSection objfun Important Note
-##' @seealso \code{\link{trajectory}}, \code{\link{optim}},
-##' \code{\link[subplex]{subplex}}, \code{\link[nloptr]{nloptr}}
+##' @seealso \code{\link[stats]{optim}}, \code{\link[subplex]{subplex}}, \code{\link[nloptr]{nloptr}}
 ##' 
 ##' @example examples/traj_match.R
 ##' 
@@ -154,15 +156,16 @@ setMethod(
   }
 )
 
-tmof.internal <- function (object,
-  est, fail.value, ode_control,
-  ..., verbose) {
+tmof.internal <- function (
+  object, est, fail.value, ode_control, ..., verbose
+) {
 
   verbose <- as.logical(verbose)
   object <- pomp(object,...,verbose=verbose)
 
   if (undefined(object@skeleton) || undefined(object@dmeasure))
-    pStop_(paste(sQuote(c("skeleton","dmeasure")),collapse=", ")," are needed basic components.")
+    pStop_(paste(sQuote(c("skeleton","dmeasure")),collapse=", "),
+      " are needed basic components.")
 
   fail.value <- as.numeric(fail.value)
 
@@ -182,7 +185,7 @@ tmof.internal <- function (object,
 
   loglik <- traj.match.loglik(object,ode_control=ode_control)
 
-  ofun <- function (par) {
+  ofun <- function (par = numeric(0)) {
     params[idx] <- par
     coef(object,transform=TRUE) <<- params
     loglik <<- traj.match.loglik(object,ode_control=ode_control)
@@ -199,11 +202,21 @@ tmof.internal <- function (object,
 
 }
 
-traj.match.loglik <- function (object, seed, ode_control) {
-  object@states <- do.call(trajectory,c(list(object),ode_control))
-  sum(dmeasure(object,y=obs(object),x=object@states,
-    times=time(object),params=coef(object),
-    log=TRUE))
+traj.match.loglik <- function (object, ode_control) {
+  object@states <- do.call(
+    flow,
+    c(list(object,x0=rinit(object)),ode_control)
+  )
+  sum(
+    dmeasure(
+      object,
+      y=object@data,
+      x=object@states,
+      times=object@times,
+      params=object@params,
+      log=TRUE
+    )
+  )
 }
 
 ##' @rdname trajectory

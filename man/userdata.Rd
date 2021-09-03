@@ -11,7 +11,7 @@ It can happen that one desires to pass information to one of the \acronym{POMP} 
 \pkg{pomp} provides facilities for this purpose.
 We refer to the objects one wishes to pass in this way as \dfn{user data}.
 
-The following will apply to every \link[=basic_components]{basic model component}.
+The following will apply to every \link[=basic components]{basic model component}.
 For the sake of definiteness, however, we'll use the \code{rmeasure} component as an example.
 To be even more specific, the measurement model we wish to implement is
 \preformatted{
@@ -88,82 +88,87 @@ See the example below.
 }
 
 \examples{
-## The familiar Ricker example
-## For some bizarre reason, we wish to pass 'phi' via the userdata facility.
+\donttest{
+  ## The familiar Ricker example
+  ## For some bizarre reason, we wish to pass 'phi'
+  ## via the userdata facility.
 
-## C snippet approach:
+  ## C snippet approach:
 
-simulate(times=1:100,t0=0,
-  phi=as.double(100),
-  params=c(r=3.8,sigma=0.3,N.0=7),
-  rprocess=discrete_time(
-    step.fun=Csnippet("
+  simulate(times=1:100,t0=0,
+    phi=as.double(100),
+    params=c(r=3.8,sigma=0.3,N.0=7),
+    rprocess=discrete_time(
+      step.fun=Csnippet("
       double e = (sigma > 0.0) ? rnorm(0,sigma) : 0.0;
       N = r*N*exp(-N+e);"
+      ),
+      delta.t=1
     ),
-    delta.t=1
-  ),
-  rmeasure=Csnippet("
+    rmeasure=Csnippet("
        double phi = *(get_userdata_double(\"phi\"));
        y = rpois(phi*N);"
-  ),
-  paramnames=c("r","sigma"),
-  statenames="N",
-  obsnames="y"
-) -> rick1
+    ),
+    paramnames=c("r","sigma"),
+    statenames="N",
+    obsnames="y"
+  ) -> rick1
 
-## The same problem solved using 'globals':
-simulate(times=1:100,t0=0,
-  globals=Csnippet("static double phi = 100;"),
-  params=c(r=3.8,sigma=0.3,N.0=7),
-  rprocess=discrete_time(
-    step.fun=Csnippet("
+  ## The same problem solved using 'globals':
+  simulate(times=1:100,t0=0,
+    globals=Csnippet("static double phi = 100;"),
+    params=c(r=3.8,sigma=0.3,N.0=7),
+    rprocess=discrete_time(
+      step.fun=Csnippet("
       double e = (sigma > 0.0) ? rnorm(0,sigma) : 0.0;
       N = r*N*exp(-N+e);"
+      ),
+      delta.t=1
     ),
-    delta.t=1
-  ),
-  rmeasure=Csnippet("
+    rmeasure=Csnippet("
        y = rpois(phi*N);"
-  ),
-  paramnames=c("r","sigma"),
-  statenames="N",
-  obsnames="y"
-) -> rick2
+    ),
+    paramnames=c("r","sigma"),
+    statenames="N",
+    obsnames="y"
+  ) -> rick2
 
-## Finally, the R function approach:
+  ## Finally, the R function approach:
 
-simulate(times=1:100,t0=0,
-  phi=100,
-  params=c(r=3.8,sigma=0.3,N_0=7),
-  rprocess=discrete_time(
-    step.fun=function (r, N, sigma, ...) {
-      e <- rnorm(n=1,mean=0,sd=sigma)
-       c(N=r*N*exp(-N+e))
-    },
-    delta.t=1
-  ),
-  rmeasure=function(phi, N, ...) {
+  simulate(times=1:100,t0=0,
+    phi=100,
+    params=c(r=3.8,sigma=0.3,N_0=7),
+    rprocess=discrete_time(
+      step.fun=function (r, N, sigma, ...) {
+        e <- rnorm(n=1,mean=0,sd=sigma)
+        c(N=r*N*exp(-N+e))
+      },
+      delta.t=1
+    ),
+    rmeasure=function(phi, N, ...) {
       c(y=rpois(n=1,lambda=phi*N))
-  }
-) -> rick3
+    }
+  ) -> rick3
+
+}
 }
 \seealso{
 More on implementing POMP models: 
 \code{\link{Csnippet}},
-\code{\link{accumulators}},
-\code{\link{basic_components}},
-\code{\link{covariate_table}()},
+\code{\link{accumulator variables}},
+\code{\link{basic components}},
+\code{\link{covariates}},
 \code{\link{distributions}},
-\code{\link{dmeasure_spec}},
-\code{\link{dprocess_spec}},
-\code{\link{parameter_trans}()},
+\code{\link{dmeasure specification}},
+\code{\link{dprocess specification}},
+\code{\link{parameter transformations}},
 \code{\link{pomp-package}},
-\code{\link{prior_spec}},
-\code{\link{rinit_spec}},
-\code{\link{rmeasure_spec}},
-\code{\link{rprocess_spec}},
-\code{\link{skeleton_spec}},
+\code{\link{pomp}},
+\code{\link{prior specification}},
+\code{\link{rinit specification}},
+\code{\link{rmeasure specification}},
+\code{\link{rprocess specification}},
+\code{\link{skeleton specification}},
 \code{\link{transformations}}
 }
-\concept{implementation_info}
+\concept{implementation information}

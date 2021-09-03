@@ -1,5 +1,34 @@
 _N_e_w_s _f_o_r _p_a_c_k_a_g_e '_p_o_m_p'
 
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _3._6:
+
+        • The ‘states’ and ‘obs’ methods now work for lists of ‘pomp’
+          objects (‘listies’).
+
+        • The workhorse function ‘flow’ now has default arguments.
+
+        • The stateful objective function created by ‘traj_objfun’ has
+          been refactored so that it is independent of ‘trajectory’.
+          This change is invisible to the user, but lays the groundwork
+          for future changes in ‘trajectory’.
+
+        • Stateful objective functions created by ‘traj_objfun’,
+          ‘nlf_objfun’, ‘probe_objfun’, and ‘spect_objfun’ now have
+          default arguments.  In particular, the default is argument is
+          a zero-length numeric vector.  Calling such a function with
+          no arguments is valid if and only if the objective function
+          was created with no variables to estimate (empty ‘est’).
+
+        • Fixed bug in ‘rprior’ arising with integer-valued return
+          vectors.
+
+        • Major improvements to the package manual, including richer
+          cross-linking and better organization.
+
+        • When ‘simulate’ is called with ‘format="data.frame"’ and
+          ‘include.data=TRUE’, the interpolated covariates are now
+          included in the data frame that is returned.
+
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _3._5:
 
         • ‘bake’ takes a new option, ‘timing’, that controls whether

@@ -26,8 +26,8 @@
 ##'
 ##' @name blowflies
 ##' @docType data
-##' @family pomp_examples
-##' @family pomp_datasets
+##' @family pomp examples
+##' @family pomp datasets
 ##' @include pomp.R
 ##' @importFrom utils read.csv2
 ##' @importFrom stats approx
@@ -49,7 +49,7 @@
 ##'
 ##' \Brillinger1980
 ##'
-##' @keywords models pomp_datasets
+##' @keywords models
 ##' @examples
 ##'
 ##' plot(blowflies1())

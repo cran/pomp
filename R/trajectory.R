@@ -13,7 +13,8 @@
 ##' @rdname trajectory
 ##' @include workhorses.R pomp_class.R flow.R
 ##' @aliases trajectory,missing-method trajectory,ANY-method
-##' @family elementary_algorithms
+##' @family elementary algorithms
+##' @family deterministic methods
 ##'
 ##' @importFrom deSolve ode diagnostics
 ##' @importFrom stats setNames
@@ -37,7 +38,6 @@
 ##' \code{trajectory} returns an array of dimensions \code{nvar} x \code{nrep} x \code{ntimes}.
 ##' If \code{x} is the returned matrix, \code{x[i,j,k]} is the i-th component of the state vector at time \code{times[k]} given parameters \code{params[,j]}.
 ##'
-##' @seealso \code{\link{skeleton}}, \code{\link{flow}}
 NULL
 
 setGeneric(

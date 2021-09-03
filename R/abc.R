@@ -2,16 +2,18 @@
 ##'
 ##' The approximate Bayesian computation (ABC) algorithm for estimating the parameters of a partially-observed Markov process.
 ##'
-##' @name abc
+##' @name approximate Bayesian computation
 ##' @rdname abc
-##' @aliases approximate_Bayesian_computation abc,missing-method abc,ANY-method
+##' @aliases abc abc,missing-method abc,ANY-method
 ##' @docType methods
 ##' @include pomp_class.R probe.R continue.R workhorses.R
 ##' @importFrom stats runif
 ##' @author Edward L. Ionides, Aaron A. King
-##' @family summary_stats_methods
-##' @family estimation_methods
-##' @seealso \link[=proposals]{MCMC proposals}
+##' @family summary statistic-based methods
+##' @family estimation methods
+##' @family MCMC methods
+##' @family Bayesian methods
+##' @concept approximate Bayesian computation
 ##'
 ##' @inheritParams pomp
 ##' @inheritParams probe
@@ -43,8 +45,10 @@
 ##' @section Methods:
 ##' The following can be applied to the output of an \code{abc} operation:
 ##' \describe{
+##' \item{abc}{repeats the calculation, beginning with the last state}
+##' \item{continue}{continues the \code{abc} calculation}
 ##' \item{plot}{produces a series of diagnostic plots}
-##' \item{traces}{produces a \code{\link[coda]{mcmc}} object, to which the various \pkg{coda} convergence diagnostics can be applied}
+##' \item{traces}{produces an \code{\link[coda]{mcmc}} object, to which the various \pkg{coda} convergence diagnostics can be applied}
 ##' }
 ##'
 ##' @references

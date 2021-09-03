@@ -7,6 +7,7 @@
 ##' @docType methods
 ##' @aliases timezero<- timezero,missing-method timezero,ANY-method
 ##' timezero<-,missing-method timezero<-,ANY-method
+##' @family extraction methods
 ##' @return
 ##' the value of the zero time
 ##'
@@ -26,7 +27,7 @@ setGeneric(
 
 ##' @rdname timezero
 ##' @param object an object of class \sQuote{pomp}, or of a class that extends \sQuote{pomp}
-##' @param \dots ignored
+##' @param \dots ignored or passed to the more primitive function
 ##' @export
 setMethod(
   "timezero",

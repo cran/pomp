@@ -13,24 +13,29 @@
 ##'
 ##' NLF assumes that the observation frequency (equivalently the time between successive observations) is uniform.
 ##'
-##' @name nonlinear_forecasting
+##' @name nonlinear forecasting
 ##' @rdname nlf
 ##' @include pomp.R simulate.R probe_match.R
 ##'
 ##' @importFrom stats .lm.fit optim setNames dnorm .lm.fit sd cov
 ##' @importFrom mvtnorm dmvnorm
 ##'
+##' @aliases nlf
 ##' @aliases nlf_objfun nlf_objfun,missing-method nlf_objfun,ANY-method
 ##'
 ##' @inheritSection pomp Note for Windows users
 ##' 
 ##' @author Stephen P. Ellner, Bruce E. Kendall, Aaron A. King
 ##'
-##' @family estimation_methods
+##' @concept nonlinear forecasting
+##' @family estimation methods
+##' @family summary statistic-based methods
+##' @family methods based on maximization
+##' @seealso \code{\link[stats]{optim}} \code{\link[subplex]{subplex}} \code{\link[nloptr]{nloptr}}
 ##'
 ##' @return
 ##' \code{nlf_objfun} constructs a stateful objective function for NLF estimation.
-##' Specfically, \code{nlf_objfun} returns an object of class \sQuote{nlf_objfun}, which is a function suitable for use in an \code{\link{optim}}-like optimizer.
+##' Specfically, \code{nlf_objfun} returns an object of class \sQuote{nlf_objfun}, which is a function suitable for use in an \code{\link[stats]{optim}}-like optimizer.
 ##' In particular, this function takes a single numeric-vector argument that is assumed to contain the parameters named in \code{est}, in that order.
 ##' When called, it will return the negative log quasilikelihood.
 ##' It is a stateful function:
@@ -91,7 +96,7 @@
 ##'
 ##' @example examples/nlf.R
 ##'
-##' @inheritParams probe_matching
+##' @inheritParams probe matching
 ##' @inheritParams pomp
 ##'
 NULL
@@ -345,7 +350,7 @@ nlfof.internal <- function (object,
     period=period,tensor=tensor,seed=seed,transform.data=transform.data,
     verbose=verbose)
 
-  ofun <- function (par) {
+  ofun <- function (par = numeric(0)) {
     params[idx] <- par
     coef(object,transform=TRUE) <<- params
     logql <<- nlf.lql(object,times=times,lags=lags,nrbf=nrbf,fail.value=fail.value,

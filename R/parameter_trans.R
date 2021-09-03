@@ -1,15 +1,17 @@
 ##' Parameter transformations
 ##'
-##' Equipping models with parameter transformations.
+##' Equipping models with parameter transformations to ease searches in constrained parameter spaces.
 ##'
-##' @name parameter_trans
+##' @name parameter transformations
+##' @aliases parameter_trans
 ##' @rdname parameter_trans
 ##' @docType methods
 ##' @include pomp_fun.R csnippet.R pstop.R undefined.R
 ##' @aliases parameter_trans,missing,missing-method
 ##' parameter_trans,ANY,ANY-method parameter_trans,ANY,missing-method
 ##' parameter_trans,NULL,NULL-method parameter_trans,missing,ANY-method
-##' @family implementation_info
+##' @family implementation information
+##' @seealso \code{\link{partrans}}
 ##' @param toEst,fromEst procedures that perform transformation of model parameters to and from the estimation scale, respectively.
 ##' These can be furnished using C snippets, \R functions, or via procedures in an external, dynamically loaded library.
 ##' @param log names of parameters to be log transformed.
@@ -20,7 +22,7 @@
 ##' @inheritSection pomp Note for Windows users
 ##' @details
 ##' When parameter transformations are desired, they can be integrated into the \sQuote{pomp} object via the \code{partrans} arguments using the \code{parameter_trans} function.
-##' As with the other \link[=basic_components]{basic model components}, these should ordinarily be specified using C snippets.
+##' As with the other \link[=basic components]{basic model components}, these should ordinarily be specified using C snippets.
 ##' When doing so, note that:
 ##' \enumerate{
 ##'   \item The parameter transformation mapping a parameter vector from the scale used by the model codes to another scale, and the inverse transformation, are specified via a call to \preformatted{parameter_trans(toEst,fromEst)}.

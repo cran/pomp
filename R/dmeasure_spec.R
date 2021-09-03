@@ -1,13 +1,11 @@
 ##' The measurement model density
 ##'
-##' Specification of dmeasure.
+##' Specification of the measurement model density function, dmeasure.
 ##'
-##' @name dmeasure_spec
+##' @name dmeasure specification
 ##' @rdname dmeasure_spec
-##' @family implementation_info
-##'
-##' @inheritSection pomp Note for Windows users
-##' 
+##' @family implementation information
+##' @seealso \code{\link{dmeasure}}
 ##' @details
 ##' The measurement model is the link between the data and the unobserved state process.
 ##' It can be specified either by using one or both of the \code{rmeasure} and \code{dmeasure} arguments.
@@ -38,10 +36,14 @@
 ##' It can take additional arguments via the \link[=userdata]{userdata facility}.
 ##' \code{f} must return a single numeric value, the probability density (or log probability density if \code{log = TRUE}) of \code{y} given \code{x} at time \code{t}.
 ##'
+##' @example examples/dmeasure_spec.R
+##'
 ##' @section Important note:
 ##' \strong{It is a common error to fail to account for both \code{log = TRUE} and \code{log = FALSE} when writing the \code{dmeasure} C snippet or function.}
 ##'
 ##' @section Default behavior:
 ##' If \code{dmeasure} is left unspecified, calls to \code{\link{dmeasure}} will return missing values (\code{NA}).
-##'
+##' 
+##' @inheritSection pomp Note for Windows users
+##' 
 NULL

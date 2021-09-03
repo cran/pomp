@@ -28,28 +28,28 @@ bsflu \%>\%
 \Anonymous1978
 }
 \seealso{
-\link{sir_models}
+\link{SIR models}
 
 More data sets provided with \pkg{pomp}: 
 \code{\link{blowflies}},
+\code{\link{childhood disease data}},
 \code{\link{dacca}()},
 \code{\link{ebola}},
-\code{\link{measles}},
 \code{\link{parus}}
 
 More examples provided with \pkg{pomp}: 
+\code{\link{SIR models}},
 \code{\link{blowflies}},
+\code{\link{childhood disease data}},
 \code{\link{dacca}()},
 \code{\link{ebola}},
 \code{\link{gompertz}()},
-\code{\link{measles}},
 \code{\link{ou2}()},
 \code{\link{parus}},
-\code{\link{pomp_examples}},
+\code{\link{pomp examples}},
 \code{\link{ricker}()},
 \code{\link{rw2}()},
-\code{\link{sir_models}},
 \code{\link{verhulst}()}
 }
-\concept{pomp_datasets}
-\concept{pomp_examples}
+\concept{pomp datasets}
+\concept{pomp examples}

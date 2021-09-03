@@ -31,7 +31,7 @@
 
 \item{transform}{logical; should the traces be transformed back onto the natural scale?}
 
-\item{\dots}{ignored or (in the case of the listie, passed to the more primitive function)}
+\item{\dots}{ignored or passed to the more primitive function}
 }
 \value{
 When \code{object} is the result of a \code{\link{mif2}} calculation,
@@ -57,3 +57,24 @@ Retrieve the history of an iterative calculation.
 \details{
 Note that \code{\link{pmcmc}} does not currently support parameter transformations.
 }
+\seealso{
+Other extraction methods: 
+\code{\link{coef}()},
+\code{\link{cond.logLik}()},
+\code{\link{covmat}()},
+\code{\link{eff.sample.size}()},
+\code{\link{filter.mean}()},
+\code{\link{filter.traj}()},
+\code{\link{forecast}()},
+\code{\link{logLik}},
+\code{\link{obs}()},
+\code{\link{pred.mean}()},
+\code{\link{pred.var}()},
+\code{\link{saved.states}()},
+\code{\link{spy}()},
+\code{\link{states}()},
+\code{\link{summary}()},
+\code{\link{timezero}()},
+\code{\link{time}()}
+}
+\concept{extraction methods}

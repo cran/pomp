@@ -16,9 +16,9 @@
 ##'
 ##' @name gompertz
 ##' @docType data
-##' @keywords models pomp_datasets
+##' @keywords models
 ##' @include simulate.R
-##' @family pomp_examples
+##' @family pomp examples
 ##'
 ##' @return
 ##' A \sQuote{pomp} object with simulated data.

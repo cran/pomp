@@ -48,7 +48,7 @@ When \code{rprocess} is called, \code{t0} is taken to be the initial time (i.e.,
 The values in \code{times} are the times at which the state of the simulated processes are required.
 }
 \seealso{
-Specification of the process-model simulator: \code{\link{rprocess_spec}}
+Specification of the process-model simulator: \link{rprocess specification}
 
 More on \pkg{pomp} workhorse functions: 
 \code{\link{dmeasure}()},
@@ -56,10 +56,11 @@ More on \pkg{pomp} workhorse functions:
 \code{\link{dprocess}()},
 \code{\link{flow}()},
 \code{\link{partrans}()},
+\code{\link{pomp-package}},
 \code{\link{rinit}()},
 \code{\link{rmeasure}()},
 \code{\link{rprior}()},
 \code{\link{skeleton}()},
 \code{\link{workhorses}}
 }
-\concept{pomp_workhorses}
+\concept{pomp workhorses}

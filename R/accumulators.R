@@ -1,11 +1,11 @@
-##' accumulators
+##' accumulator variables
 ##'
-##' Accumulator variables
+##' Latent state variables that accumulate quantities through time.
 ##'
-##' @name accumulators
+##' @name accumulator variables
 ##' @rdname accumulators
 ##' @aliases accumvars
-##' @family implementation_info
+##' @family implementation information
 ##' @seealso \code{\link{sir}}
 ##'
 ##' @details

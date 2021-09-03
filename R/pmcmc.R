@@ -10,10 +10,12 @@
 ##' @include pfilter.R proposals.R load.R continue.R
 ##' @aliases pmcmc,ANY-method pmcmc,missing-method
 ##' @author Edward L. Ionides, Aaron A. King, Sebastian Funk
-##' @seealso \link[=proposals]{MCMC proposals}
-##' @family particle_filter_methods
-##' @family estimation_methods
-##'
+##' @family estimation methods
+##' @family particle filter methods
+##' @family full-information methods
+##' @family MCMC methods
+##' @family Bayesian methods
+##' 
 ##' @importFrom stats runif
 ##' @inheritParams pomp
 ##' @inheritParams pfilter
@@ -23,6 +25,15 @@
 ##' proper inference: it is the user's responsibility to ensure that it is.
 ##' Several functions that construct appropriate proposal function are
 ##' provided: see \link[=proposals]{MCMC proposals} for more information.
+##'
+##' @section Methods:
+##' The following can be applied to the output of a \code{pmcmc} operation:
+##' \describe{
+##' \item{pmcmc}{repeats the calculation, beginning with the last state}
+##' \item{continue}{continues the \code{pmcmc} calculation}
+##' \item{plot}{produces a series of diagnostic plots}
+##' \item{traces}{produces an \code{\link[coda]{mcmc}} object, to which the various \pkg{coda} convergence diagnostics can be applied}
+##' }
 ##'
 ##' @return An object of class \sQuote{pmcmcd_pomp}.
 ##'

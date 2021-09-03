@@ -10,9 +10,9 @@
 ##'
 ##' @name bsflu
 ##' @rdname bsflu
-##' @family pomp_datasets
-##' @family pomp_examples
-##' @seealso \link{sir_models}
+##' @family pomp datasets
+##' @family pomp examples
+##' @seealso \link{SIR models}
 ##'
 ##' @references
 ##' 
