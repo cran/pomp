@@ -68,7 +68,7 @@ Examples are to be found in the tutorials on the \href{https://kingaa.github.io/
 
 If \code{f} is given as an \R function, its arguments should come from the state variables, parameters, covariates, and time.
 It may also take the argument \sQuote{\code{delta.t}};
-when called, the latter will be the time-step.
+when called, the latter will be the timestep.
 It must also have the argument \sQuote{\code{...}}.
 It should return a named vector of length equal to the number of state variables, representing a draw from the distribution of the state process at time \code{t+delta.t} conditional on its value at time \code{t}.
 }
@@ -200,10 +200,12 @@ More on implementing POMP models:
 \code{\link{Csnippet}},
 \code{\link{accumulator variables}},
 \code{\link{basic components}},
+\code{\link{betabinomial}},
 \code{\link{covariates}},
 \code{\link{distributions}},
 \code{\link{dmeasure specification}},
 \code{\link{dprocess specification}},
+\code{\link{emeasure specification}},
 \code{\link{parameter transformations}},
 \code{\link{pomp-package}},
 \code{\link{pomp}},
@@ -212,6 +214,7 @@ More on implementing POMP models:
 \code{\link{rmeasure specification}},
 \code{\link{skeleton specification}},
 \code{\link{transformations}},
-\code{\link{userdata}}
+\code{\link{userdata}},
+\code{\link{vmeasure specification}}
 }
 \concept{implementation information}

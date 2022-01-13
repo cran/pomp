@@ -6,6 +6,8 @@
 ##' They include \describe{
 ##' \item{\code{\link{dmeasure}}}{which evaluates the measurement model density,}
 ##' \item{\code{\link{rmeasure}}}{which samples from the measurement model distribution,}
+##' \item{\code{\link{emeasure}}}{which computes the expectation of the observed variables conditional on the latent state,}
+##' \item{\code{\link{vmeasure}}}{which computes the covariance matrix of the observed variables conditional on the latent state,}
 ##' \item{\code{\link{dprocess}}}{which evaluates the process model density,}
 ##' \item{\code{\link{rprocess}}}{which samples from the process model distribution,}
 ##' \item{\code{\link{dprior}}}{which evaluates the prior probability density,}
@@ -19,6 +21,8 @@
 ##' @include pomp_class.R pomp_fun.R load.R pstop.R
 ##' @docType methods
 ##' @family pomp workhorses
+##' @concept extending the pomp package
+##' @concept low-level interface
 ##' @seealso \link[=basic components]{basic model components},
 ##' \link[=elementary algorithms]{elementary algorithms},
 ##' \link[=estimation algorithms]{estimation algorithms}
@@ -37,6 +41,8 @@ NULL
 ##' @docType methods
 ##' @aliases dmeasure,ANY-method dmeasure,missing-method
 ##' @family pomp workhorses
+##' @concept extending the pomp package
+##' @concept low-level interface
 ##' @seealso Specification of the measurement density evaluator: \link{dmeasure specification}
 ##'
 ##' @param object an object of class \sQuote{pomp}, or of a class that extends \sQuote{pomp}.
@@ -124,6 +130,8 @@ dmeasure.internal <- function (object, y, x, times, params, ..., log = FALSE,
 ##' @aliases dprior,ANY-method dprior,missing-method
 ##' @family pomp workhorses
 ##' @family Bayesian methods
+##' @concept extending the pomp package
+##' @concept low-level interface
 ##' @seealso Specification of the prior density evaluator: \link{prior specification}
 ##'
 ##' @inheritParams dmeasure
@@ -184,6 +192,8 @@ dprior.internal <- function (object, params, log = FALSE,
 ##' @docType methods
 ##' @aliases dprocess,ANY-method dprocess,missing-method
 ##' @family pomp workhorses
+##' @concept extending the pomp package
+##' @concept low-level interface
 ##' @seealso Specification of the process-model density evaluator: \link{dprocess specification}
 ##'
 ##' @inheritParams dmeasure
@@ -245,6 +255,8 @@ dprocess.internal <- function (object, x, times, params, log = FALSE, .gnsi = TR
 ##' @docType methods
 ##' @aliases partrans,ANY-method partrans,missing-method
 ##' @family pomp workhorses
+##' @concept extending the pomp package
+##' @concept low-level interface
 ##' @seealso Specification of parameter transformations: \code{\link{parameter_trans}}
 ##'
 ##' @inheritParams dmeasure
@@ -312,6 +324,8 @@ partrans.internal <- function (object, params, dir = c("fromEst", "toEst"),
 ##' @docType methods
 ##' @aliases rinit,ANY-method rinit,missing-method
 ##' @family pomp workhorses
+##' @concept extending the pomp package
+##' @concept low-level interface
 ##' @seealso Specification of the initial-state distribution: \link{rinit specification}
 ##'
 ##' @inheritParams dmeasure
@@ -377,6 +391,8 @@ rinit.internal <- function (object, params, t0, nsim = 1,
 ##' @docType methods
 ##' @aliases rmeasure,ANY-method rmeasure,missing-method
 ##' @family pomp workhorses
+##' @concept extending the pomp package
+##' @concept low-level interface
 ##' @seealso Specification of the measurement-model simulator: \link{rmeasure specification}
 ##'
 ##' @inheritParams dmeasure
@@ -432,6 +448,134 @@ rmeasure.internal <- function (object, x, times, params,
   .Call(P_do_rmeasure,object,x,times,params,.gnsi)
 }
 
+##' emeasure
+##'
+##' Return the expected value of the observed variables, given values of the latent states and the parameters.
+##'
+##' @name emeasure
+##' @docType methods
+##' @aliases emeasure,ANY-method emeasure,missing-method
+##' @family pomp workhorses
+##' @seealso Specification of the measurement-model expectation: \link{emeasure specification}
+##'
+##' @inheritParams dmeasure
+##'
+##' @return
+##' \code{emeasure} returns a rank-3 array of dimensions
+##' \code{nobs} x \code{nrep} x \code{ntimes},
+##' where \code{nobs} is the number of observed variables.
+##'
+NULL
+
+setGeneric(
+  "emeasure",
+  function (object, ...)
+    standardGeneric("emeasure")
+)
+
+setMethod(
+  "emeasure",
+  signature=signature(object="missing"),
+  definition=function (...) {
+    reqd_arg("emeasure","object")
+  }
+)
+
+setMethod(
+  "emeasure",
+  signature=signature(object="ANY"),
+  definition=function (object, ...) {
+    undef_method("emeasure",object)
+  }
+)
+
+##' @export
+##' @rdname emeasure
+setMethod(
+  "emeasure",
+  signature=signature(object="pomp"),
+  definition=function (object, x, times, params, ...) {
+    tryCatch(
+      emeasure.internal(object=object,x=x,times=times,params=params,...),
+      error = function (e) pStop("emeasure",conditionMessage(e))
+    )
+  }
+)
+
+emeasure.internal <- function (object, x, times, params,
+  .gnsi = TRUE, ...) {
+  storage.mode(x) <- "double"
+  storage.mode(params) <- "double"
+  pompLoad(object)
+  on.exit(pompUnload(object))
+  .Call(P_do_emeasure,object,x,times,params,.gnsi)
+}
+
+##' vmeasure
+##'
+##' Return the covariance matrix of the observed variables, given values of the latent states and the parameters.
+##'
+##' @name vmeasure
+##' @docType methods
+##' @aliases vmeasure,ANY-method vmeasure,missing-method
+##' @family pomp workhorses
+##' @seealso Specification of the measurement-model covariance matrix: \link{vmeasure specification}
+##'
+##' @inheritParams dmeasure
+##'
+##' @return
+##' \code{vmeasure} returns a rank-4 array of dimensions
+##' \code{nobs} x \code{nobs} x \code{nrep} x \code{ntimes},
+##' where \code{nobs} is the number of observed variables.
+##' If \code{v} is the returned array, \code{v[,,j,k]} contains the
+##' covariance matrix at time \code{times[k]} given the state \code{x[,j,k]}.
+##'
+NULL
+
+setGeneric(
+  "vmeasure",
+  function (object, ...)
+    standardGeneric("vmeasure")
+)
+
+setMethod(
+  "vmeasure",
+  signature=signature(object="missing"),
+  definition=function (...) {
+    reqd_arg("vmeasure","object")
+  }
+)
+
+setMethod(
+  "vmeasure",
+  signature=signature(object="ANY"),
+  definition=function (object, ...) {
+    undef_method("vmeasure",object)
+  }
+)
+
+##' @export
+##' @rdname vmeasure
+setMethod(
+  "vmeasure",
+  signature=signature(object="pomp"),
+  definition=function (object, x, times, params, ...) {
+    tryCatch(
+      vmeasure.internal(object=object,x=x,times=times,params=params,...),
+      error = function (e) pStop("vmeasure",conditionMessage(e))
+    )
+  }
+)
+
+vmeasure.internal <- function (object, x, times, params,
+  .gnsi = TRUE, ...) {
+  storage.mode(x) <- "double"
+  storage.mode(params) <- "double"
+  pompLoad(object)
+  on.exit(pompUnload(object))
+  .Call(P_do_vmeasure,object,x,times,params,.gnsi)
+}
+
 ##' rprior
 ##'
 ##' Sample from the prior probability distribution.
@@ -441,6 +585,8 @@ rmeasure.internal <- function (object, x, times, params,
 ##' @aliases rprior,ANY-method rprior,missing-method
 ##' @family pomp workhorses
 ##' @family Bayesian methods
+##' @concept extending the pomp package
+##' @concept low-level interface
 ##' @seealso Specification of the prior distribution simulator: \link{prior specification}
 ##'
 ##' @inheritParams dmeasure
@@ -502,6 +648,8 @@ rprior.internal <- function (object, params, .gnsi = TRUE, ...) {
 ##' @docType methods
 ##' @aliases rprocess,ANY-method rprocess,missing-method
 ##' @family pomp workhorses
+##' @concept extending the pomp package
+##' @concept low-level interface
 ##' @seealso Specification of the process-model simulator: \link{rprocess specification}
 ##'
 ##' @inheritParams dmeasure
@@ -586,6 +734,8 @@ rprocess.internal <- function (object, x0, t0, times, params, ...,
 ##' @aliases skeleton,ANY-method skeleton,missing-method
 ##' @family pomp workhorses
 ##' @family deterministic methods
+##' @concept extending the pomp package
+##' @concept low-level interface
 ##' @seealso Specification of the deterministic skeleton: \link{skeleton specification}
 ##'
 ##' @inheritParams dmeasure

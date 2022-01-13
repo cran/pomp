@@ -33,6 +33,7 @@ Specification of the prior density evaluator: \link{prior specification}
 More on \pkg{pomp} workhorse functions: 
 \code{\link{dmeasure}()},
 \code{\link{dprocess}()},
+\code{\link{emeasure}()},
 \code{\link{flow}()},
 \code{\link{partrans}()},
 \code{\link{pomp-package}},
@@ -41,6 +42,7 @@ More on \pkg{pomp} workhorse functions:
 \code{\link{rprior}()},
 \code{\link{rprocess}()},
 \code{\link{skeleton}()},
+\code{\link{vmeasure}()},
 \code{\link{workhorses}}
 
 More on Bayesian methods:
@@ -51,4 +53,6 @@ More on Bayesian methods:
 \code{\link{rprior}()}
 }
 \concept{Bayesian methods}
+\concept{extending the pomp package}
+\concept{low-level interface}
 \concept{pomp workhorses}

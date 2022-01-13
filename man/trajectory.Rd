@@ -4,56 +4,104 @@
 \alias{trajectory}
 \alias{trajectory,missing-method}
 \alias{trajectory,ANY-method}
+\alias{trajectory,data.frame-method}
 \alias{trajectory,pomp-method}
 \alias{trajectory,traj_match_objfun-method}
 \title{Trajectory of a deterministic model}
 \usage{
+\S4method{trajectory}{missing}(
+  t0,
+  times,
+  params,
+  skeleton,
+  rinit,
+  ...,
+  ode_control = list(),
+  format = c("pomps", "array", "data.frame"),
+  verbose = getOption("verbose", FALSE)
+)
+
+\S4method{trajectory}{data.frame}(
+  object,
+  ...,
+  t0,
+  times,
+  params,
+  skeleton,
+  rinit,
+  ode_control = list(),
+  format = c("pomps", "array", "data.frame"),
+  verbose = getOption("verbose", FALSE)
+)
+
 \S4method{trajectory}{pomp}(
   object,
   params,
-  times,
-  t0,
-  format = c("array", "data.frame"),
   ...,
+  skeleton,
+  rinit,
+  ode_control = list(),
+  format = c("pomps", "array", "data.frame"),
   verbose = getOption("verbose", FALSE)
 )
 
 \S4method{trajectory}{traj_match_objfun}(object, ..., verbose = getOption("verbose", FALSE))
 }
 \arguments{
-\item{object}{an object of class \sQuote{pomp}, or of a class that extends \sQuote{pomp}.
-This will typically be the output of \code{pomp}, \code{simulate}, or one of the \pkg{pomp} inference algorithms.}
+\item{t0}{The zero-time, i.e., the time of the initial state.
+This must be no later than the time of the first observation, i.e., \code{t0 <= times[1]}.}
 
-\item{params}{a \code{npar} x \code{nrep} matrix of parameters.
-Each column is treated as an independent parameter set, in correspondence with the corresponding column of \code{x}.}
+\item{times}{the sequence of observation times.
+\code{times} must indicate the column of observation times by name or index.
+The time vector must be numeric and non-decreasing.}
 
-\item{times}{a numeric vector (length \code{ntimes}) containing times at which the itineraries are desired.
-These must be in non-decreasing order with \code{times[1]>t0}.
-By default, this is the full set of observation times (see \code{\link{time}}).}
+\item{params}{optional; named numeric vector of parameters.
+This will be coerced internally to storage mode \code{double}.}
 
-\item{t0}{the time at which the initial conditions are assumed to hold.
-By default, this is the zero-time (see \code{\link{timezero}}).}
+\item{skeleton}{optional; the deterministic skeleton of the unobserved state process.
+Depending on whether the model operates in continuous or discrete time, this is either a vectorfield or a map.
+Accordingly, this is supplied using either the \code{\link[=skeleton specification]{vectorfield}} or \code{\link[=skeleton specification]{map}} fnctions.
+For more information, see \link[=skeleton specification]{skeleton specification}.
+Setting \code{skeleton=NULL} removes the deterministic skeleton.}
+
+\item{rinit}{simulator of the initial-state distribution.
+This can be furnished either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
+Setting \code{rinit=NULL} sets the initial-state simulator to its default.
+For more information, see \link[=rinit specification]{rinit specification}.}
+
+\item{...}{additional arguments supply new or modify existing model characteristics or components.
+See \code{\link{pomp}} for a full list of recognized arguments.
+
+When named arguments not recognized by \code{\link{pomp}} are provided, these are made available to all basic components via the so-called \dfn{userdata} facility.
+This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
+See \link[=userdata]{userdata} for information on how to use this facility.}
+
+\item{ode_control}{optional list;
+the elements of this list will be passed to \code{\link[=deSolve]{ode}} if the skeleton is a vectorfield, and ignored if it is a map.}
 
 \item{format}{the format in which to return the results.
+
+\code{format = "pomps"} causes the trajectories to be returned as a single \sQuote{pomp} object (if a single parameter vector have been furnished to \code{trajectory}) or as a \sQuote{pompList} object (if multiple parameters have been furnished).
+In each of these, the \code{states} slot will have been replaced by the computed trajectory.
+Use \code{\link{states}} to view these.
 
 \code{format = "array"} causes the trajectories to be returned
 in a rank-3 array with dimensions
 \code{nvar} x \code{ncol(params)} x \code{ntimes}.
 Here, \code{nvar} is the number of state variables and \code{ntimes} the length of the argument \code{times}.
+Thus if \code{x} is the returned array, \code{x[i,j,k]} is the i-th component of the state vector at time \code{times[k]} given parameters \code{params[,j]}.
 
-\code{format = "data.frame"} causes the results to be returned as a single data frame containing
-the time and states.
+\code{format = "data.frame"} causes the results to be returned as a single data frame containing the time and states.
 An ordered factor variable, \sQuote{.id}, distinguishes the trajectories from one another.}
 
-\item{...}{Additional arguments are passed to the ODE integrator (if the skeleton is a vectorfield) and are ignored if it is a map.
-See \code{\link[deSolve]{ode}} for a description of the additional arguments accepted by the ODE integrator.
-By default, this is the parameter vector stored in \code{object} (see \code{\link[pomp]{coef}}).}
-
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
+
+\item{object}{optional;
+if present, it should be a data frame or a \sQuote{pomp} object.}
 }
 \value{
-\code{trajectory} returns an array of dimensions \code{nvar} x \code{nrep} x \code{ntimes}.
-If \code{x} is the returned matrix, \code{x[i,j,k]} is the i-th component of the state vector at time \code{times[k]} given parameters \code{params[,j]}.
+The \code{format} option controls the nature of the return value of \code{trajectory}.
+See above for details.
 }
 \description{
 Compute trajectories of the deterministic skeleton of a Markov process.
@@ -62,9 +110,67 @@ Compute trajectories of the deterministic skeleton of a Markov process.
 In the case of a discrete-time system, the deterministic skeleton is a map and a trajectory is obtained by iterating the map.
 In the case of a continuous-time system, the deterministic skeleton is a vector-field;
 \code{trajectory} uses the numerical solvers in \pkg{\link[deSolve]{deSolve}} to integrate the vectorfield.
+}
+\examples{
+\donttest{
+  ## The basic components needed to compute trajectories
+  ## of a deterministic dynamical system are
+  ## rinit and skeleton.
 
-Note that the handling of \code{\dots} in \code{trajectory} differs from that of most other functions in \pkg{pomp}.
-In particular, it is not possible to modify the model structure in a call to \code{trajectory}.
+  ## The following specifies these for a simple continuous-time
+  ## model: dx/dt = r (1+e cos(t)) x
+
+  trajectory(
+    t0 = 0, times = seq(1,30,by=0.1),
+    rinit = function (x0, ...) {
+      c(x = x0)
+    },
+    skeleton = vectorfield(
+      function (r, e, t, x, ...) {
+        c(x=r*(1+e*cos(t))*x)
+      }
+    ),
+    params = c(r=1,e=3,x0=1)
+  ) -> po
+
+  plot(po,log='y')
+
+  ## In the case of a discrete-time skeleton,
+  ## we use the 'map' function.  For example,
+  ## the following computes a trajectory from
+  ## the dynamical system with skeleton
+  ## x -> x exp(r sin(omega t)).
+
+  trajectory(
+    t0 = 0, times=seq(1,100),
+    rinit = function (x0, ...) {
+      c(x = x0)
+    },
+    skeleton = map(
+      function (r, t, x, omega, ...) {
+        c(x=x*exp(r*sin(omega*t)))
+      },
+      delta.t=1
+    ),
+    params = c(r=1,x0=1,omega=4)
+  ) -> po
+
+  plot(po)
+
+}
+\donttest{
+  ## generate a bifurcation diagram for the Ricker map
+  p <- parmat(coef(ricker()),nrep=500)
+  p["r",] <- exp(seq(from=1.5,to=4,length=500))
+  trajectory(
+    ricker(),
+    times=seq(from=1000,to=2000,by=1),
+    params=p,
+    format="array"
+  ) -> x
+  matplot(p["r",],x["N",,],pch='.',col='black',
+    xlab=expression(log(r)),ylab="N",log='x')
+}
 }
 \seealso{
 More on \pkg{pomp} elementary algorithms: 

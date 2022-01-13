@@ -44,6 +44,9 @@ In writing a \code{skeleton} C snippet, be aware that:
   \item When the skeleton is a map, the component corresponding to state variable \code{x} is named \code{Dx} and is the new value of \code{x} after one iteration of the map.
   \item When the skeleton is a vectorfield, the component corresponding to state variable \code{x} is named \code{Dx} and is the value of \eqn{dx/dt}.
   \item As with the other C snippets, all states, parameters and covariates, as well as the current time, \code{t}, will be defined in the context within which the snippet is executed.
+  \item \bold{NB:} When the skeleton is a map, the duration of the timestep will \bold{not} be defined in the context within which the snippet is executed.
+  When the skeleton is a vectorfield, of course, no timestep is defined.
+  In this regard, C snippets for the skeleton and rprocess components differ.
 }
 The tutorials on the \href{https://kingaa.github.io/pomp/}{package website} give some examples.
 
@@ -75,21 +78,22 @@ To circumvent this problem, use the \code{\link[=pomp]{cdir}} and \code{\link[=p
   
   ## we add or change the deterministic skeleton
   ## using the 'skeleton' argument in any 'pomp'
-  ## estimation function, or in the 'pomp' constructor
-  ## itself). Here, we pass the skeleton specification
-  ## to 'pomp' as an R function.
+  ## elementary or estimation function
+  ## (or in the 'pomp' constructor itself).
+  ## Here, we pass the skeleton specification
+  ## to 'trajectory' as an R function.
   ## Since this is a continuous-time POMP, the
   ## skeleton is a vectorfield.
 
   po \%>\%
-    pomp(
+    trajectory(
       skeleton=vectorfield(
         function(r, K, n, ...) {
           c(n=r*n*(1-n/K))
         }
-      )
-    ) \%>\%
-    trajectory(format="data.frame") -> traj
+      ),
+      format="data.frame"
+    ) -> traj
 
   ## We can also pass it as a C snippet:
 
@@ -131,10 +135,12 @@ More on implementing POMP models:
 \code{\link{Csnippet}},
 \code{\link{accumulator variables}},
 \code{\link{basic components}},
+\code{\link{betabinomial}},
 \code{\link{covariates}},
 \code{\link{distributions}},
 \code{\link{dmeasure specification}},
 \code{\link{dprocess specification}},
+\code{\link{emeasure specification}},
 \code{\link{parameter transformations}},
 \code{\link{pomp-package}},
 \code{\link{pomp}},
@@ -143,7 +149,8 @@ More on implementing POMP models:
 \code{\link{rmeasure specification}},
 \code{\link{rprocess specification}},
 \code{\link{transformations}},
-\code{\link{userdata}}
+\code{\link{userdata}},
+\code{\link{vmeasure specification}}
 
 More on methods for deterministic process models: 
 \code{\link{flow}()},

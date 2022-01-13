@@ -18,7 +18,7 @@ verhulst(n_0 = 10000, K = 10000, r = 0.9, sigma = 0.4, tau = 0.1, dt = 0.01)
 
 \item{tau}{measurement error s.d.}
 
-\item{dt}{Euler time-step}
+\item{dt}{Euler timestep}
 }
 \value{
 A \sQuote{pomp} object containing the model and simulated data.
@@ -51,13 +51,11 @@ The measurements are assumed to be log-normally distributed.
 More examples provided with \pkg{pomp}: 
 \code{\link{SIR models}},
 \code{\link{blowflies}},
-\code{\link{bsflu}},
 \code{\link{childhood disease data}},
 \code{\link{dacca}()},
 \code{\link{ebola}},
 \code{\link{gompertz}()},
 \code{\link{ou2}()},
-\code{\link{parus}},
 \code{\link{pomp examples}},
 \code{\link{ricker}()},
 \code{\link{rw2}()}

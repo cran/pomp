@@ -47,6 +47,7 @@ More on \pkg{pomp} workhorse functions:
 \code{\link{dmeasure}()},
 \code{\link{dprior}()},
 \code{\link{dprocess}()},
+\code{\link{emeasure}()},
 \code{\link{partrans}()},
 \code{\link{pomp-package}},
 \code{\link{rinit}()},
@@ -54,6 +55,7 @@ More on \pkg{pomp} workhorse functions:
 \code{\link{rprior}()},
 \code{\link{rprocess}()},
 \code{\link{skeleton}()},
+\code{\link{vmeasure}()},
 \code{\link{workhorses}}
 
 More on methods for deterministic process models: 
@@ -63,4 +65,6 @@ More on methods for deterministic process models:
 \code{\link{trajectory}()}
 }
 \concept{deterministic methods}
+\concept{extending the pomp package}
+\concept{low-level interface}
 \concept{pomp workhorses}

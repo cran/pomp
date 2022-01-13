@@ -1,5 +1,51 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 4.1}{
+  \itemize{
+    \item Change in the names of the variables returned by \code{as.data.frame} applied to a \sQuote{pfilterd.pomp} object.
+    \item Fixed bug found by Jesse Wheeler and Ed Ionides, to do with `simulate()` with `include.data=TRUE`.
+    \item It is now possible to plot lists of \sQuote{pomp} and \sQuote{pomp}-derived objects using a single call to \code{plot}.
+    \item The \code{rbetabinom} and \code{dbetabinom} functions, long present as part of the \href{https://kingaa.github.io/pomp/vignettes/C_API.html}{C API}, are now available as \R functions.
+    \item The SIR examples \code{sir()} and \code{sir2()} now use a negative binomial measurement model.
+    \item \code{parmat} can now take a data frame of parameters and convert it into a matrix suitable for furnishing to the \code{params} argument of any \pkg{pomp} function.
+    \item It is now possible to change the parameters in an \sQuote{objfun} (objective function) object using \code{coef(object)<-value}.
+    \item \code{parmat} now takes an optional argument, \code{names}, which allows the user to name the parameter sets.
+    \item Independent realizations of the stochastic processes modeled in \pkg{pomp} are now distinguished by different values of \code{.id}.
+    This behavior is now uniform throughout.
+    \item \code{bake} and \code{stew} now send messages instead of warnings when they recompute an archive due to a change in code or dependencies.
+    \item It is now possible to change the parameters in an \sQuote{objfun} (objective function) object using \code{coef(object)<-value}.
+    \item The ensemble adjusted Kalman filter (\code{eakf}) has been refactored.
+    It now makes use of the \code{emeasure} and \code{vmeasure} basic components to compute an approximation of the linear relationship between the latent state and the observed variables.
+    \item The \code{forecast} method now works for \code{pfiterd_pomp} objects (i.e., results of \code{pfilter}, \code{pmcmc}, or \code{mif2} computations).
+    \item Two new basic model components have been introduced.
+    These are:
+    \describe{
+      \item{emeasure,}{which computes the expectation of the observable variables conditional on the latent state;}
+      \item{vmeasure,}{which computes the covariance matrix of the observables given the latent state.}
+    }
+    These are used by the newly refactored ensemble Kalman filter, \code{enkf}.
+    \item The basic (linear, Gaussian) Kalman filter is now available as \code{kalmanFilter}.
+    \item Computation of Monte Carlo-adjusted profile likelihood is now facilitated by the new \code{mcap} function.
+    \item The default return-value format for \code{trajectory} now matches that of \code{simulate}.
+  }
+}
+\section{Changes in \pkg{pomp} version 4.0}{
+  Version 4 contains a few changes that are not backward compatible.
+  These are all to do with the elementary function \code{trajectory}, which computes trajectories of the deterministic dynamical skeleton.
+  See below for details.
+  \itemize{
+    \item The behavior of \code{trajectory} now fully conforms to the behavior of other \pkg{pomp} elementary functions.
+    In particular, one can now add, remove, or modify basic model components in a call to \code{trajectory} just as one can with \code{simulate}, \code{pfilter}, \code{probe}, etc.
+    Before version 4, additional arguments to \code{trajectory} (i.e., those passed via \code{...}) were passed on to the ODE integrator in the case of continuous-time deterministic skeletons (i.e., vectorfields) and ignored in the case of discrete-time skeletons (i.e., maps).
+    As of version 4, in order to adjust ODE integrator settings it is necessary to use the \code{ode_control} argument of \code{trajectory}.
+    This behavior matches that of \code{traj_objfun}.
+    \item It is now possible to create a \sQuote{pomp} object from scratch using \code{trajectory}, together with a specification of the rinit and skeleton components.
+    Prior to version 4, in order to do so, it was necessary to first create a dummy data set, then call \code{pomp}, and then pass the resulting \sQuote{pomp} object to \code{trajectory}.
+    This can now be achieved in one call.
+    \item The user now has the option, in a call to \code{trajectory}, to have the results returned as one or \sQuote{pomp} objects.
+    In this regard, its behavior matches that of \code{simulate}.
+  }
+}
 \section{Changes in \pkg{pomp} version 3.6}{
   \itemize{
     \item The \code{states} and \code{obs} methods now work for lists of \sQuote{pomp} objects (\sQuote{listies}).

@@ -39,6 +39,7 @@ More on \pkg{pomp} workhorse functions:
 \code{\link{dmeasure}()},
 \code{\link{dprior}()},
 \code{\link{dprocess}()},
+\code{\link{emeasure}()},
 \code{\link{flow}()},
 \code{\link{pomp-package}},
 \code{\link{rinit}()},
@@ -46,6 +47,9 @@ More on \pkg{pomp} workhorse functions:
 \code{\link{rprior}()},
 \code{\link{rprocess}()},
 \code{\link{skeleton}()},
+\code{\link{vmeasure}()},
 \code{\link{workhorses}}
 }
+\concept{extending the pomp package}
+\concept{low-level interface}
 \concept{pomp workhorses}

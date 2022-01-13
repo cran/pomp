@@ -20,7 +20,7 @@
 ##' @param sigma environmental process noise s.d.
 ##' @param tau measurement error s.d.
 ##' @param n_0 initial condition
-##' @param dt Euler time-step
+##' @param dt Euler timestep
 ##'
 ##' @return
 ##' A \sQuote{pomp} object containing the model and simulated data.
@@ -49,6 +49,10 @@ verhulst <- function (
       ),
       delta.t=dt
     ),
+    emeasure=Csnippet("E_N = n*exp(tau*tau/2);"),
+    vmeasure=Csnippet("
+      double et = exp(tau*tau);
+      V_N_N = n*n*et*(et-1);"),
     rmeasure=Csnippet("N = rlnorm(log(n),tau);"),
     dmeasure=Csnippet("lik = dlnorm(N,log(n),tau,give_log);"),
     skeleton=vectorfield(Csnippet("Dn = r*n*(1-n/K);")),

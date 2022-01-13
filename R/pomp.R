@@ -10,6 +10,8 @@
 ##' \item{dprocess,}{the evaluator of the probability density function for transitions of the unobserved Markov state process;}
 ##' \item{rmeasure,}{the simulator of the observed process, conditional on the unobserved state;}
 ##' \item{dmeasure,}{the evaluator of the measurement model probability density function;}
+##' \item{emeasure,}{the expectation of the measurements, conditional on the latent state;}
+##' \item{vmeasure,}{the covariance matrix of the measurements, conditional on the latent state;}
 ##' \item{rprior,}{which samples from a prior probability distribution on the parameters;}
 ##' \item{dprior,}{which evaluates the prior probability density function;}
 ##' \item{skeleton,}{which computes the deterministic skeleton of the unobserved state process;}
@@ -67,6 +69,16 @@
 ##' @param dmeasure evaluator of the measurement model density, specified either as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
 ##' Setting \code{dmeasure=NULL} removes the measurement density evaluator.
 ##' For more information, see \link[=dmeasure specification]{dmeasure specification}.
+##'
+##' @param emeasure the expectation of the measured variables, conditional on the latent state.
+##' This can be specified as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
+##' Setting \code{emeasure=NULL} removes the emeasure component.
+##' For more information, see \link[=emeasure specification]{emeasure specification}.
+##'
+##' @param vmeasure the covariance of the measured variables, conditional on the latent state.
+##' This can be specified as a C snippet, an \R function, or the name of a pre-compiled native routine available in a dynamically loaded library.
+##' Setting \code{vmeasure=NULL} removes the vmeasure component.
+##' For more information, see \link[=vmeasure specification]{vmeasure specification}.
 ##'
 ##' @param skeleton optional; the deterministic skeleton of the unobserved state process.
 ##' Depending on whether the model operates in continuous or discrete time, this is either a vectorfield or a map.
@@ -159,9 +171,13 @@ NULL
 ##' @rdname pomp
 ##' @export
 pomp <- function (data, times, t0, ...,
-  rinit, rprocess, dprocess, rmeasure, dmeasure,
-  skeleton, rprior, dprior, partrans, covar,
-  params, accumvars,
+  rinit,
+  rprocess, dprocess,
+  rmeasure, dmeasure, emeasure, vmeasure,
+  skeleton,
+  rprior, dprior,
+  partrans,
+  covar, params, accumvars,
   obsnames, statenames, paramnames, covarnames,
   PACKAGE, globals,
   cdir = getOption("pomp_cdir", NULL), cfile,
@@ -179,7 +195,8 @@ pomp <- function (data, times, t0, ...,
   if (
     is(data,"pomp") && missing(times) && missing(t0) &&
       missing(rinit) && missing(rprocess) && missing(dprocess) &&
-      missing(rmeasure) && missing(dmeasure) && missing(skeleton) &&
+      missing(rmeasure) && missing(dmeasure) && missing(emeasure) &&
+      missing(vmeasure) && missing(skeleton) &&
       missing(rprior) && missing(dprior) && missing(partrans) &&
       missing(covar) && missing(params) && missing(accumvars) &&
       ...length() == 0
@@ -193,6 +210,7 @@ pomp <- function (data, times, t0, ...,
       data=data,times=times,t0=t0,...,
       rinit=rinit,rprocess=rprocess,dprocess=dprocess,
       rmeasure=rmeasure,dmeasure=dmeasure,
+      emeasure=emeasure,vmeasure=vmeasure,
       skeleton=skeleton,rprior=rprior,dprior=dprior,partrans=partrans,
       params=params,covar=covar,accumvars=accumvars,
       obsnames=obsnames,statenames=statenames,paramnames=paramnames,
@@ -284,7 +302,9 @@ setMethod(
   "construct_pomp",
   signature=signature(data="array", times="numeric"),
   definition = function (data, times, ...,
-    rinit, rprocess, dprocess, rmeasure, dmeasure, skeleton, rprior, dprior,
+    rinit, rprocess, dprocess,
+    rmeasure, dmeasure, emeasure, vmeasure,
+    skeleton, rprior, dprior,
     partrans, params, covar) {
 
     if (missing(rinit)) rinit <- NULL
@@ -296,6 +316,8 @@ setMethod(
     if (missing(dprocess)) dprocess <- NULL
     if (missing(rmeasure)) rmeasure <- NULL
     if (missing(dmeasure)) dmeasure <- NULL
+    if (missing(emeasure)) emeasure <- NULL
+    if (missing(vmeasure)) vmeasure <- NULL
 
     if (missing(skeleton) || is.null(skeleton)) {
       skeleton <- skel_plugin()
@@ -321,6 +343,8 @@ setMethod(
       dprocess=dprocess,
       rmeasure=rmeasure,
       dmeasure=dmeasure,
+      emeasure=emeasure,
+      vmeasure=vmeasure,
       skeleton=skeleton,
       dprior=dprior,
       rprior=rprior,
@@ -346,7 +370,9 @@ setMethod(
   "construct_pomp",
   signature=signature(data="pomp", times="NULL"),
   definition = function (data, times, t0, timename, ...,
-    rinit, rprocess, dprocess, rmeasure, dmeasure, skeleton, rprior, dprior,
+    rinit, rprocess, dprocess,
+    rmeasure, dmeasure, emeasure, vmeasure,
+    skeleton, rprior, dprior,
     partrans, params, covar, accumvars, cfile) {
 
     times <- data@times
@@ -361,6 +387,8 @@ setMethod(
     if (missing(dprocess)) dprocess <- data@dprocess
     if (missing(rmeasure)) rmeasure <- data@rmeasure
     if (missing(dmeasure)) dmeasure <- data@dmeasure
+    if (missing(emeasure)) emeasure <- data@emeasure
+    if (missing(vmeasure)) vmeasure <- data@vmeasure
 
     if (missing(skeleton)) skeleton <- data@skeleton
     else if (is.null(skeleton)) skeleton <- skel_plugin()
@@ -394,6 +422,8 @@ setMethod(
       dprocess=dprocess,
       rmeasure=rmeasure,
       dmeasure=dmeasure,
+      emeasure=emeasure,
+      vmeasure=vmeasure,
       skeleton=skeleton,
       rprior=rprior,
       dprior=dprior,
@@ -411,7 +441,9 @@ setMethod(
 )
 
 pomp.internal <- function (data, times, t0, timename, ...,
-  rinit, rprocess, dprocess, rmeasure, dmeasure, skeleton, rprior, dprior,
+  rinit, rprocess, dprocess,
+  rmeasure, dmeasure, emeasure, vmeasure,
+  skeleton, rprior, dprior,
   partrans, params, covar, accumvars, obsnames, statenames,
   paramnames, covarnames, PACKAGE, globals, cdir, cfile, shlib.args,
   compile, .userdata, .solibs = list(), verbose = getOption("verbose", FALSE)) {
@@ -437,11 +469,11 @@ pomp.internal <- function (data, times, t0, timename, ...,
   if (missing(.userdata)) .userdata <- list()
   added.userdata <- list(...)
   if (length(added.userdata)>0) {
-    message("in ",sQuote("pomp"),": the unrecognized ",
-      ngettext(length(added.userdata),"argument","arguments")," ",
+    pMess_("The provided ",
+      ngettext(length(added.userdata),"object","objects")," ",
       paste(sQuote(names(added.userdata)),collapse=","),
       ngettext(length(added.userdata)," is"," are"),
-      " available for use by the POMP basic components."
+      " available for use by POMP basic components."
     )
     .userdata[names(added.userdata)] <- added.userdata
   }
@@ -498,6 +530,16 @@ pomp.internal <- function (data, times, t0, timename, ...,
            "you must also provide ",sQuote("obsnames"),".")
   }
 
+  if (is(emeasure,"Csnippet") && is.null(obsnames)) {
+    pStop_("when ",sQuote("emeasure")," is provided as a C snippet, ",
+           "you must also provide ",sQuote("obsnames"),".")
+  }
+
+  if (is(vmeasure,"Csnippet") && is.null(obsnames)) {
+    pStop_("when ",sQuote("vmeasure")," is provided as a C snippet, ",
+           "you must also provide ",sQuote("obsnames"),".")
+  }
+
   ## check and arrange covariates
   if (is.null(covar)) {
     covar <- covariate_table()
@@ -514,6 +556,8 @@ pomp.internal <- function (data, times, t0, timename, ...,
     dprocess=dprocess,
     rmeasure=rmeasure,
     dmeasure=dmeasure,
+    emeasure=emeasure,
+    vmeasure=vmeasure,
     rprior=rprior,
     dprior=dprior,
     toEst=partrans@to,
@@ -551,6 +595,8 @@ pomp.internal <- function (data, times, t0, timename, ...,
     dprocess = hitches$funs$dprocess,
     dmeasure = hitches$funs$dmeasure,
     rmeasure = hitches$funs$rmeasure,
+    emeasure = hitches$funs$emeasure,
+    vmeasure = hitches$funs$vmeasure,
     skeleton = skel_plugin(
       skeleton,
       skel.fn=hitches$funs$skeleton

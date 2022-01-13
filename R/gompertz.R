@@ -2,12 +2,12 @@
 ##'
 ##' \code{gompertz()} constructs a \sQuote{pomp} object encoding a stochastic Gompertz population model with log-normal measurement error.
 ##'
-##' The state process is \eqn{X_{t+1} = K^{1-S} X_{t}^S
-##' \epsilon_{t}}{X[t+1]=K^(1-S) X[t]^S eps[t]}, where \eqn{S=e^{-r}}{S=e^{-r}}
+##' The state process is
+##' \deqn{X_{t+1} = K^{1-S} X_{t}^S \epsilon_{t},}{X[t+1]=K^(1-S) X[t]^S eps[t],} where \eqn{S=e^{-r}}{S=e^{-r}}
 ##' and the \eqn{\epsilon_t}{eps[t]} are i.i.d. lognormal random deviates with
-##' variance \eqn{\sigma^2}{sigma^2}.  The observed variables \eqn{Y_t} are
-##' distributed as
-##' \eqn{\mathrm{lognormal}(\log{X_t},\tau)}{lognormal(log(X[t]),tau)}.
+##' variance \eqn{\sigma^2}{sigma^2}.
+##' The observed variables \eqn{Y_t} are distributed as
+##' \deqn{Y_t\sim\mathrm{lognormal}(\log{X_t},\tau).}{Y[t]~lognormal(log(X[t]),tau).}
 ##' Parameters include the per-capita growth rate \eqn{r}, the carrying
 ##' capacity \eqn{K}, the process noise s.d. \eqn{\sigma}{sigma}, the
 ##' measurement error s.d. \eqn{\tau}{tau}, and the initial condition
@@ -55,6 +55,8 @@ gompertz <- function (K = 1, r = 0.1, sigma = 0.1, tau = 0.1, X_0 = 1,
     rprocess=discrete_time(
       step.fun="_gompertz_simulator"
     ),
+    emeasure="_gompertz_normal_emeasure",
+    vmeasure="_gompertz_normal_vmeasure",
     rmeasure="_gompertz_normal_rmeasure",
     dmeasure="_gompertz_normal_dmeasure",
     skeleton=map("_gompertz_skeleton",delta.t=1),

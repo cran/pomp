@@ -119,10 +119,12 @@ More on implementing POMP models:
 \code{\link{Csnippet}},
 \code{\link{accumulator variables}},
 \code{\link{basic components}},
+\code{\link{betabinomial}},
 \code{\link{covariates}},
 \code{\link{distributions}},
 \code{\link{dmeasure specification}},
 \code{\link{dprocess specification}},
+\code{\link{emeasure specification}},
 \code{\link{parameter transformations}},
 \code{\link{pomp-package}},
 \code{\link{pomp}},
@@ -131,7 +133,8 @@ More on implementing POMP models:
 \code{\link{rprocess specification}},
 \code{\link{skeleton specification}},
 \code{\link{transformations}},
-\code{\link{userdata}}
+\code{\link{userdata}},
+\code{\link{vmeasure specification}}
 
 More on Bayesian methods:
 \code{\link{approximate Bayesian computation}},

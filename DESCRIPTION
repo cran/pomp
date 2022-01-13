@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 3.6
-Date: 2021-09-03
+Version: 4.1
+Date: 2022-01-11
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -42,23 +42,24 @@ Collate: 'pstop.R' 'undefined.R' 'package.R' 'csnippet.R' 'pomp_fun.R'
         'proposals.R' 'pmcmc.R' 'mif2.R' 'listie.R' 'simulate.R'
         'spect.R' 'plot.R' 'bsmc2.R' 'as_data_frame.R' 'as_pomp.R'
         'authors.R' 'bake.R' 'basic_components.R' 'basic_probes.R'
-        'blowflies.R' 'bsflu.R' 'bsplines.R' 'childhood.R' 'coef.R'
-        'concat.R' 'cond_logLik.R' 'covmat.R' 'dacca.R' 'design.R'
-        'distributions.R' 'ebola.R' 'eff_sample_size.R'
-        'elementary_algorithms.R' 'estimation_algorithms.R' 'extract.R'
-        'filter_mean.R' 'filter_traj.R' 'flow.R' 'forecast.R'
-        'gompertz.R' 'probe_match.R' 'spect_match.R' 'nlf.R'
-        'trajectory.R' 'traj_match.R' 'objfun.R' 'loglik.R'
-        'logmeanexp.R' 'lookup.R' 'melt.R' 'obs.R' 'ou2.R' 'parmat.R'
-        'parus.R' 'pipe.R' 'pomp_examp.R' 'pred_mean.R' 'pred_var.R'
-        'show.R' 'print.R' 'profile_design.R' 'resample.R' 'ricker.R'
-        'runif_design.R' 'rw2.R' 'sannbox.R' 'saved_states.R' 'sir.R'
-        'slice_design.R' 'sobol_design.R' 'spy.R' 'states.R' 'time.R'
-        'timezero.R' 'traces.R' 'transformations.R' 'userdata.R'
-        'verhulst.R' 'window.R'
-RoxygenNote: 7.1.1
+        'betabinom.R' 'blowflies.R' 'bsflu.R' 'bsplines.R'
+        'childhood.R' 'coef.R' 'concat.R' 'cond_logLik.R' 'covmat.R'
+        'dacca.R' 'design.R' 'distributions.R' 'ebola.R'
+        'eff_sample_size.R' 'elementary_algorithms.R' 'emeasure_spec.R'
+        'estimation_algorithms.R' 'extract.R' 'filter_mean.R'
+        'filter_traj.R' 'flow.R' 'forecast.R' 'gompertz.R' 'kf.R'
+        'probe_match.R' 'spect_match.R' 'nlf.R' 'trajectory.R'
+        'traj_match.R' 'objfun.R' 'loglik.R' 'logmeanexp.R' 'lookup.R'
+        'mcap.R' 'melt.R' 'obs.R' 'ou2.R' 'parmat.R' 'parus.R' 'pipe.R'
+        'pomp_examp.R' 'pred_mean.R' 'pred_var.R' 'show.R' 'print.R'
+        'profile_design.R' 'resample.R' 'ricker.R' 'runif_design.R'
+        'rw2.R' 'sannbox.R' 'saved_states.R' 'sir.R' 'slice_design.R'
+        'sobol_design.R' 'spy.R' 'states.R' 'time.R' 'timezero.R'
+        'traces.R' 'transformations.R' 'userdata.R' 'verhulst.R'
+        'vmeasure_spec.R' 'window.R'
+RoxygenNote: 7.1.2
 NeedsCompilation: yes
-Packaged: 2021-09-03 17:21:11 UTC; kingaa
+Packaged: 2022-01-11 23:27:33 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -75,4 +76,4 @@ Author: Aaron A. King [aut, cre],
   Simon N. Wood [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2021-09-03 21:30:02 UTC
+Date/Publication: 2022-01-13 08:22:48 UTC

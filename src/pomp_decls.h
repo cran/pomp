@@ -7,12 +7,16 @@ extern void periodic_bspline_basis_eval_deriv(double x, double period, int degre
 extern SEXP R_Euler_Multinom(SEXP n, SEXP size, SEXP rate, SEXP Rf_dt);
 extern SEXP D_Euler_Multinom(SEXP x, SEXP size, SEXP rate, SEXP Rf_dt, SEXP log);
 extern SEXP R_GammaWN(SEXP n, SEXP sigma, SEXP deltat);
+extern SEXP R_BetaBinom(SEXP n, SEXP size, SEXP prob, SEXP theta);
+extern SEXP D_BetaBinom(SEXP x, SEXP size, SEXP prob, SEXP theta, SEXP log);
 /* src/dmeasure.c */
 extern SEXP do_dmeasure(SEXP object, SEXP y, SEXP x, SEXP times, SEXP params, SEXP log, SEXP gnsi);
 /* src/dprior.c */
 extern SEXP do_dprior(SEXP object, SEXP params, SEXP log, SEXP gnsi);
 /* src/dprocess.c */
 extern SEXP do_dprocess(SEXP object, SEXP x, SEXP times, SEXP params, SEXP log, SEXP gnsi);
+/* src/emeasure.c */
+extern SEXP do_emeasure(SEXP object, SEXP x, SEXP times, SEXP params, SEXP gnsi);
 /* src/euler.c */
 extern SEXP euler_model_simulator(SEXP func, SEXP xstart, SEXP tstart, SEXP times, SEXP params, double deltat, rprocmode method, SEXP accumvars, SEXP covar, SEXP args, SEXP gnsi);
 extern int num_euler_steps(double t1, double t2, double *Rf_dt);
@@ -20,6 +24,8 @@ extern int num_map_steps(double t1, double t2, double Rf_dt);
 /* src/gompertz.c */
 extern void _gompertz_normal_dmeasure(double *lik, double *y, double *x, double *p, int give_log, int *obsindex, int *stateindex, int *parindex, int *covindex, double *covars, double t);
 extern void _gompertz_normal_rmeasure(double *y, double *x, double *p, int *obsindex, int *stateindex, int *parindex, int *covindex, double *covars, double t);
+extern void _gompertz_normal_emeasure(double *f, double *x, double *p, int *obsindex, int *stateindex, int *parindex, int *covindex, double *covars, double t);
+extern void _gompertz_normal_vmeasure(double *f, double *x, double *p, int *vmatindex, int *stateindex, int *parindex, int *covindex, double *covars, double t);
 extern void _gompertz_simulator(double *x, const double *p, const int *stateindex, const int *parindex, const int *covindex, int covdim, const double *covar, double t, double Rf_dt);
 extern void _gompertz_skeleton(double *f, double *x, const double *p, const int *stateindex, const int *parindex, const int *covindex, const double *covar, double t);
 extern void _gompertz_to_trans(double *__pt, const double *__p, const int *__parindex);
@@ -39,6 +45,8 @@ extern void _ou2_pdf(double *f, double *x, double *z, double t1, double t2, cons
 extern void _ou2_skel(double *f, double *x, double *p, int *stateindex, int *parindex, int *covindex, double *covars, double t);
 extern void _ou2_dmeasure(double *lik, double *y, double *x, double *p, int give_log, int *obsindex, int *stateindex, int *parindex, int *covindex, double *covar, double t);
 extern void _ou2_rmeasure(double *y, double *x, double *p, int *obsindex, int *stateindex, int *parindex, int *covindex, double *covar, double t);
+extern void _ou2_emeasure(double *y, double *x, double *p, int *obsindex, int *stateindex, int *parindex, int *covindex, double *covar, double t);
+extern void _ou2_vmeasure(double *f, double *x, double *p, int *vmatindex, int *stateindex, int *parindex, int *covindex, double *covar, double t);
 /* src/partrans.c */
 extern SEXP do_partrans(SEXP object, SEXP params, SEXP dir, SEXP gnsi);
 /* src/pfilter.c */
@@ -47,12 +55,12 @@ extern SEXP pfilter(SEXP x, SEXP params, SEXP Np, SEXP predmean, SEXP predvar, S
 extern SEXP pomp_fun_handler(SEXP pfun, SEXP gnsi, pompfunmode *mode, SEXP S, SEXP P, SEXP O, SEXP C);
 extern SEXP load_stack_incr(SEXP pack);
 extern SEXP load_stack_decr(SEXP pack);
-/* src/probe_acf.c */
-extern SEXP probe_acf(SEXP x, SEXP lags, SEXP corr);
-extern SEXP probe_ccf(SEXP x, SEXP y, SEXP lags, SEXP corr);
 /* src/probe.c */
 extern SEXP apply_probe_data(SEXP object, SEXP probes);
 extern SEXP apply_probe_sim(SEXP object, SEXP nsim, SEXP params, SEXP probes, SEXP datval, SEXP gnsi);
+/* src/probe_acf.c */
+extern SEXP probe_acf(SEXP x, SEXP lags, SEXP corr);
+extern SEXP probe_ccf(SEXP x, SEXP y, SEXP lags, SEXP corr);
 /* src/probe_marginal.c */
 extern SEXP probe_marginal_setup(SEXP ref, SEXP order, SEXP diff);
 extern SEXP probe_marginal_solve(SEXP x, SEXP setup, SEXP diff);
@@ -100,5 +108,7 @@ extern const SEXP get_userdata(const char *name);
 extern const int *get_userdata_int(const char *name);
 extern const double *get_userdata_double(const char *name);
 extern void unset_pomp_userdata(void);
+/* src/vmeasure.c */
+extern SEXP do_vmeasure(SEXP object, SEXP x, SEXP times, SEXP params, SEXP gnsi);
 /* src/wpfilter.c */
 extern SEXP wpfilter(SEXP X, SEXP Params, SEXP Weights, SEXP W, SEXP Trigger, SEXP Target, SEXP Np);

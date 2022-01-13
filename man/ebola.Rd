@@ -24,10 +24,10 @@ ebolaModel(
 \arguments{
 \item{country}{ISO symbol for the country (GIN=Guinea, LBR=Liberia, SLE=Sierra Leone).}
 
-\item{data}{if NULL, the situation report data (see \code{ebolaWHO}) for the appropriate country or region will be used.
+\item{data}{if NULL, the situation report data (WHO Ebola Response Team 2014) for the appropriate country or region will be used.
 Providing a dataset here will override this behavior.}
 
-\item{timestep}{duration (in days) of Euler time-step for the simulations.}
+\item{timestep}{duration (in days) of Euler timestep for the simulations.}
 
 \item{nstageE}{integer; number of incubation stages.}
 
@@ -109,12 +109,10 @@ More data sets provided with \pkg{pomp}:
 More examples provided with \pkg{pomp}: 
 \code{\link{SIR models}},
 \code{\link{blowflies}},
-\code{\link{bsflu}},
 \code{\link{childhood disease data}},
 \code{\link{dacca}()},
 \code{\link{gompertz}()},
 \code{\link{ou2}()},
-\code{\link{parus}},
 \code{\link{pomp examples}},
 \code{\link{ricker}()},
 \code{\link{rw2}()},

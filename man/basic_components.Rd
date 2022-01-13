@@ -12,11 +12,13 @@ Accordingly, for each such component, there are two basic model components, one 
 \details{
 In addition to the parts listed above, \pkg{pomp} includes two additional basic model components: the deterministic skeleton, and parameter transformations that can be used to map the parameter space onto a Euclidean space for estimation purposes.
 
-There are thus altogether nine \bold{basic model components}:
+There are thus altogether eleven \bold{basic model components}:
 \enumerate{
 \item \link[=rprocess specification]{rprocess}, which samples from the latent-state transition distribution,
 \item \link[=dprocess specification]{dprocess}, which evaluates the latent-state transition density,
 \item \link[=rmeasure specification]{rmeasure}, which samples from the measurement distribution,
+\item \link[=emeasure specification]{emeasure}, which computes the conditional expectation of the measurements, given the latent states,
+\item \link[=vmeasure specification]{vmeasure}, which computes the conditional covariance matrix of the measurements, given the latent states,
 \item \link[=dmeasure specification]{dmeasure}, which evaluates the measurement density,
 \item \link[=prior specification]{rprior}, which samples from the prior distribution,
 \item \link[=prior specification]{dprior}, which evaluates the prior density,
@@ -38,10 +40,12 @@ Help pages detailing each basic model component are provided.
 More on implementing POMP models: 
 \code{\link{Csnippet}},
 \code{\link{accumulator variables}},
+\code{\link{betabinomial}},
 \code{\link{covariates}},
 \code{\link{distributions}},
 \code{\link{dmeasure specification}},
 \code{\link{dprocess specification}},
+\code{\link{emeasure specification}},
 \code{\link{parameter transformations}},
 \code{\link{pomp-package}},
 \code{\link{pomp}},
@@ -51,7 +55,8 @@ More on implementing POMP models:
 \code{\link{rprocess specification}},
 \code{\link{skeleton specification}},
 \code{\link{transformations}},
-\code{\link{userdata}}
+\code{\link{userdata}},
+\code{\link{vmeasure specification}}
 }
 \concept{basic model components}
 \concept{implementation information}

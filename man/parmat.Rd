@@ -2,14 +2,29 @@
 % Please edit documentation in R/parmat.R
 \name{parmat}
 \alias{parmat}
+\alias{parmat,missing-method}
+\alias{parmat,ANY-method}
+\alias{parmat,numeric-method}
+\alias{parmat,array-method}
+\alias{parmat,data.frame-method}
 \title{Create a matrix of parameters}
 \usage{
-parmat(params, nrep = 1)
+parmat(params, ...)
+
+\S4method{parmat}{numeric}(params, nrep = 1, ..., names = NULL)
+
+\S4method{parmat}{array}(params, nrep = 1, ..., names = NULL)
+
+\S4method{parmat}{data.frame}(params, nrep = 1, ...)
 }
 \arguments{
 \item{params}{named numeric vector or matrix of parameters.}
 
+\item{...}{additional arguments, currently ignored.}
+
 \item{nrep}{number of replicates (columns) desired.}
+
+\item{names}{optional character; column names.}
 }
 \value{
 \code{parmat} returns a matrix consisting of \code{nrep} copies of
@@ -24,8 +39,14 @@ use in \pkg{pomp} functions.
   ## generate a bifurcation diagram for the Ricker map
   p <- parmat(coef(ricker()),nrep=500)
   p["r",] <- exp(seq(from=1.5,to=4,length=500))
-  x <- trajectory(ricker(),times=seq(from=1000,to=2000,by=1),params=p)
-  matplot(p["r",],x["N",,],pch='.',col='black',xlab="log(r)",ylab="N",log='x')
+  trajectory(
+    ricker(),
+    times=seq(from=1000,to=2000,by=1),
+    params=p,
+    format="array"
+  ) -> x
+  matplot(p["r",],x["N",,],pch='.',col='black',
+    xlab=expression(log(r)),ylab="N",log='x')
 }
 }
 \author{
