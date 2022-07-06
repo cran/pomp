@@ -15,7 +15,8 @@ bake(
   normal.kind = NULL,
   dependson = NULL,
   info = FALSE,
-  timing = TRUE
+  timing = TRUE,
+  dir = getOption("pomp_archive_dir", getwd())
 )
 
 stew(
@@ -25,7 +26,8 @@ stew(
   kind = NULL,
   normal.kind = NULL,
   dependson = NULL,
-  info = FALSE
+  info = FALSE,
+  dir = getOption("pomp_archive_dir", getwd())
 )
 
 freeze(
@@ -38,7 +40,7 @@ freeze(
 )
 }
 \arguments{
-\item{file}{Name of the binary data file in which the result will be stored or retrieved, as appropriate.
+\item{file}{Name of the archive file in which the result will be stored or retrieved, as appropriate.
 For \code{bake}, this will contain a single object and hence be an RDS file (extension \sQuote{rds});
 for \code{stew}, this will contain one or more named objects and hence be an RDA file (extension \sQuote{rda}).}
 
@@ -56,7 +58,8 @@ A hash of these objects will be archived in \code{file}, along with the results 
 When \code{bake} or \code{stew} are called and \code{file} exists, the hash of these objects will be compared against the archived hash;
 recomputation is forced when these do not match.
 The dependencies should be specified as unquoted symbols:
-use a list if there are multiple dependencies.}
+use a list if there are multiple dependencies.
+See the note below about avoiding using \sQuote{pomp} objects as dependencies.}
 
 \item{info}{logical.
 If \code{TRUE}, the \dQuote{ingredients} of the calculation are returned as a list.
@@ -66,6 +69,9 @@ In the case of \code{stew}, this list is a hidden object named \dQuote{.ingredie
 \item{timing}{logical.
 If \code{TRUE}, the time required for the computation is returned.
 This is returned as the \dQuote{system.time} attribute of the returned object.}
+
+\item{dir}{Directory holding archive files; by default, this is the current working directory.
+This can also be set using the global option \code{pomp_archive_dir}.}
 
 \item{envir}{the \code{\link[base]{environment}} in which \code{expr} is to
     be evaluated.  May also be \code{NULL}, a list, a data frame,
@@ -122,6 +128,13 @@ By contrast, \code{stew} creates a local environment within which \code{expr} is
 \code{bake} and \code{stew} also store information about the code executed, the dependencies, and the state of the random-number generator (if the latter is controlled) in the archive file.
 Re-computation is triggered if any of these things change.
 }
+\section{Avoid using \sQuote{pomp} objects as dependencies}{
+
+Note that when a \sQuote{pomp} object is built with one or more \link[=Csnippet]{C snippets}, the resulting code is \dQuote{salted} with a random element to prevent collisions in parallel computations.
+As a result, two such \sQuote{pomp} objects will never match perfectly, even if the codes and data used to construct them are identical.
+Therefore, avoid using \sQuote{pomp} objects as dependencies in \code{bake} and \code{stew}.
+}
+
 \section{Compatibility with older versions}{
 
 With \pkg{pomp} version 3.4.4.2, the behavior of \code{bake} and \code{stew} changed.

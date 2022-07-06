@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 4.2
-Date: 2022-04-11
+Version: 4.3
+Date: 2022-07-06
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -57,9 +57,9 @@ Collate: 'pstop.R' 'undefined.R' 'package.R' 'csnippet.R' 'pomp_fun.R'
         'sobol_design.R' 'spy.R' 'states.R' 'time.R' 'timezero.R'
         'traces.R' 'transformations.R' 'userdata.R' 'verhulst.R'
         'vmeasure_spec.R' 'window.R'
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 NeedsCompilation: yes
-Packaged: 2022-04-11 15:04:38 UTC; kingaa
+Packaged: 2022-07-06 18:44:17 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -76,4 +76,4 @@ Author: Aaron A. King [aut, cre],
   Simon N. Wood [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2022-04-11 22:40:02 UTC
+Date/Publication: 2022-07-06 19:20:02 UTC

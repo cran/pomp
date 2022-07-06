@@ -102,7 +102,15 @@ setMethod(
 setMethod(
   "dmeasure",
   signature=signature(object="pomp"),
-  definition=function (object, y, x, times, params, ..., log = FALSE) {
+  definition=function (
+    object,
+    y = obs(object),
+    x = states(object),
+    times = time(object),
+    params = coef(object),
+    ...,
+    log = FALSE
+  ) {
     tryCatch(
       dmeasure.internal(object=object,y=y,x=x,times=times,
         params=params,log=log,...),
@@ -168,7 +176,12 @@ setMethod(
 setMethod(
   "dprior",
   signature=signature(object="pomp"),
-  definition=function (object, params, ..., log = FALSE) {
+  definition=function (
+    object,
+    params = coef(object),
+    ...,
+    log = FALSE
+  ) {
     tryCatch(
       dprior.internal(object=object,params=params,log=log,...),
       error = function (e) pStop("dprior",conditionMessage(e))
@@ -231,7 +244,14 @@ setMethod(
 setMethod(
   "dprocess",
   signature=signature(object="pomp"),
-  definition = function (object, x, times, params, ..., log = FALSE) {
+  definition = function (
+    object,
+    x = states(object),
+    times = time(object),
+    params = coef(object),
+    ...,
+    log = FALSE
+  ) {
     tryCatch(
       dprocess.internal(object=object,x=x,times=times,params=params,log=log,...),
       error = function (e) pStop("dprocess",conditionMessage(e))
@@ -296,7 +316,11 @@ setMethod(
 setMethod(
   "partrans",
   signature=signature(object="pomp"),
-  definition=function (object, params, dir = c("fromEst", "toEst"), ...) {
+  definition=function (
+    object, params,
+    dir = c("fromEst", "toEst"),
+    ...
+  ) {
     dir <- match.arg(dir)
     tryCatch(
       partrans.internal(object=object,params=params,dir=dir,...),
@@ -365,7 +389,13 @@ setMethod(
 setMethod(
   "rinit",
   signature=signature("pomp"),
-  definition=function (object, params, t0, nsim = 1, ...) {
+  definition=function (
+    object,
+    params = coef(object),
+    t0 = timezero(object),
+    nsim = 1,
+    ...
+  ) {
     tryCatch(
       rinit.internal(object=object,params=params,t0=t0,nsim=nsim,...),
       error = function (e) pStop("rinit",conditionMessage(e))
@@ -375,9 +405,7 @@ setMethod(
 
 rinit.internal <- function (object, params, t0, nsim = 1,
   .gnsi = TRUE, ...) {
-  if (missing(t0)) t0 <- object@t0
-  if (missing(params)) params <- coef(object)
-  else storage.mode(params) <- "double"
+  storage.mode(params) <- "double"
   pompLoad(object)
   on.exit(pompUnload(object))
   .Call(P_do_rinit,object,params,t0,nsim,.gnsi)
@@ -431,7 +459,13 @@ setMethod(
 setMethod(
   "rmeasure",
   signature=signature(object="pomp"),
-  definition=function (object, x, times, params, ...) {
+  definition=function (
+    object,
+    x = states(object),
+    times = time(object),
+    params = coef(object),
+    ...
+  ) {
     tryCatch(
       rmeasure.internal(object=object,x=x,times=times,params=params,...),
       error = function (e) pStop("rmeasure",conditionMessage(e))
@@ -494,7 +528,13 @@ setMethod(
 setMethod(
   "emeasure",
   signature=signature(object="pomp"),
-  definition=function (object, x, times, params, ...) {
+  definition=function (
+    object,
+    x = states(object),
+    times = time(object),
+    params = coef(object),
+    ...
+  ) {
     tryCatch(
       emeasure.internal(object=object,x=x,times=times,params=params,...),
       error = function (e) pStop("emeasure",conditionMessage(e))
@@ -559,7 +599,13 @@ setMethod(
 setMethod(
   "vmeasure",
   signature=signature(object="pomp"),
-  definition=function (object, x, times, params, ...) {
+  definition=function (
+    object,
+    x = states(object),
+    times = time(object),
+    params = coef(object),
+    ...
+  ) {
     tryCatch(
       vmeasure.internal(object=object,x=x,times=times,params=params,...),
       error = function (e) pStop("vmeasure",conditionMessage(e))
@@ -623,7 +669,11 @@ setMethod(
 setMethod(
   "rprior",
   signature=signature(object="pomp"),
-  definition=function (object, params, ...)
+  definition=function (
+    object,
+    params = coef(object),
+    ...
+  )
     tryCatch(
       rprior.internal(object=object,params=params,...),
       error = function (e) pStop("rprior",conditionMessage(e))
@@ -704,7 +754,14 @@ setMethod(
 setMethod(
   "rprocess",
   signature=signature(object="pomp"),
-  definition=function (object, x0, t0, times, params, ...) {
+  definition=function (
+    object,
+    x0 = rinit(object),
+    t0 = timezero(object),
+    times = time(object),
+    params = coef(object),
+    ...
+  ) {
     tryCatch(
       rprocess.internal(object=object,x0=x0,t0=t0,times=times,params=params,...),
       error = function (e) pStop("rprocess",conditionMessage(e))
@@ -773,7 +830,13 @@ setMethod(
 setMethod(
   "skeleton",
   signature=signature("pomp"),
-  definition=function (object, x, times, params, ...)
+  definition=function (
+    object,
+    x = states(object),
+    times = time(object),
+    params = coef(object),
+    ...
+  )
     tryCatch(
       skeleton.internal(object=object,x=x,times=times,params=params,...),
       error = function (e) pStop("skeleton",conditionMessage(e))

@@ -1,5 +1,18 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 4.3}{
+  \itemize{
+    \item The archiving functions \code{bake} and \code{stew} now use a slightly less exacting comparison of the expression, \code{expr}, they are furnished.
+    \strong{NB:} Running \code{bake} or \code{stew} with archives created by earlier versions may result in recomputation.
+    \item The \code{time} method has been extended to \code{pompList} and related objects.
+    \item All workhorse functions except \code{partrans} have new default arguments.
+    \item Some documentation improvements.
+    \item The archiving functions \code{bake} and \code{stew} now take the argument \code{dir}, which is the directory holding the archive files.
+    By default, this is the current working directory or the value of the global option \code{pomp.archive.dir}.
+    \item A new global option, \code{pomp_archive_dir}, can be used to specify the locations of archive files used by \code{bake} and \code{stew}.
+    \item Documentation repair of issue flagged by Kurt Hornik (9 June 2022).
+  }
+}
 \section{Changes in \pkg{pomp} version 4.2}{
   \itemize{
     \item Minor changes to the C codes to keep up with R-devel.
