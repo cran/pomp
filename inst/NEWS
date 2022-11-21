@@ -1,5 +1,28 @@
 _N_e_w_s _f_o_r _p_a_c_k_a_g_e '_p_o_m_p'
 
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _4._4:
+
+        • The new function ‘wquant’ computes weighted quantiles.
+
+        • The precise order in which the ‘pmcmc’ function computes
+          prior and likelihood of furnished and proposed parameters has
+          changed slightly.  This prevents proposals that are
+          incompatible with the prior from being passed to ‘pfilter’
+          and forestalls an associated class of errors.  A consequence
+          of this change, ‘pmcmc’ computations using the new version
+          will differ very slightly from previous computations, even
+          with the RNG seed fixed at its previous values.
+
+        • There is now a C interface to the ‘bspline_eval’ function.
+          See the ‘pomp’ C API documentation for details.
+
+        • The ‘bspline.basis’ function now takes the optional argument
+          ‘rg’ which allows one to specify the range over which the
+          basis will be constructed.  By default, this is ‘range(x)’,
+          which agrees with the behavior in earlier versions.
+
+        • Documentation improvements.
+
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _4._3:
 
         • The archiving functions ‘bake’ and ‘stew’ now use a slightly
@@ -28,6 +51,8 @@ _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _4._3:
           2022).
 
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _4._2:
+
+        • Minor changes, invisible to the user.
 
         • Minor changes to the C codes to keep up with R-devel.
 
@@ -722,6 +747,10 @@ _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._1_8:
           ‘probed.pomp’ object, the new parameters were ignored.  This
           bug has been fixed.
 
+        • ‘mif2’, ‘pfilter’, ‘probe’, ‘probe.match’, and
+          ‘probe.match.objfun’ can now gracefully handle a list in the
+          ‘start’ or ‘params’ arguments.
+
         • New ‘spy’ method displays the C snippet file(s) associated
           with a ‘pomp’ object.
 
@@ -970,6 +999,12 @@ _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._8:
         • Fixed a bug in ‘plot’ on ‘pomp’ objects with more than 10
           variables to plot.
 
+        • Added the ‘shlib.args’ option to ‘pomp’, allowing arbitrary
+          options to be passed to the compiler when C snippets are
+          used.
+
+        • Modified the “dacca” example to use C snippets.
+
         • Refactored ‘rw.sd’ for greater stability.
 
         • Modified the “dacca” example to use C snippets.
@@ -1044,6 +1079,8 @@ _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _1._6:
         • ‘pomp’ is no longer an S4 method.  Its new status as an
           ordinary function abbreviates and consolidates the code and
           simplifies the documentation.
+
+        • Some minor improvements to error messages.
 
         • A bug restricting access in C code to ‘userdata’ has been
           fixed.

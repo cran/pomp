@@ -10,6 +10,8 @@
 ##' @family interpolation
 ##'
 ##' @param x Vector at which the spline functions are to be evaluated.
+##' @param rg numeric of length 2; range of the B-spline basis.
+##' To be properly specified, we must have \code{rg[1] < rg[2]}.
 ##' @param nbasis The number of basis functions to return.
 ##' @param degree Degree of requested B-splines.
 ##' @param period The period of the requested periodic B-splines.
@@ -34,7 +36,7 @@
 ##'
 ##' @section C API:
 ##' Access to the underlying C routines is available: see 
-##' \href{https://kingaa.github.io/pomp/vignettes/C_API.html}{the \pkg{pomp} C API document}.
+##' \href{https://kingaa.github.io/pomp/C_API.html}{the \pkg{pomp} C API document}.
 ##' for definition and documentation of the C API.
 ##'
 ##' @author Aaron A. King
@@ -55,10 +57,11 @@ NULL
 
 ##' @rdname bsplines
 ##' @export
-bspline.basis <- function (x, nbasis, degree = 3, deriv = 0, names = NULL) {
+bspline.basis <- function (x, nbasis, degree = 3, deriv = 0, names = NULL, rg = range(x)) {
   ep <- "bspline.basis"
+  rg <- as.numeric(rg)
   y <- tryCatch(
-    .Call(P_bspline_basis,x,nbasis,degree,deriv),
+    .Call(P_bspline_basis,rg,x,nbasis,degree,deriv),
     error = function (e) {
       pStop(ep,conditionMessage(e))
     }
