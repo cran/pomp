@@ -1,15 +1,15 @@
 ##' Weighted quantile function
 ##'
-##' Computes weighted quantiles.
+##' Estimate weighted quantiles.
 ##'
-##' \code{wquant} computes a quantile of type 7 according to the typology of \code{\link[stats]{quantile}}.
+##' \code{wquant} estimates quantiles of weighted data using the estimator of Harrell & Davis (1982), with improvements recommended by Andrey Akinshin.
 ##'
 ##' @param x numeric; a vector of data.
 ##' @param weights numeric; vector of weights.
 ##' @param probs numeric; desired quantiles.
 ##'
 ##' @return
-##' \code{wquant} returns a vector containing the quantiles.
+##' \code{wquant} returns a vector containing the estimated quantiles.
 ##' If \code{probs} has names, these are inherited.
 ##'
 ##' @author Aaron A. King
@@ -17,41 +17,52 @@
 ##' @examples
 ##' x <- c(1,1,1,2,2,3,3,3,3,4,5,5,6,6,6)
 ##' quantile(x)
+##' wquant(x)
 ##' wquant(c(1,2,3,4,5,6),weights=c(3,2,4,1,2,3))
+##' wquant(c(1,2,3,4,5),c(1,0,0,1,1))
+##' @references
+##' \Harrell1982
+##'
+## The discussion in Andrey Akinshin's blog post
+## https://aakinshin.net/posts/weighted-quantiles/
+## was instrumental in developing these codes.
 ##'
 ##' @rdname wquant
-##' @importFrom stats approx setNames
+##' @importFrom stats pbeta
 ##' @export
 wquant <- function (
-  x, weights,
+  x, weights = rep(1, length(x)),
   probs = c(`0%`=0, `25%`=0.25, `50%`=0.5, `75%`=0.75, `100%`=1)
 ) {
   x <- as.numeric(x)
   weights <- as.numeric(weights)
-  if (length(x)!=length(weights))
+  if (length(weights) != length(x))
     pStop("wquant",sQuote("x")," and ",sQuote("weights"),
       " must be of equal length.")
-  if (any(is.na(x)) || any(is.na(weights)))
-    pStop("wquant","NA values are disallowed.")
+  if (any(is.na(x)) || any(!is.finite(weights)))
+    pStop("wquant","NA and non-finite values are disallowed.")
+  if (any(weights < 0))
+    pStop("wquant","weights must be non-negative.")
   if (!is.numeric(probs) || any(is.na(probs)) ||
         isTRUE(any(probs < 0 | probs > 1))) {
     pStop("wquant",sQuote("probs"),
       " must be a numeric vector with values in [0,1].")
   }
+  ## order the data and the weights
   idx <- order(x)
   x <- x[idx]
   weights <- weights[idx]
-  n <- sum(weights)
-  k <- length(probs)
-  ord <- 1+(n-1)*probs
-  low <- pmax(floor(ord),1)
-  high <- pmin(low+1,n)
-  ord <- ord%%1
-  allq <- approx(
-    x=cumsum(weights),y=x,xout=c(low,high),
-    method="constant",f=1,rule=2
-  )$y
-  dim(allq) <- c(k,2)
-  qs <- (1-ord)*allq[,1]+ord*allq[,2]
-  setNames(qs,names(probs))
+  ## accumulate and normalize the weights
+  w <- cumsum(c(0,weights))
+  w <- w/w[length(w)]
+  q <- probs       # inherits the names of `probs`
+  ess <- sum(weights)^2/sum(weights^2) # Kish effective sample size
+  a <- probs*(ess+1) # a,b are shape parameters for Beta distribution
+  b <- (1-probs)*(ess+1)
+  for (j in seq_along(probs)) {
+    W <- pbeta(q=w,shape1=a[j],shape2=b[j])
+    W[w==1] <- 1
+    q[j] <- sum(diff(W)*x)
+  }
+  q
 }

@@ -6,7 +6,7 @@
 \usage{
 wquant(
   x,
-  weights,
+  weights = rep(1, length(x)),
   probs = c(`0\%` = 0, `25\%` = 0.25, `50\%` = 0.5, `75\%` = 0.75, `100\%` = 1)
 )
 }
@@ -18,20 +18,24 @@ wquant(
 \item{probs}{numeric; desired quantiles.}
 }
 \value{
-\code{wquant} returns a vector containing the quantiles.
+\code{wquant} returns a vector containing the estimated quantiles.
 If \code{probs} has names, these are inherited.
 }
 \description{
-Computes weighted quantiles.
+Estimate weighted quantiles.
 }
 \details{
-\code{wquant} computes a quantile of type 7 according to the typology of \code{\link[stats]{quantile}}.
+\code{wquant} estimates quantiles of weighted data using the estimator of Harrell & Davis (1982), with improvements recommended by Andrey Akinshin.
 }
 \examples{
 x <- c(1,1,1,2,2,3,3,3,3,4,5,5,6,6,6)
 quantile(x)
+wquant(x)
 wquant(c(1,2,3,4,5,6),weights=c(3,2,4,1,2,3))
-
+wquant(c(1,2,3,4,5),c(1,0,0,1,1))
+}
+\references{
+\Harrell1982
 }
 \author{
 Aaron A. King

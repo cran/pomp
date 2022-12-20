@@ -1,5 +1,5 @@
-7d0bdd159ee9da8840dc599d3c4968f9 *DESCRIPTION
-68947bf479a138984d798ef4410a307c *NAMESPACE
+8456755d0d3d78dfe7d697d299bf2994 *DESCRIPTION
+f92fb0d7598fb038460a571c83794c4c *NAMESPACE
 f699f25b23f8f1344e592463431a7f84 *R/abc.R
 5da1fdfd9589882cb328172e0fa67569 *R/accumulators.R
 c24a49b2565e0bbb1daadbacffb2c873 *R/as_data_frame.R
@@ -38,8 +38,8 @@ b5702d36deeab67fb55c78550f8d5ef4 *R/filter_mean.R
 3e58b9b13998f0e02b430003fabb1a78 *R/flow.R
 f96670778d5b7bb15bca5f0ae6fe77e1 *R/forecast.R
 d2bf0f445d50adcbd7c4066657677279 *R/gompertz.R
-08cdf799fa123b041128e510ce78d3f7 *R/kalman.R
-85e5543dde1006831dc4fda151504a6d *R/kf.R
+2d5fca8f073d2c00c1245147edf16df2 *R/kalman.R
+962b0625c6cbbc9aeff14f4fe0ce8e16 *R/kf.R
 88457476b8d4c502589de506bff9700d *R/listie.R
 198d981ca561ad8b6f7621dbd5a19f93 *R/load.R
 f6fe5d878624eb26a1d2e908dff3b048 *R/loglik.R
@@ -56,7 +56,7 @@ e6922e93be16c427d6a6f4fae9413bb5 *R/objfun.R
 0441b896e8b328c36e2121809815ac88 *R/parameter_trans.R
 f7ab8acb51d2d2cb4c86fcb1e1cfdfee *R/parmat.R
 bafdbe8fb0fdf335376b981f786d4817 *R/parus.R
-aac9ea1d028ac5c182bae5eb37256e36 *R/pfilter.R
+d5ccc78eadb5f4620afcd8954984783d *R/pfilter.R
 b9e09e2d5b40bd0096958202349cb7c0 *R/pipe.R
 91275bd36f2da7a68269b4cb76cd5468 *R/plot.R
 5b8a4f3c4c67edd5ec796698a8bb411d *R/pmcmc.R
@@ -82,7 +82,7 @@ b6745499cba114a8f2cd957aa123211b *R/runif_design.R
 e4c6444f612d6458595581116a74b7a8 *R/rw2.R
 b1517f61ad704f608a03f5490c59ae47 *R/safecall.R
 938e3a98c75299b0f51b08f5ee0b40e2 *R/sannbox.R
-c8552aaae2bf689e8779a9467da3bfeb *R/saved_states.R
+269f3a99f7de03b4dfb89cdd8ecec256 *R/saved_states.R
 2cc9a1a75cf3fdb571f76e5f19fd9047 *R/show.R
 fc1c8e39489abffab86e385fc3d82f57 *R/simulate.R
 7a54800d6ceda2573d639388ec1387e2 *R/sir.R
@@ -108,7 +108,7 @@ d7b9b27ef1f715c60b95846d084f48b8 *R/vmeasure_spec.R
 be532b5bba090780a528ec6684ee4b95 *R/window.R
 6165b74cacf7065de6c7807c7cc9a802 *R/workhorses.R
 182e459c6ac51f679f58303caec910dc *R/wpfilter.R
-58f492e33c4895e122f396d1fe071792 *R/wquant.R
+c57fe1ccace942b9bd0d7deeda1584a0 *R/wquant.R
 ea124a494ad7922985532ad3b308e4d5 *build/partial.rdb
 47386653c5419e5b1ca12f5713ff7cc0 *data/LondonYorke.rda
 4665eb3edd8952544df3a67c4d1d2bba *data/blowflies.csv.xz
@@ -119,8 +119,8 @@ d845abe80f86f789a985d99fa23515ee *data/ewmeas.rda
 0e0eda4824bc68535da32d9aa065fae7 *data/parus.csv.gz
 3ac5a534409a2445fbc9738d5e4ab4d8 *inst/CITATION
 d32239bcb673463ab874e80d47fae504 *inst/GPL
-f6da616bdca45a13c32f1bd60d06d7ef *inst/NEWS
-dedff3595eacfe4327c350816157bf28 *inst/NEWS.Rd
+3d03374307e46db640b5e614d263148d *inst/NEWS
+bf94ed0ea1ce19413f8d401147f87751 *inst/NEWS.Rd
 4f0e82cca78d04352d75f6afb423e2a4 *inst/doc/index.html
 072346ba0b1b4338f7d2b3c16c510f98 *inst/include/pomp.h
 410535124d38e6fe9c98b3e801f1e8f7 *inst/include/pomp_defines.h
@@ -165,13 +165,13 @@ a152d7b27130dbb14fff6169306a3dc8 *man/forecast.Rd
 d4855d1d630d3be7d3c67c2667254b09 *man/gompertz.Rd
 86199c204f27fcfc48cd801809a51ce5 *man/hitch.Rd
 63e5db45a30c91635a8a9d18ca5fa3a6 *man/kalman.Rd
-e4f550f735532dbf1628345770ddbcbc *man/kf.Rd
+d9c16884c9cbf2265e0a11a705923278 *man/kf.Rd
 717d7ff80e237c597be1d77a1d4c6589 *man/listie.Rd
 d232aa618bf3a651f9e65918e0604ae1 *man/load.Rd
 9b17e83a37b036f0ed0d8fbdbe75c3e5 *man/loglik.Rd
 149c2f18cd80db833a7215b934a810ba *man/logmeanexp.Rd
 29a039e87380e49269057b0d95baeeb3 *man/lookup.Rd
-c868c1202fddef7f33e9ecee744bce82 *man/macros/citations.Rd
+c6dd0d105e0314371c11ce8f1a136321 *man/macros/citations.Rd
 a092a5c9db2adc15fe6e9bfd09046ca2 *man/mcap.Rd
 a611cab3004694550253ca3037f63360 *man/melt.Rd
 a8429f3ec5f5974869e654ec7fd35d33 *man/mif2.Rd
@@ -184,7 +184,7 @@ ca02027895a68eeb27edfcca38b8f7d4 *man/nlf.Rd
 c5b42e1a839234cf69e989421ba62552 *man/parmat.Rd
 8bfb9aee1da9a79b41a994e0a1fe2c1f *man/partrans.Rd
 ef73709c9f6647e55cc6702a96c80ece *man/parus.Rd
-26fefa6c7e07d01a7d9ded4f5f9885c0 *man/pfilter.Rd
+7a56efcf17aa1098b30b8ff035ab7444 *man/pfilter.Rd
 62a0261ef29079481e2703010df8f1c9 *man/pipe.Rd
 ba3879d4ef258c03ea0e1b57b9cebeb4 *man/plot.Rd
 ab62991109305326d0b9c22a2f0c06fe *man/pmcmc.Rd
@@ -212,7 +212,7 @@ ce92514e523abf128904eb8fa5b4420b *man/rinit.Rd
 e6e2c291b54745aefa17b57404cc97d9 *man/rw2.Rd
 a0c20155e305c1809b209c4e3c0c66c5 *man/rw_sd.Rd
 59a93eebac02ab5df220c817d699c3ca *man/sannbox.Rd
-ef0924e8c5899b271efc83aac86bb638 *man/saved_states.Rd
+e35b84698a04693a8c8aed7a46262eb4 *man/saved_states.Rd
 3f2c206a0235cc8ba35db12da4fa7fdc *man/show.Rd
 6b627482b0194e0ff92b51f411f97207 *man/simulate.Rd
 cbc6d5ca9ad9d1d1fc0d89a49cd9617b *man/sir.Rd
@@ -237,7 +237,7 @@ ec5f7bed43232dfad925a079c188e0e7 *man/verhulst.Rd
 e715565227b8ff3faa88a6fde060c8ba *man/window.Rd
 2e840dcf03d29bc802188b67dbfcbd0f *man/workhorses.Rd
 4f87090ccfb2841ea8f20f26ee7604ac *man/wpfilter.Rd
-55bc86cbbdaee84ef5b19da0bbad4b7a *man/wquant.Rd
+80e9886fd532ce5c30a2fc28c04e2b5e *man/wquant.Rd
 2a6f9e9e044a78154d3cfda5936d6f48 *src/Makevars
 470782c643ce997a5eb0c0638cbad085 *src/bspline.c
 9059a35eb4973dfb8c61338379c98a40 *src/distributions.c
@@ -252,7 +252,7 @@ d79bd0aac31268bbebebf4d7ad173fb0 *src/lookup_table.c
 4a0696501ea8fa83fb8d576cc747ec41 *src/mif2.c
 d8245abae6f922d953d87382c07d78cf *src/ou2.c
 569cc77f41915bf807fce34f4c48cd19 *src/partrans.c
-0e29e95e985195199cd263ecb9ec52c4 *src/pfilter.c
+25608a36a00c1632858edf728218361b *src/pfilter.c
 072346ba0b1b4338f7d2b3c16c510f98 *src/pomp.h
 aeae8b0103b768a2f1dbbd0d8ef698a1 *src/pomp_decls.h
 410535124d38e6fe9c98b3e801f1e8f7 *src/pomp_defines.h
@@ -269,7 +269,7 @@ ca6d91fa1a9cc7c15b0e9a6aaad3d646 *src/probe_marginal.c
 a89ed238f862487749c9dc4913cf74e3 *src/rprior.c
 5fbd2ccce6402a6afa90a68eba5e5c9e *src/rprocess.c
 ad8fef225c075258b4d9b6466073a374 *src/simulate.c
-1e3a1ed96b559475196cd85f015c2d48 *src/skeleton.c
+9bd9701a8cfbb570bb39b9495af7a851 *src/skeleton.c
 f59dd0059cdd443a58c43bf2755f66e5 *src/soboldata.h
 936e4e0251c431521170b80bae282cc0 *src/sobolseq.c
 cad015348f68defb067355dcae762faf *src/ssa.c

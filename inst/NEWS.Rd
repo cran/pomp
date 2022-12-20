@@ -1,5 +1,18 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 4.5}{
+  \itemize{
+    \item A bug in trajectory computation for maps (discrete-time dynamical systems) has been fixed.
+    Thanks to Felicia Magpantay for noticing it and tracking it down.
+    \item Minor documentation improvements.
+    \item The weighted quantile function \code{wquant} now uses the Harrell-Davis estimator instead of the type-7 estimator used previously.
+    This eliminates bugs associated with non-integer weights.
+    \item It is now possible to retrieve the weighted particles computed in the course of a \code{pfilter} computation.
+    To accomplish this, set \code{save.states="weighted"} in the call to \code{pfilter} and retrieve the particles and their weights using \code{saved.states}.
+    Previously, one could obtain only the unweighted particles.
+    \item Some documentation improvements.
+  }
+}
 \section{Changes in \pkg{pomp} version 4.4}{
   \itemize{
     \item The new function \code{wquant} computes weighted quantiles.
