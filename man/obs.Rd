@@ -3,6 +3,8 @@
 \docType{methods}
 \name{obs}
 \alias{obs}
+\alias{obs,ANY-method}
+\alias{obs,missing-method}
 \alias{obs,pomp-method}
 \alias{obs,listie-method}
 \title{obs}
@@ -24,16 +26,16 @@ Extract the data array from a \sQuote{pomp} object.
 \seealso{
 Other extraction methods: 
 \code{\link{coef}()},
-\code{\link{cond.logLik}()},
+\code{\link{cond_logLik}()},
 \code{\link{covmat}()},
-\code{\link{eff.sample.size}()},
-\code{\link{filter.mean}()},
-\code{\link{filter.traj}()},
+\code{\link{eff_sample_size}()},
+\code{\link{filter_mean}()},
+\code{\link{filter_traj}()},
 \code{\link{forecast}()},
 \code{\link{logLik}},
-\code{\link{pred.mean}()},
-\code{\link{pred.var}()},
-\code{\link{saved.states}()},
+\code{\link{pred_mean}()},
+\code{\link{pred_var}()},
+\code{\link{saved_states}()},
 \code{\link{spy}()},
 \code{\link{states}()},
 \code{\link{summary}()},

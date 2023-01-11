@@ -6,8 +6,8 @@
 ##' @rdname forecast
 ##' @aliases forecast,missing-method forecast,ANY-method
 ##' @family extraction methods
-##' @include kalman.R
-##' @inheritParams filter.mean
+##' @include pfilter.R kalman.R melt.R
+##' @inheritParams filter_mean
 ##'
 
 setGeneric(
@@ -37,11 +37,17 @@ setMethod(
 setMethod(
   "forecast",
   signature=signature(object="kalmand_pomp"),
-  definition=function (object, vars, ...) {
-    if (!missing(vars)) 
+  definition=function (object, vars, ...,
+    format = c("array", "data.frame")) {
+    if (missing(vars)) vars <- rownames(object@forecast)
+    format <- match.arg(format)
+    if (format == "array") {
       object@forecast[vars,,drop=FALSE]
-    else
-      object@forecast
+    } else {
+      x <- melt(object@forecast[vars,,drop=FALSE])
+      x$time <- time(object)[as.integer(x$time)]
+      x
+    }
   }
 )
 
@@ -50,27 +56,33 @@ setMethod(
 setMethod(
   "forecast",
   signature=signature(object="pfilterd_pomp"),
-  definition=function (object, vars, ...) {
+  definition=function (object, vars, ...,
+    format = c("array", "data.frame")) {
     if (undefined(object@emeasure))
       pStop("forecast",paste(sQuote(c("emeasure")),collapse=", "),
         " is a needed basic component.")
-    x <- pred.mean(object)
+    x <- pred_mean(object)
     if (length(x)==0)
       pStop("forecast","no prediction mean. ",
         "Rerun ",sQuote("pfilter")," with ",
         sQuote("pred.mean=TRUE"),".")
     y <- emeasure(
       object,
-      x=pred.mean(object),
+      x=x,
       times=time(object),
       params=coef(object)
     )
     if (!missing(vars))
       y <- y[vars,,,drop=FALSE]
-    nm <- rownames(y)
     dn <- dim(y)[c(1L,3L)]
+    dnm <- dimnames(y)[c(1L,3L)]
     dim(y) <- dn
-    rownames(y) <- nm
+    dimnames(y) <- dnm
+    format <- match.arg(format)
+    if (format=="data.frame") {
+      y <- melt(y)
+      y$time <- time(object)[as.integer(y$time)]
+    }
     y
   }
 )

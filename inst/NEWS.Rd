@@ -1,5 +1,26 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 4.6}{
+  \itemize{
+    \item \code{logmeanexp} can now compute the effective sample size, which can be useful in determining the reliability of its estimate.
+    To do so, set \code{ess=TRUE} in a call to \code{logmeanexp}.
+    \item \code{logmeanexp} now returns a fully-named vector when either \code{se=TRUE} or \code{ess=TRUE}.
+    \item A new \code{format} argument has been added to the extractor functions \code{cond_logLik}, \code{eff_sample_size}, \code{filter_mean}, \code{filter_traj}, \code{forecast}, \code{pred_mean}, \code{pred_var}, and \code{saved_states}.
+    This allows the user to extract the relevant elements in data-frame format if desired.
+    \item \pkg{pomp} no longer depends on the superseded package \pkg{reshape2}.
+    The \code{melt} function for converting arrays and nested lists into data frames is accordingly no longer re-exported from \pkg{reshape2}.
+    It has been replaced by a stricter version of \code{melt}.
+
+    \item The \pkg{magrittr} pipe \code{\%>\%} is no longer re-exported by \pkg{pomp}: use the native \R pipe \code{|>} instead.
+    \item The package now requires \R version 4.1 at least.
+    \item All \pkg{pomp} functions with names.that.contain.dots have been deprecated in favor of functions in \sQuote{snake_case}.
+    This is to avoid anticipated problems with CRAN checks, which (falsely) assume that certain functions with dotted.names are S3 methods.
+    From this point, no exported \pkg{pomp} function has such a name.
+    \item The \code{dimnames} attributes for some of the arrays computed in \code{pfilter} and \code{pmcmc} computations have changed.
+    In particular, whereas in previous versions, the \code{time} dimension was given names that were character strings composed of decimal representations of the time (difficult to work with and prone to roundoff error), the \code{time} dimension now is not given names.
+    \item A bug that resulted in \code{gompertz} giving different simulations on Windows machines has been fixed.
+  }
+}
 \section{Changes in \pkg{pomp} version 4.5}{
   \itemize{
     \item A bug in trajectory computation for maps (discrete-time dynamical systems) has been fixed.

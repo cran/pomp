@@ -498,7 +498,7 @@ perturbn.kernel.sd <- function (rw.sd, time, paramnames) {
     unrec <- names(rw.sd)[!names(rw.sd) %in% paramnames]
     pStop_("the following parameter(s), ",
       "given random walks in ",sQuote("rw.sd"),", are not present in ",
-      sQuote("params"),": ",paste(sapply(unrec,sQuote),collapse=","),".")
+      sQuote("params"),": ",paste(lapply(unrec,sQuote),collapse=","),".")
   }
   ivp <- function (sd, lag = 1L) {
     sd*(seq_along(time)==lag)
@@ -517,16 +517,16 @@ perturbn.kernel.sd <- function (rw.sd, time, paramnames) {
   do.call(rbind,sds)
 }
 
-##' rw.sd
+##' rw_sd
 ##'
 ##' Specifying random-walk intensities.
 ##'
 ##' See \code{\link{mif2}} for details.
 ##'
-##' @name rw.sd
+##' @name rw_sd
 ##' @rdname rw_sd
 ##' @param \dots Specification of the random-walk intensities (as standard deviations).
 ##' @seealso \code{\link{mif2}}
 ##'
 ##' @export
-rw.sd <- safecall
+rw_sd <- safecall

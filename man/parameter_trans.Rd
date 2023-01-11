@@ -25,7 +25,7 @@ parameter_trans(toEst, fromEst, ...)
 
 \S4method{parameter_trans}{character,character}(toEst, fromEst, ...)
 
-\S4method{parameter_trans}{function,function}(toEst, fromEst, ...)
+\S4method{parameter_trans}{`function`,`function`}(toEst, fromEst, ...)
 }
 \arguments{
 \item{toEst, fromEst}{procedures that perform transformation of model parameters to and from the estimation scale, respectively.

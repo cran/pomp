@@ -1,5 +1,49 @@
 _N_e_w_s _f_o_r _p_a_c_k_a_g_e '_p_o_m_p'
 
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _4._6:
+
+        • ‘logmeanexp’ can now compute the effective sample size, which
+          can be useful in determining the reliability of its estimate.
+          To do so, set ‘ess=TRUE’ in a call to ‘logmeanexp’.
+
+        • ‘logmeanexp’ now returns a fully-named vector when either
+          ‘se=TRUE’ or ‘ess=TRUE’.
+
+        • A new ‘format’ argument has been added to the extractor
+          functions ‘cond_logLik’, ‘eff_sample_size’, ‘filter_mean’,
+          ‘filter_traj’, ‘forecast’, ‘pred_mean’, ‘pred_var’, and
+          ‘saved_states’.  This allows the user to extract the relevant
+          elements in data-frame format if desired.
+
+        • ‘pomp’ no longer depends on the superseded package
+          ‘reshape2’.  The ‘melt’ function for converting arrays and
+          nested lists into data frames is accordingly no longer
+          re-exported from ‘reshape2’.  It has been replaced by a
+          stricter version of ‘melt’.
+
+        • The ‘magrittr’ pipe ‘%>%’ is no longer re-exported by ‘pomp’:
+          use the native R pipe ‘|>’ instead.
+
+        • The package now requires R version 4.1 at least.
+
+        • All ‘pomp’ functions with names.that.contain.dots have been
+          deprecated in favor of functions in ‘snake_case’.  This is to
+          avoid anticipated problems with CRAN checks, which (falsely)
+          assume that certain functions with dotted.names are S3
+          methods.  From this point, no exported ‘pomp’ function has
+          such a name.
+
+        • The ‘dimnames’ attributes for some of the arrays computed in
+          ‘pfilter’ and ‘pmcmc’ computations have changed.  In
+          particular, whereas in previous versions, the ‘time’
+          dimension was given names that were character strings
+          composed of decimal representations of the time (difficult to
+          work with and prone to roundoff error), the ‘time’ dimension
+          now is not given names.
+
+        • A bug that resulted in ‘gompertz’ giving different
+          simulations on Windows machines has been fixed.
+
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _4._5:
 
         • A bug in trajectory computation for maps (discrete-time

@@ -9,56 +9,72 @@
 ##' The prediction mean is therefore the expectation of this distribution
 ##' \deqn{E[X(t_k) \vert Y(t_1)=y^*_1,\dots,Y(t_{k-1})=y^*_{k-1}].}{E[Xk | Y1=y1*,\dots,Y(k-1)=y(k-1)*].}
 ##'
-##' @name pred.mean
-##' @aliases pred.mean,ANY-method pred.mean,missing-method
-##' @include pfilter.R kalman.R
+##' @name pred_mean
+##' @aliases pred_mean,ANY-method pred_mean,missing-method
+##' @include pfilter.R kalman.R melt.R
 ##' @rdname pred_mean
 ##' @family particle filter methods
 ##' @family extraction methods
-##' @inheritParams filter.mean
+##' @inheritParams filter_mean
 ##'
 NULL
 
 setGeneric(
-  "pred.mean",
+  "pred_mean",
   function (object, ...)
-    standardGeneric("pred.mean")
+    standardGeneric("pred_mean")
 )
 
 setMethod(
-  "pred.mean",
+  "pred_mean",
   signature=signature(object="missing"),
   definition=function (...) {
-    reqd_arg("pred.mean","object")
+    reqd_arg("pred_mean","object")
   }
 )
 
 setMethod(
-  "pred.mean",
+  "pred_mean",
   signature=signature(object="ANY"),
   definition=function (object, ...) {
-    undef_method("pred.mean",object)
+    undef_method("pred_mean",object)
   }
 )
 
 ##' @rdname pred_mean
 ##' @export
 setMethod(
-  "pred.mean",
+  "pred_mean",
   signature=signature(object="kalmand_pomp"),
-  definition=function (object, vars, ...) {
+  definition=function (object, vars, ...,
+    format = c("array", "data.frame")) {
     if (missing(vars)) vars <- rownames(object@pred.mean)
-    object@pred.mean[vars,,drop=FALSE]
+    format <- match.arg(format)
+    if (format == "array") {
+      object@pred.mean[vars,,drop=FALSE]
+    } else {
+      x <- melt(object@pred.mean[vars,,drop=FALSE])
+      x$time <- time(object)[as.integer(x$time)]
+      x
+    }
   }
 )
 
 ##' @rdname pred_mean
 ##' @export
 setMethod(
-  "pred.mean",
+  "pred_mean",
   signature=signature(object="pfilterd_pomp"),
-  definition=function (object, vars, ...) {
+  definition=function (object, vars, ...,
+    format = c("array", "data.frame")) {
     if (missing(vars)) vars <- rownames(object@pred.mean)
-    object@pred.mean[vars,,drop=FALSE]
+    format <- match.arg(format)
+    if (format == "array") {
+      object@pred.mean[vars,,drop=FALSE]
+    } else {
+      x <- melt(object@pred.mean[vars,,drop=FALSE])
+      x$time <- time(object)[as.integer(x$time)]
+      x
+    }
   }
 )

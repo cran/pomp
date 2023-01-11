@@ -3,16 +3,16 @@
 ##' Retrieve latent state trajectories from a particle filter calculation.
 ##'
 ##' When one calls \code{\link{pfilter}} with \code{save.states=TRUE}, the latent state vector associated with each particle is saved.
-##' This can be extracted by calling \code{saved.states} on the \sQuote{pfilterd.pomp} object.
+##' This can be extracted by calling \code{saved_states} on the \sQuote{pfilterd.pomp} object.
 ##' These are the \emph{unweighted} particles, saved \emph{after} resampling.
 ##' 
-##' @name saved.states
-##' @aliases saved.states,ANY-method saved.states,missing-method
-##' @include pfilter.R pmcmc.R
+##' @name saved_states
+##' @aliases saved_states,ANY-method saved_states,missing-method
+##' @include pfilter.R pmcmc.R melt.R
 ##' @rdname saved_states
 ##' @family particle filter methods
 ##' @family extraction methods
-##' @inheritParams filter.mean
+##' @inheritParams filter_mean
 ##' @param format character;
 ##' format of the returned object (see below).
 ##'
@@ -30,30 +30,30 @@
 NULL
 
 setGeneric(
-  "saved.states",
-  function (object,...) standardGeneric("saved.states")
+  "saved_states",
+  function (object,...) standardGeneric("saved_states")
 )
 
 setMethod(
-  "saved.states",
+  "saved_states",
   signature=signature(object="missing"),
   definition=function (...) {
-    reqd_arg("saved.states","object")
+    reqd_arg("saved_states","object")
   }
 )
 
 setMethod(
-  "saved.states",
+  "saved_states",
   signature=signature(object="ANY"),
   definition=function (object, ...) {
-    undef_method("saved.states",object)
+    undef_method("saved_states",object)
   }
 )
 
 ##' @rdname saved_states
 ##' @export
 setMethod(
-  "saved.states",
+  "saved_states",
   signature=signature(object="pfilterd_pomp"),
   definition=function (object, ...,
     format = c("list","data.frame")) {
@@ -71,24 +71,37 @@ setMethod(
         w[,c("time",".id","variable","value")]
       )
       x <- x[order(x$time,x$.id),]
-      rownames(x) <- NULL
+      row.names(x) <- NULL
       x
     } else {
       s <- melt(object@saved.states)
       s$time <- time(object)[as.integer(s$L1)]
       s <- s[,c("time",".id","variable","value")]
-      rownames(s) <- NULL
+      row.names(s) <- NULL
       s
     }
   }
 )
 
 ##' @rdname saved_states
+##' @importFrom plyr rbind.fill
 ##' @export
 setMethod(
-  "saved.states",
+  "saved_states",
   signature=signature(object="pfilterList"),
-  definition=function (object, ...) {
-    lapply(object,saved.states,...)
+  definition=function (object, ...,
+    format = c("list","data.frame")) {
+    format <- match.arg(format)
+    x <- lapply(object,saved_states,...,format=format)
+    if (format == "data.frame") {
+      n <- vapply(x,nrow,integer(1L))
+      nm <- names(x)
+      if (is.null(nm)) nm <- as.character(seq_along(x))
+      x <- cbind(
+        L1=rep(nm,n),
+        rbind.fill(x)
+      )
+    }
+    x
   }
 )

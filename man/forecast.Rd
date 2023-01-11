@@ -10,9 +10,9 @@
 \usage{
 forecast(object, ...)
 
-\S4method{forecast}{kalmand_pomp}(object, vars, ...)
+\S4method{forecast}{kalmand_pomp}(object, vars, ..., format = c("array", "data.frame"))
 
-\S4method{forecast}{pfilterd_pomp}(object, vars, ...)
+\S4method{forecast}{pfilterd_pomp}(object, vars, ..., format = c("array", "data.frame"))
 }
 \arguments{
 \item{object}{result of a filtering computation}
@@ -20,6 +20,8 @@ forecast(object, ...)
 \item{...}{ignored}
 
 \item{vars}{optional character; names of variables}
+
+\item{format}{format of the returned object.}
 }
 \description{
 Mean of the one-step-ahead forecasting distribution.
@@ -27,16 +29,16 @@ Mean of the one-step-ahead forecasting distribution.
 \seealso{
 Other extraction methods: 
 \code{\link{coef}()},
-\code{\link{cond.logLik}()},
+\code{\link{cond_logLik}()},
 \code{\link{covmat}()},
-\code{\link{eff.sample.size}()},
-\code{\link{filter.mean}()},
-\code{\link{filter.traj}()},
+\code{\link{eff_sample_size}()},
+\code{\link{filter_mean}()},
+\code{\link{filter_traj}()},
 \code{\link{logLik}},
 \code{\link{obs}()},
-\code{\link{pred.mean}()},
-\code{\link{pred.var}()},
-\code{\link{saved.states}()},
+\code{\link{pred_mean}()},
+\code{\link{pred_var}()},
+\code{\link{saved_states}()},
 \code{\link{spy}()},
 \code{\link{states}()},
 \code{\link{summary}()},

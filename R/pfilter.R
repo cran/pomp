@@ -46,16 +46,16 @@
 ##' @section Methods:
 ##' \describe{
 ##' \item{\code{\link{logLik}}}{ the estimated log likelihood  }
-##' \item{\code{\link{cond.logLik}}}{ the estimated conditional log likelihood }
-##' \item{\code{\link{eff.sample.size}}}{
+##' \item{\code{\link{cond_logLik}}}{ the estimated conditional log likelihood }
+##' \item{\code{\link{eff_sample_size}}}{
 ##' the (time-dependent) estimated effective sample size }
-##' \item{\code{\link{pred.mean}}, \code{\link{pred.var}}}{ the mean and variance of the approximate prediction distribution }
-##' \item{\code{\link{filter.mean}}}{ the mean of the filtering distribution }
-##' \item{\code{\link{filter.traj}}}{
+##' \item{\code{\link{pred_mean}}, \code{\link{pred_var}}}{ the mean and variance of the approximate prediction distribution }
+##' \item{\code{\link{filter_mean}}}{ the mean of the filtering distribution }
+##' \item{\code{\link{filter_traj}}}{
 ##'   retrieve one particle trajectory.
 ##'   Useful for building up the smoothing distribution.
 ##' }
-##' \item{\code{\link{saved.states}}}{retrieve saved states}
+##' \item{\code{\link{saved_states}}}{retrieve saved states}
 ##' \item{\code{\link{as.data.frame}}}{coerce to a data frame}
 ##' \item{\code{\link{plot}}}{diagnostic plots}
 ##' }
@@ -250,7 +250,7 @@ pfilter.internal <- function (object, Np,
   stsav <- save.states %in% c("unweighted","TRUE")
   wtsav <- save.states == "weighted"
   if (stsav || wtsav || filter.traj) {
-    xparticles <- setNames(vector(mode="list",length=ntimes),time(object))
+    xparticles <- vector(mode="list",length=ntimes)
     if (wtsav) xweights <- xparticles
   }
   if (filter.traj) {
@@ -263,28 +263,28 @@ pfilter.internal <- function (object, Np,
   ## set up storage for prediction means, variances, etc.
   if (pred.mean) {
     pred.m <- array(data=numeric(1),dim=c(nvars,ntimes),
-      dimnames=list(variable=statenames,time=time(object)))
+      dimnames=list(variable=statenames,time=NULL))
   } else {
     pred.m <- array(data=numeric(0),dim=c(0,0))
   }
 
   if (pred.var) {
     pred.v <- array(data=numeric(1),dim=c(nvars,ntimes),
-      dimnames=list(variable=statenames,time=time(object)))
+      dimnames=list(variable=statenames,time=NULL))
   } else {
     pred.v <- array(data=numeric(0),dim=c(0,0))
   }
 
   if (filter.mean) {
     filt.m <- array(data=numeric(1),dim=c(nvars,ntimes),
-      dimnames=list(variable=statenames,time=time(object)))
+      dimnames=list(variable=statenames,time=NULL))
   } else {
     filt.m <- array(data=numeric(0),dim=c(0,0))
   }
 
   if (filter.traj) {
     filt.t <- array(data=numeric(1),dim=c(nvars,1,ntimes+1),
-      dimnames=list(variable=statenames,rep=1,time=times))
+      dimnames=list(variable=statenames,rep=1,time=NULL))
   } else {
     filt.t <- array(data=numeric(0),dim=c(0,0,0))
   }
@@ -309,8 +309,10 @@ pfilter.internal <- function (object, Np,
 
     ## store unweighted particles and their weights
     if (wtsav) {
-      xparticles[[nt]] <- X
-      xweights[[nt]] <- weights
+      xparticles[[nt]] <- array(X,dim=dim(X)[c(1L,2L)],
+        dimnames=list(variable=statenames,.id=NULL))
+      xweights[[nt]] <- array(weights,dim=length(weights),
+        dimnames=list(.id=NULL))
     }
 
     ## compute prediction mean, prediction variance, filtering mean,
@@ -345,8 +347,7 @@ pfilter.internal <- function (object, Np,
 
     if (stsav || filter.traj) {
       xparticles[[nt]] <- x
-      dimnames(xparticles[[nt]]) <- setNames(dimnames(xparticles[[nt]]),
-        c("variable",".id"))
+      dimnames(xparticles[[nt]]) <- list(variable=statenames,.id=NULL)
     }
 
     if (verbose && (nt%%5 == 0))
