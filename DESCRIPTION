@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 4.6
-Date: 2023-01-11
+Version: 4.7
+Date: 2023-03-02
 Authors@R: c(person(given=c("Aaron","A."),family="King",
 		role=c("aut","cre"),email="kingaa@umich.edu"),
 	  person(given=c("Edward","L."),family="Ionides",role=c("aut")),
@@ -21,8 +21,8 @@ Authors@R: c(person(given=c("Aaron","A."),family="King",
 	  )
 URL: https://kingaa.github.io/pomp/
 Description: Tools for data analysis with partially observed Markov process (POMP) models (also known as stochastic dynamical systems, hidden Markov models, and nonlinear, non-Gaussian, state-space models).  The package provides facilities for implementing POMP models, simulating them, and fitting them to time series data by a variety of frequentist and Bayesian methods.  It is also a versatile platform for implementation of inference methods for general POMP models.
-Depends: R(>= 4.1.0), methods
-Imports: stats, graphics, digest, mvtnorm, deSolve, coda, plyr
+Depends: R(>= 4.1.0)
+Imports: methods, stats, graphics, digest, mvtnorm, deSolve, coda, plyr
 Suggests: ggplot2, knitr, tidyr, dplyr, subplex, nloptr
 SystemRequirements: For Windows users, Rtools (see
         https://cran.r-project.org/bin/windows/Rtools/).
@@ -42,8 +42,8 @@ Collate: 'package.R' 'aaa.R' 'pstop.R' 'undefined.R' 'csnippet.R'
         'simulate.R' 'spect.R' 'plot.R' 'bsmc2.R' 'as_data_frame.R'
         'as_pomp.R' 'authors.R' 'bake.R' 'basic_components.R'
         'basic_probes.R' 'betabinom.R' 'blowflies.R' 'bsflu.R'
-        'bsplines.R' 'childhood.R' 'coef.R' 'concat.R' 'cond_logLik.R'
-        'covmat.R' 'dacca.R' 'deprecated.R' 'design.R'
+        'bsplines.R' 'childhood.R' 'coef.R' 'conc.R' 'concat.R'
+        'cond_logLik.R' 'covmat.R' 'dacca.R' 'defunct.R' 'design.R'
         'distributions.R' 'ebola.R' 'eff_sample_size.R'
         'elementary_algorithms.R' 'emeasure_spec.R'
         'estimation_algorithms.R' 'extract.R' 'filter_mean.R'
@@ -58,7 +58,7 @@ Collate: 'package.R' 'aaa.R' 'pstop.R' 'undefined.R' 'csnippet.R'
         'traces.R' 'transformations.R' 'userdata.R' 'verhulst.R'
         'vmeasure_spec.R' 'window.R' 'wquant.R'
 NeedsCompilation: yes
-Packaged: 2023-01-11 16:17:55 UTC; kingaa
+Packaged: 2023-03-02 22:33:45 UTC; kingaa
 Author: Aaron A. King [aut, cre],
   Edward L. Ionides [aut],
   Carles Breto [aut],
@@ -75,4 +75,4 @@ Author: Aaron A. King [aut, cre],
   Simon N. Wood [ctb]
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2023-01-11 17:00:02 UTC
+Date/Publication: 2023-03-03 01:30:02 UTC

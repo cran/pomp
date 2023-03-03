@@ -1,5 +1,19 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 4.7}{
+  \itemize{
+    \item Functions with names.that.contain.dots that were been deprecated in version 4.5.1 are now defunct.
+    Attempts to use such functions will generate an error with a message indicating the replacement function.
+    \item \code{plot} now removes \code{NA}.
+    \item Better handling of \sQuote{listie}s (lists of \sQuote{pomp} objects).
+    \item New \code{concat} function to turn lists of \sQuote{pomp} objects into \sQuote{listies}.
+    \item Bug fix in \code{filter_traj} applied to \sQuote{pfilterList} and \sQuote{pmcmcList} objects.
+    \item The \code{states} and \code{obs} methods take a new optional argument, \code{format}.
+    Setting \code{format="data.frame"} causes the method to return the states or data in a convenient data-frame format.
+    \item When \code{melt} is applied to a list, the identifier variable is now \dQuote{\code{.Lx}}, where \code{x} denotes the level.
+    This applies when \code{as.data.frame} is used to coerce a list of \sQuote{pomp} objects, and when \code{saved_states} is used to extract the particles from a list of \sQuote{pfilterd_pomp} objects.
+  }
+}
 \section{Changes in \pkg{pomp} version 4.6}{
   \itemize{
     \item \code{logmeanexp} can now compute the effective sample size, which can be useful in determining the reliability of its estimate.

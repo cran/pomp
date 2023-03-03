@@ -169,7 +169,7 @@ setAs(
     nm <- names(L)
     if (is.null(nm)) nm <- seq_along(L)
     cbind(
-      .id=rep(nm,n),
+      .L1=rep(nm,n),
       rbind.fill(L)
     )
   }
@@ -223,4 +223,3 @@ setAs(
 ##' but with conditional log likelihood and effective sample size estimates included.
 ##' @export
 as.data.frame.wpfilterd_pomp <- function (x, ...) as(x,"data.frame")
-

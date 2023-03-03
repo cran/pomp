@@ -30,7 +30,7 @@
 ##' @param filter.mean logical; if \code{TRUE}, the filtering means are calculated for the state variables and parameters.
 ##'
 ##' @param filter.traj logical; if \code{TRUE}, a filtered trajectory is returned for the state variables and parameters.
-##' See \code{\link{filter.traj}} for more information.
+##' See \code{\link{filter_traj}} for more information.
 ##'
 ##' @param save.states character;
 ##' If \code{save.states="unweighted"}, the state-vector for each unweighted particle at each time is saved.
@@ -141,7 +141,7 @@ setMethod(
     verbose = getOption("verbose", FALSE)) {
 
     tryCatch(
-      pfilter.internal(
+      pfilter_internal(
         data,
         Np=Np,
         pred.mean=pred.mean,
@@ -179,7 +179,7 @@ setMethod(
     verbose = getOption("verbose", FALSE)) {
 
     tryCatch(
-      pfilter.internal(
+      pfilter_internal(
         data,
         Np=Np,
         pred.mean=pred.mean,
@@ -211,7 +211,7 @@ setMethod(
   }
 )
 
-pfilter.internal <- function (object, Np,
+pfilter_internal <- function (object, Np,
   pred.mean = FALSE, pred.var = FALSE, filter.mean = FALSE,
   filter.traj = FALSE, cooling, cooling.m,
   save.states = c("no", "weighted", "unweighted", "FALSE", "TRUE"),

@@ -43,22 +43,14 @@ NULL
 
 setClass(
   "wpfilterd_pomp",
-  contains="pomp",
+  contains="pfilterd_pomp",
   slots=c(
     trigger="numeric",
-    target="numeric",
-    eff.sample.size="numeric",
-    cond.logLik="numeric",
-    Np="integer",
-    loglik="numeric"
+    target="numeric"
   ),
   prototype=prototype(
     trigger=0.0,
-    target=0.5,
-    eff.sample.size=numeric(0),
-    cond.logLik=numeric(0),
-    Np=as.integer(NA),
-    loglik=as.double(NA)
+    target=0.5
   )
 )
 
@@ -98,7 +90,7 @@ setMethod(
     verbose = getOption("verbose", FALSE)) {
 
     tryCatch(
-      wpfilter.internal(
+      wpfilter_internal(
         data,
         Np=Np,
         rinit=rinit,
@@ -129,7 +121,7 @@ setMethod(
     verbose = getOption("verbose", FALSE)) {
 
     tryCatch(
-      wpfilter.internal(
+      wpfilter_internal(
         data,
         Np=Np,
         trigger=trigger,
@@ -162,7 +154,7 @@ setMethod(
   }
 )
 
-wpfilter.internal <- function (object, Np, trigger, target, ...,
+wpfilter_internal <- function (object, Np, trigger, target, ...,
   .gnsi = TRUE, verbose = FALSE) {
 
   verbose <- as.logical(verbose)

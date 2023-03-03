@@ -9,6 +9,7 @@
 \alias{cond_logLik,pfilterd_pomp-method}
 \alias{cond_logLik,wpfilterd_pomp-method}
 \alias{cond_logLik,bsmcd_pomp-method}
+\alias{cond_logLik,pfilterList-method}
 \title{Conditional log likelihood}
 \usage{
 \S4method{cond_logLik}{kalmand_pomp}(object, ..., format = c("numeric", "data.frame"))
@@ -18,13 +19,15 @@
 \S4method{cond_logLik}{wpfilterd_pomp}(object, ..., format = c("numeric", "data.frame"))
 
 \S4method{cond_logLik}{bsmcd_pomp}(object, ..., format = c("numeric", "data.frame"))
+
+\S4method{cond_logLik}{pfilterList}(object, ..., format = c("numeric", "data.frame"))
 }
 \arguments{
 \item{object}{result of a filtering computation}
 
 \item{...}{ignored}
 
-\item{format}{format of the returned object.}
+\item{format}{format of the returned object}
 }
 \value{
 The numerical value of the conditional log likelihood.

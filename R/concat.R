@@ -1,143 +1,26 @@
 ##' Concatenate
 ##'
-##' Methods to concatenate objects into useful listie
+##' Concatenate two or more \sQuote{pomp} objects into a list-like \sQuote{listie}.
 ##'
 ##' @name concat
 ##' @rdname concat
 ##' @aliases c
-##' @include listie.R
-##' @importFrom stats setNames
-##' @keywords internal
+##' @include listie.R conc.R
+##' @param ... elements to be recursively combined into a \sQuote{listie}
+##' @details
+##' \code{concat} applied to one or more \sQuote{pomp} objects or lists of \sQuote{pomp} objects converts the list into a \sQuote{listie}.
+##' In particular, \code{concat(A,B,C)} is equivalent to \code{do.call(c,unlist(list(A,B,C)))}.
+##' 
+##' @example examples/concat.R
+##' 
 NULL
 
-setGeneric(
-  "concat",
-  function (...)
-    standardGeneric("concat")
-)
-
-setMethod(
-  "concat",
-  signature=signature(...="missing"),
-  definition=function (...) {
-    NULL   #nocov
-  }
-)
-
-setMethod(
-  "concat",
-  signature=signature(...="ANY"),
-  definition=function (...) {
-    pStop_(sQuote("c")," is not defined for objects of mixed class.")
-  }
-)
-
 ##' @rdname concat
-setMethod(
-  "concat",
-  signature=signature(...="Pomp"),
-  definition=function (...) {
-    y <- lapply(
-      list(...),
-      function (z) {
-        if (is(z,"list"))
-          setNames(as(z,"list"),names(z))
-        else
-          z
-      }
-    )
-    new("pompList",unlist(y))
-  }
-)
-
-##' @rdname concat
-setMethod(
-  "concat",
-  signature=signature(...="Pfilter"),
-  definition=function (...) {
-    y <- lapply(
-      list(...),
-      function (z) {
-        if (is(z,"list"))
-          setNames(as(z,"list"),names(z))
-        else
-          z
-      }
-    )
-    new("pfilterList",unlist(y))
-  }
-)
-
-##' @rdname concat
-setMethod(
-  "concat",
-  signature=signature(...="Abc"),
-  definition=function (...) {
-    y <- lapply(
-      list(...),
-      function (z) {
-        if (is(z,"list"))
-          setNames(as(z,"list"),names(z))
-        else
-          z
-      }
-    )
-    new("abcList",unlist(y))
-  }
-)
-
-##' @rdname concat
-setMethod(
-  "concat",
-  signature=signature(...="Mif2"),
-  definition=function (...) {
-    y <- lapply(
-      list(...),
-      function (z) {
-        if (is(z,"list"))
-          setNames(as(z,"list"),names(z))
-        else
-          z
-      }
-    )
-    new("mif2List",unlist(y))
-  }
-)
-
-##' @rdname concat
-setMethod(
-  "concat",
-  signature=signature(...="Pmcmc"),
-  definition=function (...) {
-    y <- lapply(
-      list(...),
-      function (z) {
-        if (is(z,"list"))
-          setNames(as(z,"list"),names(z))
-        else
-          z
-      }
-    )
-    new("pmcmcList",unlist(y))
-  }
-)
+##' @export
+c.Pomp <- function (...) conc(...)
 
 ##' @rdname concat
 ##' @export
-c.Pomp <- function (...) concat(...)
-
-##' @rdname concat
-##' @export
-c.Pfilter <- function (...) concat(...)
-
-##' @rdname concat
-##' @export
-c.Abc <- function (...) concat(...)
-
-##' @rdname concat
-##' @export
-c.Mif2 <- function (...) concat(...)
-
-##' @rdname concat
-##' @export
-c.Pmcmc <- function (...) concat(...)
+concat <- function (...) {
+  do.call(conc,unlist(list(...)))
+}
