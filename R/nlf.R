@@ -23,8 +23,6 @@
 ##' @aliases nlf
 ##' @aliases nlf_objfun nlf_objfun,missing-method nlf_objfun,ANY-method
 ##'
-##' @inheritSection pomp Note for Windows users
-##' 
 ##' @author Stephen P. Ellner, Bruce E. Kendall, Aaron A. King
 ##'
 ##' @concept nonlinear forecasting
@@ -59,7 +57,9 @@
 ##' constructed using tensor products of basis functions of observables with
 ##' basis functions of time.
 ##'
+##' @inheritSection pomp Note for Windows users
 ##' @inheritSection objfun Important Note
+##' @inheritSection objfun Warning! Objective functions based on C snippets
 ##'
 ##' @param lags A vector specifying the lags to use when constructing the nonlinear autoregressive prediction model.
 ##' The first lag is the prediction interval.
@@ -350,19 +350,22 @@ nlfof_internal <- function (object,
     period=period,tensor=tensor,seed=seed,transform.data=transform.data,
     verbose=verbose)
 
+  .gnsi <- TRUE
+
   ofun <- function (par = numeric(0)) {
     params[idx] <- par
     coef(object,transform=TRUE) <<- params
     logql <<- nlf_lql(object,times=times,lags=lags,nrbf=nrbf,fail.value=fail.value,
       period=period,tensor=tensor,seed=seed,transform.data=transform.data,
-      verbose=verbose)
+      .gnsi=.gnsi,verbose=verbose)
+    .gnsi <<- FALSE
     if (is.finite(logql) || is.na(fail.value)) -logql else fail.value #nocov
   }
 
   environment(ofun) <- list2env(
     list(object=object,times=times,lags=lags,nrbf=nrbf,fail.value=fail.value,
       period=period,tensor=tensor,seed=seed,transform.data=transform.data,
-      params=params,idx=idx,logql=logql,verbose=verbose),
+      params=params,idx=idx,logql=logql,.gnsi=.gnsi,verbose=verbose),
     parent=parent.frame(2)
   )
 
@@ -377,10 +380,10 @@ nlfof_internal <- function (object,
 ## so a large NEGATIVE value is used to flag bad parameters
 
 nlf_lql <- function (object, times, lags, nrbf, period, tensor,
-  seed, transform.data, fail.value, verbose)
+  seed, transform.data, fail.value, .gnsi = TRUE, verbose)
 {
 
-  y <- simulate(object,times=times,seed=seed,format="arrays",verbose=verbose)$obs
+  y <- simulate(object,times=times,seed=seed,format="arrays",.gnsi=.gnsi,verbose=verbose)$obs
 
   ## Test whether the model time series is valid
   if (!all(is.finite(y))) return(-fail.value)

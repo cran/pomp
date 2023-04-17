@@ -225,11 +225,11 @@ setMethod(
       object@traces[,colnames(obj@traces)],
       obj@traces[-1,]
     )
-    names(dimnames(obj@traces)) <- c("iteration","variable")
+    names(dimnames(obj@traces)) <- c("iteration","name")
     ft <- array(
       dim=replace(dim(obj@filter.traj),2L,ndone+Nmcmc),
       dimnames=list(
-        variable=rownames(obj@filter.traj),
+        name=rownames(obj@filter.traj),
         rep=NULL,
         time=NULL
       )
@@ -289,10 +289,14 @@ pmcmc_internal <- function (object, Nmcmc, proposal, Np, ...,
   if (verbose)
     cat("performing",Nmcmc,"PMCMC iteration(s) using",Np[1L],"particles\n")
 
-  traces <- array(data=NA_real_,dim=c(Nmcmc+1L,length(theta)+2L),
+  traces <- array(
+    data=NA_real_,
+    dim=c(Nmcmc+1L,length(theta)+2L),
     dimnames=list(
-      iteration=seq(from=0L,to=Nmcmc,by=1L),
-      variable=c("loglik","log.prior",names(theta))))
+      iteration=NULL,
+      name=c("loglik","log.prior",names(theta))
+    )
+  )
 
   if (.ndone==0L) { ## compute prior and likelihood on initial parameter vector
 
@@ -328,7 +332,7 @@ pmcmc_internal <- function (object, Nmcmc, proposal, Np, ...,
     data=NA_real_,
     dim=replace(dim(pfp@filter.traj),2L,Nmcmc),
     dimnames=list(
-      variable=rownames(pfp@filter.traj),
+      name=rownames(pfp@filter.traj),
       rep=NULL,
       time=NULL
     )

@@ -44,7 +44,7 @@ setMethod(
     format = c("array", "data.frame")) {
     if (length(object@states)==0) {
       x <- array(NA_real_,dim=c(0,length(object@times)),
-        dimnames=setNames(list(NULL,NULL),c("variable",object@timename)))
+        dimnames=setNames(list(NULL,NULL),c("name",object@timename)))
     } else {
       varnames <- rownames(object@states)
       if (missing(vars)) vars <- varnames
@@ -52,7 +52,7 @@ setMethod(
         pStop("states","some elements of ",
           sQuote("vars")," correspond to no state variable")
       x <- object@states[vars,,drop=FALSE]
-      dimnames(x) <- setNames(list(vars,NULL),c("variable",object@timename))
+      dimnames(x) <- setNames(list(vars,NULL),c("name",object@timename))
     }
     format <- match.arg(format)
     if (format == "data.frame") {
@@ -65,6 +65,7 @@ setMethod(
 
 ##' @rdname states
 ##' @inheritParams obs
+##' @importFrom dplyr bind_rows
 ##' @export
 setMethod(
   "states",
@@ -74,7 +75,7 @@ setMethod(
     format <- match.arg(format)
     x <- lapply(object,states,vars=vars,format=format,...)
     if (format == "data.frame") {
-      rbind.fill(x,.id=".id")
+      bind_rows(x,.id=".id")
     } else {
       x
     }
