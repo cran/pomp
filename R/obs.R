@@ -6,7 +6,7 @@
 ##' @aliases obs,ANY-method obs,missing-method
 ##' @docType methods
 ##' @rdname obs
-##' @include pomp_class.R
+##' @include pomp_class.R melt.R
 ##' @importFrom stats setNames
 ##' @family extraction methods
 ##'
@@ -49,7 +49,7 @@ setMethod(
     if (missing(vars))
       vars <- varnames
     else if (!all(vars%in%varnames))
-      pStop("obs","some elements of ",
+      pStop(who="obs","some elements of ",
         sQuote("vars")," correspond to no observed variable.")
     y <- object@data[vars,,drop=FALSE]
     dimnames(y) <- setNames(list(vars,NULL),c("name",object@timename))
@@ -63,7 +63,6 @@ setMethod(
 )
 
 ##' @rdname obs
-##' @importFrom dplyr bind_rows
 ##' @export
 setMethod(
   "obs",
@@ -73,7 +72,7 @@ setMethod(
     format <- match.arg(format)
     y <- lapply(object,obs,vars=vars,format=format,...)
     if (format == "data.frame") {
-      bind_rows(y,.id=".id")
+      rbind_fill(y,.id=".id")
     } else {
       y
     }

@@ -6,7 +6,7 @@
 ##' @aliases states,ANY-method states,missing-method
 ##' @rdname states
 ##' @docType methods
-##' @include pomp_class.R
+##' @include pomp_class.R melt.R
 ##' @importFrom stats setNames
 ##' @family extraction methods
 ##'
@@ -49,7 +49,7 @@ setMethod(
       varnames <- rownames(object@states)
       if (missing(vars)) vars <- varnames
       else if (!all(vars%in%varnames))
-        pStop("states","some elements of ",
+        pStop(who="states","some elements of ",
           sQuote("vars")," correspond to no state variable")
       x <- object@states[vars,,drop=FALSE]
       dimnames(x) <- setNames(list(vars,NULL),c("name",object@timename))
@@ -65,7 +65,6 @@ setMethod(
 
 ##' @rdname states
 ##' @inheritParams obs
-##' @importFrom dplyr bind_rows
 ##' @export
 setMethod(
   "states",
@@ -75,7 +74,7 @@ setMethod(
     format <- match.arg(format)
     x <- lapply(object,states,vars=vars,format=format,...)
     if (format == "data.frame") {
-      bind_rows(x,.id=".id")
+      rbind_fill(x,.id=".id")
     } else {
       x
     }

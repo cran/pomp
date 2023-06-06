@@ -14,6 +14,13 @@
 ##'
 NULL
 
+##' @importFrom data.table rbindlist
+rbind_fill <- function (x, .id = ".id") {
+  as.data.frame(
+    rbindlist(x,use.names=TRUE,fill=TRUE,idcol=.id)
+  )
+}
+
 setGeneric(
   "melt",
   function (data, ...)
@@ -77,15 +84,14 @@ setMethod(
 ##' @details A list can be melted into a data frame.
 ##' This operation is recursive.
 ##' A variable will be appended to distinguish the separate list entries.
-##' @importFrom dplyr bind_rows
 ##' @export
 setMethod(
   "melt",
   signature=signature(data="list"),
   definition=function (data, ..., level = 1) {
     if (length(unique(lapply(data,mode))) > 1L)
-      pStop("melt","refusing to melt data of incompatible types.")
-    bind_rows(
+      pStop(who="melt","refusing to melt data of incompatible types.")
+    rbind_fill(
       lapply(data,melt,level=level+1,...),
       .id=paste0(".L",level)
     )

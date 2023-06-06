@@ -21,7 +21,7 @@
 ##' @param object optional;
 ##' if present, it should be a data frame or a \sQuote{pomp} object.
 ##' @param ode_control optional list;
-##' the elements of this list will be passed to \code{\link[=deSolve]{ode}} if the skeleton is a vectorfield, and ignored if it is a map.
+##' the elements of this list will be passed to \code{\link[deSolve]{ode}} if the skeleton is a vectorfield, and ignored if it is a map.
 ##' @param format the format in which to return the results.
 ##'
 ##' \code{format = "pomps"} causes the trajectories to be returned as a single \sQuote{pomp} object (if a single parameter vector have been furnished to \code{trajectory}) or as a \sQuote{pompList} object (if multiple parameters have been furnished).
@@ -94,7 +94,7 @@ setMethod(
         format=format,
         verbose=verbose
       ),
-      error = function (e) pStop("trajectory",conditionMessage(e))
+      error = function (e) pStop(who="trajectory",conditionMessage(e))
     )
 
   }
@@ -127,7 +127,7 @@ setMethod(
         format=format,
         verbose=verbose
       ),
-      error = function (e) pStop("trajectory",conditionMessage(e))
+      error = function (e) pStop(who="trajectory",conditionMessage(e))
     )
     
   }
@@ -158,7 +158,7 @@ setMethod(
         format=format,
         verbose=verbose
       ),
-      error = function (e) pStop("trajectory",conditionMessage(e))
+      error = function (e) pStop(who="trajectory",conditionMessage(e))
     )
 
   }
