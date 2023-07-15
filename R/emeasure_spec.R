@@ -1,12 +1,12 @@
-##' The expectation of the measurement model
+##' emeasure specification
 ##'
 ##' Specification of the measurement-model conditional expectation, emeasure.
 ##'
-##' @name emeasure specification
+##' @name emeasure_spec
 ##' @rdname emeasure_spec
 ##' @family implementation information
 ##' @seealso \code{\link{emeasure}}
-##' 
+##'
 ##' @details
 ##' The measurement model is the link between the data and the unobserved state process.
 ##' Some algorithms require the conditional expectation of the measurement model, given the latent state and parameters.
@@ -42,7 +42,7 @@
 ##' @section Default behavior:
 ##' The default \code{emeasure} is undefined.
 ##' It will yield missing values (\code{NA}).
-##' 
+##'
 ##' @inheritSection pomp Note for Windows users
 ##'
 NULL

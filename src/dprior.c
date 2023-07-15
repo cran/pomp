@@ -4,17 +4,16 @@
 #include <Rmath.h>
 #include <Rdefines.h>
 #include <Rinternals.h>
-#include <R_ext/Rdynload.h>
 
-#include "pomp_internal.h"
+#include "internal.h"
 
 static R_INLINE SEXP add_args (SEXP names, SEXP log, SEXP args)
 {
 
   SEXP var;
   int v;
-  
-  PROTECT(args = LCONS(AS_LOGICAL(log),args));
+
+  PROTECT(args = LCONS(AS_LOGICAL(log),VectorToPairList(args)));
   SET_TAG(args,install("log"));
 
   for (v = LENGTH(names)-1; v >= 0; v--) {
@@ -66,7 +65,7 @@ SEXP do_dprior (SEXP object, SEXP params, SEXP log, SEXP gnsi)
   PROTECT(fn = pomp_fun_handler(pompfun,gnsi,&mode,NA_STRING,Pnames,NA_STRING,NA_STRING));
 
   // extract 'userdata' as pairlist
-  PROTECT(args = VectorToPairList(GET_SLOT(object,install("userdata"))));
+  PROTECT(args = GET_SLOT(object,install("userdata")));
 
   // to store results
   PROTECT(F = NEW_NUMERIC(nreps));
@@ -106,15 +105,12 @@ SEXP do_dprior (SEXP object, SEXP params, SEXP log, SEXP gnsi)
 
     give_log = *(INTEGER(AS_INTEGER(log)));
 
-    R_CheckUserInterrupt();	// check for user interrupt
-
-    set_pomp_userdata(args);
+    R_CheckUserInterrupt();     // check for user interrupt
 
     // loop over replicates
     for (j = 0, pt = REAL(F), ps = REAL(params); j < nreps; j++, ps += npars, pt++)
       (*ff)(pt,ps,give_log,pidx);
 
-    unset_pomp_userdata();
   }
 
     break;

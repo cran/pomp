@@ -1,8 +1,8 @@
-##' The measurement model density
+##' dmeasure specification
 ##'
 ##' Specification of the measurement model density function, dmeasure.
 ##'
-##' @name dmeasure specification
+##' @name dmeasure_spec
 ##' @rdname dmeasure_spec
 ##' @family implementation information
 ##' @seealso \code{\link{dmeasure}}
@@ -43,7 +43,7 @@
 ##'
 ##' @section Default behavior:
 ##' If \code{dmeasure} is left unspecified, calls to \code{\link{dmeasure}} will return missing values (\code{NA}).
-##' 
+##'
 ##' @inheritSection pomp Note for Windows users
-##' 
+##'
 NULL

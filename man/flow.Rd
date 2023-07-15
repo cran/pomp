@@ -5,7 +5,7 @@
 \alias{flow,missing-method}
 \alias{flow,ANY-method}
 \alias{flow,pomp-method}
-\title{Flow of a deterministic model}
+\title{flow workhorse}
 \usage{
 \S4method{flow}{pomp}(
   object,
@@ -52,6 +52,7 @@ In the case of a continuous-time system (vectorfield), \code{flow} uses the nume
 }
 \seealso{
 More on \pkg{pomp} workhorse functions: 
+\code{\link{dinit}()},
 \code{\link{dmeasure}()},
 \code{\link{dprior}()},
 \code{\link{dprocess}()},
@@ -67,9 +68,9 @@ More on \pkg{pomp} workhorse functions:
 \code{\link{workhorses}}
 
 More on methods for deterministic process models: 
-\code{\link{skeleton specification}},
+\code{\link{skeleton_spec}},
 \code{\link{skeleton}()},
-\code{\link{trajectory matching}},
+\code{\link{traj_match}},
 \code{\link{trajectory}()}
 }
 \concept{deterministic methods}

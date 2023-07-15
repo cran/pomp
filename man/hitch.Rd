@@ -16,6 +16,7 @@ hitch(
   globals,
   cfile,
   cdir = getOption("pomp_cdir", NULL),
+  on_load,
   shlib.args,
   compile = TRUE,
   verbose = getOption("verbose", FALSE)
@@ -42,7 +43,7 @@ This is only useful if one or more of the model components has been specified us
 it is not used for any component specified using C snippets.
 \code{PACKAGE} can name at most one library.}
 
-\item{globals}{optional character;
+\item{globals}{optional character or C snippet;
 arbitrary C code that will be hard-coded into the shared-object library created when C snippets are provided.
 If no C snippets are used, \code{globals} has no effect.}
 
@@ -55,6 +56,10 @@ If the chosen filename would result in over-writing an existing file, an error i
 \code{cdir} specifies the name of the directory within which C snippet code will be compiled.
 By default, this is in a temporary directory specific to the \R session.
 One can also set this directory using the \code{pomp_cdir} global option.}
+
+\item{on_load}{optional character or C snippet:
+arbitrary C code that will be executed when the C snippet file is loaded.
+If no C snippets are used, \code{on_load} has no effect.}
 
 \item{shlib.args}{optional character variables.
 Command-line arguments to the \code{R CMD SHLIB} call that compiles the C snippets.
@@ -85,7 +90,7 @@ library was created in the session's temporary directory.  }
 character string with the full contents of the C snippet file.  } }
 }
 \description{
-The algorithms in \pkg{pomp} are formulated using \R functions that access the \link[=basic components]{basic model components}
+The algorithms in \pkg{pomp} are formulated using \R functions that access the \link[=basic_components]{basic model components}
 (\code{rprocess}, \code{dprocess}, \code{rmeasure}, \code{dmeasure}, etc.).
 For short, we refer to these elementary functions as \dQuote{\link{workhorses}}.
 In implementing a model, the user specifies basic model components

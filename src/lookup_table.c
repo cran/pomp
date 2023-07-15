@@ -2,7 +2,7 @@
 #include <Rmath.h>
 #include <Rdefines.h>
 
-#include "pomp_internal.h"
+#include "internal.h"
 
 SEXP get_covariate_names (SEXP object) {
   return GET_ROWNAMES(GET_DIMNAMES(GET_SLOT(object,install("table"))));
@@ -76,4 +76,3 @@ void table_lookup (lookup_table_t *tab, double x, double *y)
     break;
   }
 }
-

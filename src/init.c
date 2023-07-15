@@ -1,7 +1,8 @@
-#include "pomp_internal.h"
+#include "internal.h"
 #include <R_ext/Rdynload.h>
 
 static const R_CallMethodDef callMethods[] = {
+  {"set_userdata", (DL_FUNC) &set_pomp_userdata, 1},
   {"logmeanexp", (DL_FUNC) &logmeanexp, 2},
   {"bspline_basis", (DL_FUNC) &bspline_basis, 5},
   {"periodic_bspline_basis", (DL_FUNC) &periodic_bspline_basis, 5},
@@ -43,6 +44,7 @@ static const R_CallMethodDef callMethods[] = {
   {"do_dprior", (DL_FUNC) &do_dprior, 4},
   {"do_skeleton", (DL_FUNC) &do_skeleton, 5},
   {"do_rinit", (DL_FUNC) &do_rinit, 5},
+  {"do_dinit", (DL_FUNC) &do_dinit, 6},
   {"LogitTransform", (DL_FUNC) &LogitTransform, 1},
   {"ExpitTransform", (DL_FUNC) &ExpitTransform, 1},
   {"LogBarycentricTransform", (DL_FUNC) &LogBarycentricTransform, 1},
@@ -60,8 +62,6 @@ void R_init_pomp (DllInfo *info) {
   R_RegisterCCallable("pomp","pomp_fun_handler",(DL_FUNC) &pomp_fun_handler);
   R_RegisterCCallable("pomp","load_stack_incr",(DL_FUNC) &load_stack_incr);
   R_RegisterCCallable("pomp","load_stack_decr",(DL_FUNC) &load_stack_decr);
-  R_RegisterCCallable("pomp","set_pomp_userdata",(DL_FUNC) &set_pomp_userdata);
-  R_RegisterCCallable("pomp","unset_pomp_userdata",(DL_FUNC) &unset_pomp_userdata);
   R_RegisterCCallable("pomp","make_covariate_table",(DL_FUNC) &make_covariate_table);
   R_RegisterCCallable("pomp","get_covariate_names",(DL_FUNC) &get_covariate_names);
   R_RegisterCCallable("pomp","table_lookup",(DL_FUNC) &table_lookup);
@@ -70,8 +70,12 @@ void R_init_pomp (DllInfo *info) {
   R_RegisterCCallable("pomp","apply_probe_sim",(DL_FUNC) &apply_probe_sim);
   R_RegisterCCallable("pomp","systematic_resampling",(DL_FUNC) &systematic_resampling);
   R_RegisterCCallable("pomp","randwalk_perturbation", (DL_FUNC) &randwalk_perturbation);
+  // THE FOLLOWING TWO FUNCTIONS WILL GO AWAY SOON
+  R_RegisterCCallable("pomp","set_pomp_userdata",(DL_FUNC) &set_pomp_userdata);
+  R_RegisterCCallable("pomp","unset_pomp_userdata",(DL_FUNC) &unset_pomp_userdata);
 
   // Register routines
   R_registerRoutines(info,NULL,callMethods,NULL,NULL);
   R_useDynamicSymbols(info,TRUE);
+  R_forceSymbols(info,FALSE);
 }

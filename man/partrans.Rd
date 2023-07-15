@@ -7,7 +7,7 @@
 \alias{partrans,missing-method}
 \alias{partrans,pomp-method}
 \alias{partrans,objfun-method}
-\title{partrans}
+\title{partrans workhorse}
 \usage{
 \S4method{partrans}{pomp}(object, params, dir = c("fromEst", "toEst"), ...)
 
@@ -36,6 +36,7 @@ Performs parameter transformations.
 Specification of parameter transformations: \code{\link{parameter_trans}}
 
 More on \pkg{pomp} workhorse functions: 
+\code{\link{dinit}()},
 \code{\link{dmeasure}()},
 \code{\link{dprior}()},
 \code{\link{dprocess}()},

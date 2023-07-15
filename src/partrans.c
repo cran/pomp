@@ -4,9 +4,8 @@
 #include <Rmath.h>
 #include <Rdefines.h>
 #include <Rinternals.h>
-#include <string.h>
 
-#include "pomp_internal.h"
+#include "internal.h"
 
 typedef enum {to = 1, from = -1} direction_t;
 
@@ -16,7 +15,7 @@ static R_INLINE SEXP add_args (SEXP args, SEXP names)
   SEXP var;
   int v;
 
-  PROTECT(args);
+  PROTECT(args = VectorToPairList(args));
 
   for (v = LENGTH(names)-1; v >= 0; v--) {
     var = NEW_NUMERIC(1);
@@ -71,10 +70,10 @@ SEXP do_partrans (SEXP object, SEXP params, SEXP dir, SEXP gnsi)
   direc = (direction_t) *(INTEGER(dir));
   PROTECT(ob = GET_SLOT(object,install("partrans")));
   switch (direc) {
-  case from: default:	// from estimation scale
+  case from: default:   // from estimation scale
     PROTECT(pompfun = GET_SLOT(ob,install("from")));
     break;
-  case to:			// to estimation scale
+  case to:                      // to estimation scale
     PROTECT(pompfun = GET_SLOT(ob,install("to")));
     break;
   }
@@ -82,7 +81,7 @@ SEXP do_partrans (SEXP object, SEXP params, SEXP dir, SEXP gnsi)
   PROTECT(fn = pomp_fun_handler(pompfun,gnsi,&mode,NA_STRING,Pnames,NA_STRING,NA_STRING));
 
   // extract 'userdata' as pairlist
-  PROTECT(args = VectorToPairList(GET_SLOT(object,install("userdata"))));
+  PROTECT(args = GET_SLOT(object,install("userdata")));
 
   int nprotect = 7;
 
@@ -124,7 +123,7 @@ SEXP do_partrans (SEXP object, SEXP params, SEXP dir, SEXP gnsi)
 
   case native: case regNative: {
 
-    pomp_transform_fn *ff;
+    pomp_transform *ff;
     double *ps, *pt;
     int *idx;
     int j;
@@ -135,12 +134,8 @@ SEXP do_partrans (SEXP object, SEXP params, SEXP dir, SEXP gnsi)
 
     idx = INTEGER(GET_SLOT(pompfun,install("paramindex")));
 
-    set_pomp_userdata(args);
-
     for (j = 0, ps = REAL(params), pt = REAL(tparams); j < nreps; j++, ps += npars, pt += npars)
       (*ff)(pt,ps,idx);
-
-    unset_pomp_userdata();
 
   }
 

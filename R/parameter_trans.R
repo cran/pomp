@@ -1,9 +1,8 @@
-##' Parameter transformations
+##' parameter transformations
 ##'
-##' Equipping models with parameter transformations to ease searches in constrained parameter spaces.
+##' Equipping models with parameter transformations to facilitate searches in constrained parameter spaces.
 ##'
-##' @name parameter transformations
-##' @aliases parameter_trans
+##' @name parameter_trans
 ##' @rdname parameter_trans
 ##' @docType methods
 ##' @include pomp_fun.R csnippet.R pstop.R undefined.R
@@ -22,7 +21,7 @@
 ##' @inheritSection pomp Note for Windows users
 ##' @details
 ##' When parameter transformations are desired, they can be integrated into the \sQuote{pomp} object via the \code{partrans} arguments using the \code{parameter_trans} function.
-##' As with the other \link[=basic components]{basic model components}, these should ordinarily be specified using C snippets.
+##' As with the other \link[=basic_components]{basic model components}, these should ordinarily be specified using C snippets.
 ##' When doing so, note that:
 ##' \enumerate{
 ##'   \item The parameter transformation mapping a parameter vector from the scale used by the model codes to another scale, and the inverse transformation, are specified via a call to \preformatted{parameter_trans(toEst,fromEst)}.
@@ -187,24 +186,6 @@ setMethod(
   }
 )
 
-##' @rdname show
-##' @export
-setMethod(
-  "show",
-  signature=signature(object="partransPlugin"),
-  definition=function (object) {
-    if (object@has) {
-      cat("  - to estimation scale: ")
-      show(object@to)
-      cat("  - from estimation scale: ")
-      show(object@from)
-    } else {
-      cat("  - to estimation scale: <identity>\n")
-      cat("  - from estimation scale: <identity>\n")
-    }
-  }
-)
-
 parameter_trans_internal <- function (toEst = NULL, fromEst = NULL,
   ..., log, logit, barycentric) {
 
@@ -224,8 +205,10 @@ parameter_trans_internal <- function (toEst = NULL, fromEst = NULL,
   out2 <- textConnection(object="toEst",open="a",local=TRUE)
 
   if (length(log) > 0) {
-    tpl1 <- "\t{%v%} = exp(T_{%v%});\n"
-    tpl2 <- "\tT_{%v%} = log({%v%});\n"
+    tpl1 <- r"{
+  {%v%} = exp(T_{%v%});}"
+    tpl2 <- r"{
+  T_{%v%} = log({%v%});}"
     for (v in log) {
       cat(file=out1,render(tpl1,v=v))
       cat(file=out2,render(tpl2,v=v))
@@ -233,8 +216,10 @@ parameter_trans_internal <- function (toEst = NULL, fromEst = NULL,
   }
 
   if (length(logit) > 0) {
-    tpl1 <- "\t{%v%} = expit(T_{%v%});\n"
-    tpl2 <- "\tT_{%v%} = logit({%v%});\n"
+    tpl1 <- r"{
+  {%v%} = expit(T_{%v%});}"
+    tpl2 <- r"{
+  T_{%v%} = logit({%v%});}"
     for (v in logit) {
       cat(file=out1,render(tpl1,v=v))
       cat(file=out2,render(tpl2,v=v))
@@ -242,8 +227,10 @@ parameter_trans_internal <- function (toEst = NULL, fromEst = NULL,
   }
 
   if (length(barycentric) > 0) {
-    tpl1 <- "\tfrom_log_barycentric(&{%v%},&T_{%v%},{%n%});"
-    tpl2 <- "\tto_log_barycentric(&T_{%v%},&{%v%},{%n%});"
+    tpl1 <- r"{
+  from_log_barycentric(&{%v%},&T_{%v%},{%n%});}"
+    tpl2 <- r"{
+  to_log_barycentric(&T_{%v%},&{%v%},{%n%});}"
     for (b in barycentric) {
       cat(file=out1,render(tpl1,v=b[1],n=length(b)))
       cat(file=out2,render(tpl2,v=b[1],n=length(b)))

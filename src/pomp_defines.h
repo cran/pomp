@@ -53,26 +53,23 @@ static R_INLINE SEXP makearray (int rank, const int *dim) {
 
 // check if names exist and are nonempty
 static R_INLINE int invalid_names (SEXP names) {
-  int i, ok;
-  ok = !isNull(names);
-  for (i = 0; ok && i < LENGTH(names); i++)
-    ok = ok && LENGTH(STRING_ELT(names,i)) > 0 &&
-      STRING_ELT(names,i) != NA_STRING;
-  return !ok;
+  return isNull(names);
 }
 
-static R_INLINE SEXP matchnames (SEXP provided, SEXP needed, const char *where) {
+static R_INLINE SEXP matchnames
+(
+ SEXP provided, SEXP needed, const char *where
+ ) {
   int m = LENGTH(provided);
   int n = length(needed);
   SEXP index;
   int *idx, i, j;
-
   PROTECT(provided = AS_CHARACTER(provided));
   PROTECT(needed = AS_CHARACTER(needed));
-  if (invalid_names(provided)) errorcall(R_NilValue,"invalid variable names among the %s.",where);
+  if (invalid_names(provided))
+    err("invalid variable names among the %s.",where); // #nocov
   PROTECT(index = NEW_INTEGER(n));
   idx = INTEGER(index);
-
   for (i = 0; i < n; i++) {
     for (j = 0; j < m; j++) {
       if (!strcmp(CHAR(STRING_ELT(provided,j)),CHAR(STRING_ELT(needed,i)))) {
@@ -80,17 +77,41 @@ static R_INLINE SEXP matchnames (SEXP provided, SEXP needed, const char *where) 
         break;
       }
     }
-    if (j==m) errorcall(R_NilValue,"variable '%s' not found among the %s.",CHAR(STRING_ELT(needed,i)),where);
+    if (j==m)
+      err("variable '%s' not found among the %s.",CHAR(STRING_ELT(needed,i)),where);
   }
   UNPROTECT(3);
   return index;
+}
+
+static R_INLINE void fillrownames (SEXP x, SEXP names) {
+  SEXP dim, dimnms;
+  int nr;
+  PROTECT(names = AS_CHARACTER(names));
+  PROTECT(dim = GET_DIM(x));
+  PROTECT(dimnms = allocVector(VECSXP,length(dim)));
+  nr = INTEGER(dim)[0];
+  if (nr > length(names)) {
+    SEXP nm;
+    int k;
+    PROTECT(nm = NEW_CHARACTER(nr));
+    for (k = 0; k < length(names); k++) {
+      SET_STRING_ELT(nm,k,STRING_ELT(names,k));
+    }
+    SET_ELEMENT(dimnms,0,nm);
+    UNPROTECT(1);
+  } else {
+    SET_ELEMENT(dimnms,0,names);
+  }
+  SET_DIMNAMES(x,dimnms);
+  UNPROTECT(3);
 }
 
 static R_INLINE void setrownames (SEXP x, SEXP names, int rank) {
   SEXP dimnms, nm;
   PROTECT(nm = AS_CHARACTER(names));
   PROTECT(dimnms = allocVector(VECSXP,rank));
-  SET_ELEMENT(dimnms,0,nm);	// set row names
+  SET_ELEMENT(dimnms,0,nm);     // set row names
   SET_DIMNAMES(x,dimnms);
   UNPROTECT(2);
 }
@@ -122,36 +143,35 @@ static R_INLINE void fixdimnames (SEXP x, const char **names, int n) {
 }
 
 static R_INLINE SEXP as_matrix (SEXP x) {
-  int nprotect = 0;
+  int nprotect = 1;
   SEXP dim, names;
   int *xdim, nrow, ncol;
-  PROTECT(dim = GET_DIM(x)); nprotect++;
+  PROTECT(dim = GET_DIM(x));
   if (isNull(dim)) {
-    PROTECT(x = duplicate(x)); nprotect++;
-    PROTECT(names = GET_NAMES(x)); nprotect++;
+    PROTECT(x = duplicate(x));
+    PROTECT(names = GET_NAMES(x));
+    nprotect += 2;
     dim = NEW_INTEGER(2);
-    xdim = INTEGER(dim);
-    xdim[0] = LENGTH(x); xdim[1] = 1;
+    xdim = INTEGER(dim); xdim[0] = LENGTH(x); xdim[1] = 1;
     SET_DIM(x,dim);
     SET_NAMES(x,R_NilValue);
     setrownames(x,names,2);
   } else if (LENGTH(dim) == 1) {
-    PROTECT(x = duplicate(x)); nprotect++;
-    PROTECT(names = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
+    PROTECT(x = duplicate(x));
+    PROTECT(names = GET_ROWNAMES(GET_DIMNAMES(x)));
+    nprotect += 2;
     dim = NEW_INTEGER(2);
-    xdim = INTEGER(dim);
-    xdim[0] = LENGTH(x); xdim[1] = 1;
+    xdim = INTEGER(dim); xdim[0] = LENGTH(x); xdim[1] = 1;
     SET_DIM(x,dim);
     SET_NAMES(x,R_NilValue);
     setrownames(x,names,2);
   } else if (LENGTH(dim) > 2) {
-    PROTECT(x = duplicate(x)); nprotect++;
-    PROTECT(names = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
-    nrow = INTEGER(dim)[0];
-    ncol = LENGTH(x)/nrow;
+    PROTECT(x = duplicate(x));
+    PROTECT(names = GET_ROWNAMES(GET_DIMNAMES(x)));
+    nprotect += 2;
+    nrow = INTEGER(dim)[0]; ncol = LENGTH(x)/nrow;
     dim = NEW_INTEGER(2);
-    xdim = INTEGER(dim);
-    xdim[0] = nrow; xdim[1] = ncol;
+    xdim = INTEGER(dim); xdim[0] = nrow; xdim[1] = ncol;
     SET_DIM(x,dim);
     SET_NAMES(x,R_NilValue);
     setrownames(x,names,2);
@@ -161,44 +181,43 @@ static R_INLINE SEXP as_matrix (SEXP x) {
 }
 
 static R_INLINE SEXP as_state_array (SEXP x) {
-  int nprotect = 0;
+  int nprotect = 1;
   SEXP dim, names;
   int *xdim, nrow, ncol;
-  PROTECT(dim = GET_DIM(x)); nprotect++;
+  PROTECT(dim = GET_DIM(x));
   if (isNull(dim)) {
-    PROTECT(x = duplicate(x)); nprotect++;
-    PROTECT(names = GET_NAMES(x)); nprotect++;
+    PROTECT(x = duplicate(x));
+    PROTECT(names = GET_NAMES(x));
+    nprotect += 2;
     dim = NEW_INTEGER(3);
-    xdim = INTEGER(dim);
-    xdim[0] = LENGTH(x); xdim[1] = 1; xdim[2] = 1;
+    xdim = INTEGER(dim); xdim[0] = LENGTH(x); xdim[1] = 1; xdim[2] = 1;
     SET_DIM(x,dim);
     SET_NAMES(x,R_NilValue);
     setrownames(x,names,3);
   } else if (LENGTH(dim) == 1) {
-    PROTECT(x = duplicate(x)); nprotect++;
-    PROTECT(names = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
+    PROTECT(x = duplicate(x));
+    PROTECT(names = GET_ROWNAMES(GET_DIMNAMES(x)));
+    nprotect += 2;
     dim = NEW_INTEGER(3);
-    xdim = INTEGER(dim);
-    xdim[0] = LENGTH(x); xdim[1] = 1; xdim[2] = 1;
+    xdim = INTEGER(dim); xdim[0] = LENGTH(x); xdim[1] = 1; xdim[2] = 1;
     SET_DIM(x,dim);
     SET_NAMES(x,R_NilValue);
     setrownames(x,names,3);
   } else if (LENGTH(dim) == 2) {
-    PROTECT(x = duplicate(x)); nprotect++;
-    PROTECT(names = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
-    xdim = INTEGER(dim);
-    nrow = xdim[0]; ncol = xdim[1];
+    PROTECT(x = duplicate(x));
+    PROTECT(names = GET_ROWNAMES(GET_DIMNAMES(x)));
+    nprotect += 2;
+    xdim = INTEGER(dim); nrow = xdim[0]; ncol = xdim[1];
     dim = NEW_INTEGER(3);
-    xdim = INTEGER(dim);
-    xdim[0] = nrow; xdim[1] = 1; xdim[2] = ncol;
+    xdim = INTEGER(dim); xdim[0] = nrow; xdim[1] = 1; xdim[2] = ncol;
     SET_DIM(x,dim);
     SET_NAMES(x,R_NilValue);
     setrownames(x,names,3);
   } else if (LENGTH(dim) > 3) {
-    PROTECT(x = duplicate(x)); nprotect++;
-    PROTECT(names = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
-    xdim = INTEGER(dim);
-    nrow = xdim[0]; ncol = xdim[1];
+    PROTECT(x = duplicate(x));
+    PROTECT(names = GET_ROWNAMES(GET_DIMNAMES(x)));
+    nprotect += 2;
+    xdim = INTEGER(dim); nrow = xdim[0]; ncol = xdim[1];
     dim = NEW_INTEGER(3);
     xdim = INTEGER(dim);
     xdim[0] = nrow; xdim[1] = ncol; xdim[2] = LENGTH(x)/nrow/ncol;
@@ -231,28 +250,6 @@ static R_INLINE SEXP getPairListElement (SEXP list, const char *name)
     list = CDR(list);
   }
   return CAR(list);
-}
-
-static R_INLINE SEXP paste0 (SEXP a, SEXP b) {
-  SEXP x;
-  PROTECT(x = LCONS(b,R_NilValue));
-  PROTECT(x = LCONS(a,x));
-  PROTECT(x = LCONS(install("paste0"),x));
-  PROTECT(x = eval(x,R_BaseEnv));
-  UNPROTECT(4);
-  return x;
-}
-
-static R_INLINE SEXP paste (SEXP a, SEXP b, SEXP sep) {
-  SEXP x;
-  PROTECT(x = LCONS(sep,R_NilValue));
-  SET_TAG(x,install("sep"));
-  PROTECT(x = LCONS(b,x));
-  PROTECT(x = LCONS(a,x));
-  PROTECT(x = LCONS(install("paste"),x));
-  PROTECT(x = eval(x,R_BaseEnv));
-  UNPROTECT(5);
-  return x;
 }
 
 #ifdef __cplusplus

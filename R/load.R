@@ -68,6 +68,7 @@ setMethod(
 
 pompLoad_internal <- function (object, ...,
   verbose = getOption("verbose", FALSE)) {
+  .Call(P_set_userdata,object@userdata)
   for (lib in object@solibs) {
     if (!is.loaded("__pomp_load_stack_incr",PACKAGE=lib$name)) {
       dir <- srcDir(lib$dir,verbose=verbose)

@@ -1,8 +1,8 @@
-##' The initial-state distribution
+##' rinit specification
 ##'
 ##' Specification of the initial-state distribution simulator, rinit.
 ##'
-##' @name rinit specification
+##' @name rinit_spec
 ##' @rdname rinit_spec
 ##' @family implementation information
 ##' @seealso \code{\link{rinit}}
@@ -41,5 +41,5 @@
 ##' @inheritSection pomp Note for Windows users
 ##'
 ##' @example examples/rinit_spec.R
-##' 
+##'
 NULL

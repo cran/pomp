@@ -8,6 +8,7 @@
 ##' @include rprocess_spec.R skeleton_spec.R
 ##' @include covariate_table.R parameter_trans.R
 ##' @keywords internal
+##' @seealso \link{pomp_constructor}
 
 ##' @export
 setClass(
@@ -18,6 +19,7 @@ setClass(
     t0 = "numeric",
     timename = "character",
     rinit = "pomp_fun",
+    dinit = "pomp_fun",
     rprocess = "rprocPlugin",
     dprocess = "pomp_fun",
     rmeasure = "pomp_fun",
@@ -32,6 +34,7 @@ setClass(
     states = "array",
     covar = "covartable",
     accumvars = "character",
+    nstatevars = "integer",
     solibs = "list",
     userdata = "list"
   ),
@@ -41,6 +44,7 @@ setClass(
     t0=numeric(),
     timename="time",
     rinit=pomp_fun(slotname="rinit"),
+    dinit=pomp_fun(slotname="dinit"),
     rprocess=rproc_plugin(),
     dprocess=pomp_fun(slotname="dprocess"),
     rmeasure=pomp_fun(slotname="rmeasure"),
@@ -54,6 +58,7 @@ setClass(
     params=numeric(),
     states=array(data=numeric(),dim=c(0,0)),
     covar=covariate_table(),
+    nstatevars=0L,
     accumvars=character(),
     solibs=list(),
     userdata=list()
@@ -61,18 +66,21 @@ setClass(
   validity=function (object) {
     retval <- character(0)
     if (length(object@times)<1)
-      retval <- append(retval,paste(sQuote("times"),"is a required argument"))
+      retval <- append(retval,paste(sQuote("times"),"is a required argument."))
     if (!is.numeric(object@params) || (length(object@params)>0 && is.null(names(object@params))))
-      retval <- append(retval,paste(sQuote("params"),"must be a named numeric vector"))
+      retval <- append(retval,paste(sQuote("params"),"must be a named numeric vector."))
     if (ncol(object@data)!=length(object@times))
-      retval <- append(retval,paste("the length of",sQuote("times"),"should match the number of observations"))
+      retval <- append(retval,paste("the length of",sQuote("times"),"should match the number of observations."))
     if (length(object@t0)<1)
-      retval <- append(retval,paste(sQuote("t0"),"is a required argument"))
+      retval <- append(retval,paste(sQuote("t0"),"is a required argument."))
     if (!is.numeric(object@t0) || !is.finite(object@t0) || length(object@t0)>1)
-      retval <- append(retval,paste(sQuote("t0"),"must be a single number"))
+      retval <- append(retval,paste(sQuote("t0"),"must be a single number."))
     if (object@t0 > object@times[1])
       retval <- append(retval,paste("the zero-time",sQuote("t0"),
-        "must occur no later than the first observation"))
+        "must occur no later than the first observation."))
+    if (is.na(object@nstatevars) || object@nstatevars < 0L)
+      retval <- append(retval,paste("the number of state variables,",
+        sQuote("nstatevars"),"must be non-negative."))
     if (length(retval)==0) TRUE else retval
   }
 )

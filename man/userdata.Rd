@@ -7,11 +7,11 @@
 When \acronym{POMP} basic components need information they can't get from parameters or covariates.
 }
 \details{
-It can happen that one desires to pass information to one of the \acronym{POMP} model \dfn{basic components} (see \link[=pomp]{here for a definition of this term}) outside of the standard routes (i.e., via model parameters or covariates).
+It can happen that one desires to pass information to one of the \acronym{POMP} model \dfn{basic components} (see \link[=basic_components]{here for a definition of this term}) outside of the standard routes (i.e., via model parameters or covariates).
 \pkg{pomp} provides facilities for this purpose.
 We refer to the objects one wishes to pass in this way as \dfn{user data}.
 
-The following will apply to every \link[=basic components]{basic model component}.
+The following will apply to every \link[=basic_components]{basic model component}.
 For the sake of definiteness, however, we'll use the \code{rmeasure} component as an example.
 To be even more specific, the measurement model we wish to implement is
 \preformatted{
@@ -49,12 +49,12 @@ This warning helps forestall accidental triggering of this facility due to typog
 
 A C snippet implementation of the aforementioned measurement model is:
 \preformatted{
-    f <- Csnippet("
-     double theta = *(get_userdata_double(\"theta\"));
+    f <- Csnippet(r"{
+     double theta = *get_userdata_double("theta");
      y1 = rpois(x1+theta); y2 = rpois(x2+theta);
-    ")}
+    }")}
 Here, the call to \code{get_userdata_double} retrieves a \emph{pointer} to the stored value of \code{theta}.
-Note the need to escape the quotes in the C snippet text.
+Note that, by using \R string literals (\code{r"{}"}) we avoid the need to escape the quotes in the C snippet text.
 
 It is possible to store and retrieve integer objects also, using \code{get_userdata_int}.
 
@@ -82,16 +82,16 @@ See the \href{https://cran.r-project.org/doc/manuals/R-exts.html}{Writing \R ext
 
 
 The use of the userdata facilities incurs a run-time cost.
-It is faster and more elegant, when using C snippets, to put the needed objects directly into the C snippet library.
+It is often more efficient, when using C snippets, to put the needed objects directly into the C snippet library.
 The \code{globals} argument does this.
 See the example below.
 }
 
 \examples{
 \donttest{
-  ## The familiar Ricker example
-  ## For some bizarre reason, we wish to pass 'phi'
-  ## via the userdata facility.
+  ## The familiar Ricker example.
+  ## Suppose that for some reason we wish to pass 'phi'
+  ## via the userdata facility instead of as a parameter.
 
   ## C snippet approach:
 
@@ -99,15 +99,15 @@ See the example below.
     phi=as.double(100),
     params=c(r=3.8,sigma=0.3,N.0=7),
     rprocess=discrete_time(
-      step.fun=Csnippet("
+      step.fun=Csnippet(r"{
       double e = (sigma > 0.0) ? rnorm(0,sigma) : 0.0;
-      N = r*N*exp(-N+e);"
+      N = r*N*exp(-N+e);}"
       ),
       delta.t=1
     ),
-    rmeasure=Csnippet("
-       double phi = *(get_userdata_double(\"phi\"));
-       y = rpois(phi*N);"
+    rmeasure=Csnippet(r"{
+       double phi = *get_userdata_double("phi");
+       y = rpois(phi*N);}"
     ),
     paramnames=c("r","sigma"),
     statenames="N",
@@ -119,9 +119,9 @@ See the example below.
     globals=Csnippet("static double phi = 100;"),
     params=c(r=3.8,sigma=0.3,N.0=7),
     rprocess=discrete_time(
-      step.fun=Csnippet("
+      step.fun=Csnippet(r"{
       double e = (sigma > 0.0) ? rnorm(0,sigma) : 0.0;
-      N = r*N*exp(-N+e);"
+      N = r*N*exp(-N+e);}"
       ),
       delta.t=1
     ),
@@ -145,7 +145,7 @@ See the example below.
       },
       delta.t=1
     ),
-    rmeasure=function(phi, N, ...) {
+    rmeasure=function (phi, N, ...) {
       c(y=rpois(n=1,lambda=phi*N))
     }
   ) -> rick3
@@ -155,23 +155,24 @@ See the example below.
 \seealso{
 More on implementing POMP models: 
 \code{\link{Csnippet}},
-\code{\link{accumulator variables}},
-\code{\link{basic components}},
+\code{\link{accumvars}},
+\code{\link{basic_components}},
 \code{\link{betabinomial}},
 \code{\link{covariates}},
-\code{\link{distributions}},
-\code{\link{dmeasure specification}},
-\code{\link{dprocess specification}},
-\code{\link{emeasure specification}},
-\code{\link{parameter transformations}},
+\code{\link{dinit_spec}},
+\code{\link{dmeasure_spec}},
+\code{\link{dprocess_spec}},
+\code{\link{emeasure_spec}},
+\code{\link{eulermultinom}},
+\code{\link{parameter_trans}()},
 \code{\link{pomp-package}},
-\code{\link{pomp}},
-\code{\link{prior specification}},
-\code{\link{rinit specification}},
-\code{\link{rmeasure specification}},
-\code{\link{rprocess specification}},
-\code{\link{skeleton specification}},
+\code{\link{pomp_constructor}},
+\code{\link{prior_spec}},
+\code{\link{rinit_spec}},
+\code{\link{rmeasure_spec}},
+\code{\link{rprocess_spec}},
+\code{\link{skeleton_spec}},
 \code{\link{transformations}},
-\code{\link{vmeasure specification}}
+\code{\link{vmeasure_spec}}
 }
 \concept{implementation information}

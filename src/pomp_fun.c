@@ -4,10 +4,8 @@
 #include <Rdefines.h>
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
-#include <Rversion.h>
-#include <stdarg.h>
 
-#include "pomp_internal.h"
+#include "internal.h"
 
 static R_INLINE SEXP name_index (SEXP provided, SEXP object, const char *slot, const char *humanreadable) {
   SEXP slotnames, index;
@@ -30,7 +28,7 @@ static R_INLINE SEXP name_index (SEXP provided, SEXP object, const char *slot, c
 // names in the corresponding 'pomp_fun' slots and storing the corresponding index
 // inside the 'pomp_fun'.
 SEXP pomp_fun_handler (SEXP pfun, SEXP gnsi, pompfunmode *mode,
-  SEXP S, SEXP P, SEXP O, SEXP C)
+                       SEXP S, SEXP P, SEXP O, SEXP C)
 {
   int nprotect = 0;
   SEXP f = R_NilValue;
@@ -40,41 +38,41 @@ SEXP pomp_fun_handler (SEXP pfun, SEXP gnsi, pompfunmode *mode,
 
   switch (*mode) {
 
-  case Rfun:			// R function
+  case Rfun:                    // R function
 
     PROTECT(f = GET_SLOT(pfun,install("R.fun"))); nprotect++;
 
     break;
 
-  case native: case regNative:	// native code
+  case native: case regNative:  // native code
 
-    if (*(LOGICAL(gnsi))) {	// get native symbol information?
+    if (*(LOGICAL(gnsi))) {     // get native symbol information?
 
       SEXP nf, pack;
       PROTECT(nf = GET_SLOT(pfun,install("native.fun")));
       PROTECT(pack = GET_SLOT(pfun,install("PACKAGE")));
       nprotect += 2;
-      
+
       if (LENGTH(pack) < 1) {
         PROTECT(pack = mkString("")); nprotect++; // #nocov
       }
 
       if (*mode == native) {
-	
+
         SEXP nsi;
         PROTECT(nsi = eval(PROTECT(lang3(install("getNativeSymbolInfo"),nf,pack)),R_BaseEnv));
         PROTECT(f = getListElement(nsi,"address"));
-	nprotect += 3;
-	
+        nprotect += 3;
+
       } else if (*mode == regNative) {
-	
+
         const char *fname, *pkg;
         fname = (const char *) CHAR(STRING_ELT(nf,0));
         pkg = (const char *) CHAR(STRING_ELT(pack,0));
         DL_FUNC fn;
         fn = R_GetCCallable(pkg,fname);
         PROTECT(f = R_MakeExternalPtrFn(fn,R_NilValue,R_NilValue)); nprotect++;
-	
+
       }
 
       SET_SLOT(pfun,install("address"),f);
@@ -99,7 +97,7 @@ SEXP pomp_fun_handler (SEXP pfun, SEXP gnsi, pompfunmode *mode,
         SET_SLOT(pfun,install("covarindex"),cidx);
       }
 
-    } else {			// native symbol info is stored
+    } else {                    // native symbol info is stored
 
       PROTECT(f = GET_SLOT(pfun,install("address"))); nprotect++;
 
@@ -108,12 +106,12 @@ SEXP pomp_fun_handler (SEXP pfun, SEXP gnsi, pompfunmode *mode,
     break;
 
   case undef: default:
-    
+
     PROTECT(f = R_NilValue); nprotect++;
     *mode = undef;
 
     break;
-    
+
   }
 
   UNPROTECT(nprotect);
@@ -133,7 +131,7 @@ SEXP load_stack_decr (SEXP pack) {
   SEXP s;
   const char *pkg;
   void (*ff)(int *);
-  PROTECT(s = NEW_INTEGER(1));
+  PROTECT(s = ScalarInteger(NA_INTEGER));
   pkg = (const char *) CHAR(STRING_ELT(pack,0));
   ff = (void (*)(int *)) R_GetCCallable(pkg,"__pomp_load_stack_decr");
   ff(INTEGER(s));
@@ -141,38 +139,3 @@ SEXP load_stack_decr (SEXP pack) {
   UNPROTECT(1);
   return s;
 }
-
-// SEXP concat (int nargs, ...) {
-//   int nprotect = 0;
-//   va_list ap;
-//   SEXP f = R_NilValue;
-//   int i;
-
-//   va_start(ap,nargs);
-//   for (i = 0; i < nargs; i++) {
-//     PROTECT(f = LCONS(va_arg(ap,SEXP),f)); nprotect++;
-//   }
-//   va_end(ap);
-
-//   PROTECT(f = eval(LCONS(install("c"),f),R_BaseEnv)); nprotect++;
-
-//   UNPROTECT(nprotect);
-//   return f;
-// }
-
-// 'pomp_fun' is provided for use by other packages
-// It returns a list of two elements.
-// The first is the the R function or the address of the native routine.
-// The second is the 'mode'.
-
-// SEXP pomp_fun (SEXP pfun, SEXP gnsi) {
-//   pompfunmode md;
-//   SEXP fun, mode, retval;
-//   PROTECT(fun = pomp_fun_handler(pfun,gnsi,&md));
-//   PROTECT(mode = NEW_INTEGER(1));
-//   *(INTEGER(mode)) = (int) md;
-//   PROTECT(retval = NEW_LIST(2));
-//   SET_ELEMENT(retval,0,fun);
-//   SET_ELEMENT(retval,0,mode);
-//   return retval;
-// }
