@@ -1,5 +1,11 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 5.4}{
+  \itemize{
+    \item \code{stew} now returns timing information by default.
+    \item The spurious warnings associated with NULL \code{userdata} have been eliminated.
+  }
+}
 \section{Changes in \pkg{pomp} version 5.3}{
   \itemize{
     \item The new option \code{on_load} allows one to specify a C snippet that will be executed at the time the C snippet library is loaded.

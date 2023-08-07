@@ -21,7 +21,7 @@ extern SEXP do_dprocess(SEXP object, SEXP x, SEXP times, SEXP params, SEXP log, 
 /* src/emeasure.c */
 extern SEXP do_emeasure(SEXP object, SEXP x, SEXP times, SEXP params, SEXP gnsi);
 /* src/euler.c */
-extern SEXP euler_model_simulator(SEXP func, SEXP xstart, SEXP tstart, SEXP times, SEXP params, double deltat, rprocmode method, SEXP accumvars, SEXP covar, SEXP args, SEXP gnsi);
+extern SEXP euler_simulator(SEXP func, SEXP xstart, SEXP tstart, SEXP times, SEXP params, double deltat, rprocmode method, SEXP accumvars, SEXP covar, SEXP args, SEXP gnsi);
 extern int num_euler_steps(double t1, double t2, double *deltat);
 extern int num_map_steps(double t1, double t2, double deltat);
 /* src/gompertz.c */
@@ -108,7 +108,7 @@ extern SEXP ExpitTransform(SEXP X);
 extern SEXP LogBarycentricTransform(SEXP X);
 extern SEXP InverseLogBarycentricTransform(SEXP Y);
 /* src/userdata.c */
-extern void set_pomp_userdata(SEXP userdata);
+extern SEXP set_pomp_userdata(SEXP userdata);
 extern const SEXP get_userdata(const char *name);
 extern const int *get_userdata_int(const char *name);
 extern const double *get_userdata_double(const char *name);

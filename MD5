@@ -1,10 +1,10 @@
-15dcee4d9d59630d9b52d979749f0fd0 *DESCRIPTION
+4c8ee4c4d54c665680e9b38079526bef *DESCRIPTION
 3719d92d178bce491aa4bb35df4aae40 *NAMESPACE
 02534df093ec523b2eaaa3749675c91e *R/abc.R
 290505ed00e8da021f6978923db3c8e3 *R/accumulators.R
 f631c0b055cd77901154c1d136aff661 *R/as_data_frame.R
 cb687fab11bfce9f1a2d726c243d5b92 *R/as_pomp.R
-fee5b650ad30b110e7304675c9b24c64 *R/bake.R
+031733e115edd4569950461819d2e199 *R/bake.R
 a3dac97d88a9ee0f69afe9419d60dde4 *R/basic_components.R
 6f586885dc2c9d9dd013abdba19b0192 *R/basic_probes.R
 52e905355299bbe2e6b7cb0c3f645c4c *R/betabinom.R
@@ -64,7 +64,7 @@ e66716dd3e0934154a3c0709fdf9e0e6 *R/pmcmc.R
 59db660f5447adb6adaf010f6cb78010 *R/pomp.R
 dab4f0738dbcf9313530cda3ba0c62b4 *R/pomp_class.R
 a094c2c219742139c75461c1a5485549 *R/pomp_examp.R
-8a0c1f45034c4c2271665b28d00478ce *R/pomp_fun.R
+2dbaee4a6c9c9483c216d57c13ea268a *R/pomp_fun.R
 571f769acc35c2e89bc6ee13596462d6 *R/pred_mean.R
 f1e7a49c24c2ca2d58cbe995526270e0 *R/pred_var.R
 df0959485eb78a4fe68e9ca1338dfd5b *R/print.R
@@ -74,7 +74,7 @@ ac50142e5adeabb6b815eadd1eb61eb0 *R/probe.R
 f870c1766c00b085c20a233996256f0e *R/profile_design.R
 6dd6187bd88729648f65496ac3661c1d *R/proposals.R
 f864587fe3777f6b9b35a1f65feff785 *R/pstop.R
-91d5f63c5ba5655f325a23e0ffeca3ba *R/resample.R
+fbf4e75ddaba91862fe13a2add0ec59c *R/resample.R
 16e6f83b7c0a3d1c551b5884cd02d29c *R/ricker.R
 ef0042515b34afe987a6a250fa0fbbcc *R/rinit_spec.R
 80d92614b9252a543c48347ecdcfb8a3 *R/rmeasure_spec.R
@@ -120,8 +120,8 @@ cd6ac31b6d5fe76019d6426f2a453e05 *data/ewcitmeas.rda
 0e0eda4824bc68535da32d9aa065fae7 *data/parus.csv.gz
 b3467dd24936736bb5c8300c507a0f39 *inst/CITATION
 d32239bcb673463ab874e80d47fae504 *inst/GPL
-f240d8fe508b05a1c18e837e72cc4145 *inst/NEWS
-8cbda4ab29ab519afc8c3ca19a0719f8 *inst/NEWS.Rd
+424fa4296f0a23da1543da8af1779337 *inst/NEWS
+9a003eb28d21be25edd7c3e3eeadde1c *inst/NEWS.Rd
 27c1db8cc70185e80bee9990421613b3 *inst/doc/index.html
 5416ecb0ced763ada08409d4ee9a0552 *inst/include/pomp.h
 80a3bd957af7c5fb07b31cbc64925330 *inst/include/pomp_defines.h
@@ -129,7 +129,7 @@ f240d8fe508b05a1c18e837e72cc4145 *inst/NEWS
 50ecbf6a80b3b11b3afe3dc01991f339 *man/accumvars.Rd
 9f08db5c6ce2a47919f1a16bf2fd8aba *man/as_data_frame.Rd
 9fb528e7af70e75a272b51ec561e8af5 *man/as_pomp.Rd
-256064a06827e4efcd02dc0ac471dcf0 *man/bake.Rd
+b487a30a4f09c63b95a51dab92ab6071 *man/bake.Rd
 e56881730061ad446adfd94e447871e8 *man/basic_components.Rd
 2e9a241d0eeddcbaa17365dda996e931 *man/basic_probes.Rd
 d23106155f95afd7ef10340abadcb4cd *man/betabinom.Rd
@@ -196,7 +196,7 @@ d90393d8bdc7e2f91afa44913246bf95 *man/pomp-defunct.Rd
 3f0736b27f826cb73d36165034338bed *man/pomp.Rd
 5ae46356ad061e42538e8f72f79c3011 *man/pomp_class.Rd
 0f0ca4d99fdc7f14aaca4c8b075f9a14 *man/pomp_examp.Rd
-c1063e66408830163094991d92a90ba4 *man/pomp_fun.Rd
+8f59a042d349a72afb5b89d93e97d84c *man/pomp_fun.Rd
 566f80def4298a8b270073525cdd7345 *man/pred_mean.Rd
 5d5b7bcd4d5cf59ae75a64d104a70292 *man/pred_var.Rd
 b16bc18bec634174729c5d9805776236 *man/print.Rd
@@ -204,7 +204,7 @@ c863ed4062a94094c72545240efa167c *man/prior_spec.Rd
 f25a4a9cbdda04582daf7458ed0ffc4a *man/probe.Rd
 b2f47ab46118f803d3faf1585cd09fd1 *man/probe_match.Rd
 975f999aa7bab726bae8d0ef154b49ff *man/proposals.Rd
-dc3346f001165e963702983beebed726 *man/resample.Rd
+523380e307fff1a0c534b47a53dd04f0 *man/resample.Rd
 9f0fe0c72847754a310882514d9f83b3 *man/ricker.Rd
 ee5bb2671b582ce5fcb2cfbe59407f22 *man/rinit.Rd
 7480ddc6a961f5379263dabb290610a0 *man/rinit_spec.Rd
@@ -244,16 +244,16 @@ e715565227b8ff3faa88a6fde060c8ba *man/window.Rd
 80e9886fd532ce5c30a2fc28c04e2b5e *man/wquant.Rd
 2a6f9e9e044a78154d3cfda5936d6f48 *src/Makevars
 e8087264ef7301a0df7ecaadb44377cc *src/bspline.c
-9b5cd86b155077a0c77257336a7e724b *src/decls.h
+ec88c384b67922e5f7054abb259aa95c *src/decls.h
 e9b2cb24ca3e694c3348585d94824d11 *src/dinit.c
 d41734f8d878f3323b0bb2187d10f36e *src/distributions.c
 630d030c21406e62bcc63e41f640148e *src/dmeasure.c
 ceaeefc115eb4d837f57a2974c1e4bb4 *src/dprior.c
 66093e1e60659148ee030cf41458d031 *src/dprocess.c
 f9d15f1b9e76efd828c0d70cda97e2c7 *src/emeasure.c
-de073da8d55239e6268b1046a2ecc408 *src/euler.c
+ec2a6f3501ce23382732ed879868a9ba *src/euler.c
 bacc44bb4acc7a242f2363a8b215aa0d *src/gompertz.c
-37758197d6e46cecedeaddd7c0d0fb81 *src/init.c
+64b238639cb4f07597175062fed07543 *src/init.c
 b4c4094a7e813777ec7b3fc072de9120 *src/internal.h
 cf1fea63d8707e7901af09758232c4d5 *src/logmeanexp.c
 3df5e9df9ed0c9fcc49793436b6fc3c3 *src/lookup_table.c
@@ -273,7 +273,7 @@ aedc6518b0a0bc1d89aa785fc778b3b0 *src/resample.c
 b5ae565dd8a13934f02f0dff380a1b87 *src/rinit.c
 83b5defe42757522f6a7827a927c4aa0 *src/rmeasure.c
 d14603e7d8a02a467dcbce3c37e90991 *src/rprior.c
-a87566937bda3db8aada2f44c8a15405 *src/rprocess.c
+f9a3fa656d434f199b6c4fa7695c1d24 *src/rprocess.c
 da6446a38bc0c8009fa11c9733d24d6c *src/simulate.c
 92368c7900e142117e085ff744d9555f *src/skeleton.c
 f59dd0059cdd443a58c43bf2755f66e5 *src/soboldata.h
@@ -282,6 +282,6 @@ a579079ce932aae31c893e25ce5aa4f4 *src/sobolseq.c
 f1ce592d9e611bd87c985094106b76f0 *src/synth_lik.c
 5bcc5fcce0e3bbe1f82e7993de6856f8 *src/trajectory.c
 f06c799ac06b81f8cfc55115ec895087 *src/transformations.c
-12cebb157dfab934a982514679bdca0c *src/userdata.c
+d9d642d89fca2483940891ef732ae813 *src/userdata.c
 90d9cc2b8b3e21b3455e864feff5c2b2 *src/vmeasure.c
 083f4a7e4453fa20dfe58dd3a3e1d343 *src/wpfilter.c
