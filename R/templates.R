@@ -18,13 +18,23 @@ pomp_templates <- list(
 #include <R_ext/Rdynload.h>}"
   ),
   utilities=list(
+    bspline_basis=list(
+      trigger=r"{(?<!periodic_)bspline_basis_eval}",
+      header=r"{
+static bspline_basis_eval_deriv_t *__pomp_bspline_basis_eval_deriv;
+#define bspline_basis_eval(X,K,P,N,Y)  (__pomp_bspline_basis_eval_deriv((X),(K),(P),(N),0,(Y)))
+#define bspline_basis_eval_deriv(X,K,P,N,D,Y)  (__pomp_bspline_basis_eval_deriv((X),(K),(P),(N),(D),(Y)))}",
+      reg=r"{
+  __pomp_bspline_basis_eval_deriv = (bspline_basis_eval_deriv_t *) R_GetCCallable("pomp","bspline_basis_eval_deriv");}"
+    ),
     periodic_bspline_basis=list(
       trigger="periodic_bspline_basis_eval",
       header=r"{
-static periodic_bspline_basis_eval_t *__pomp_periodic_bspline_basis_eval;
-#define periodic_bspline_basis_eval(X,Y,M,N,Z)  (__pomp_periodic_bspline_basis_eval((X),(Y),(M),(N),(Z)))}",
+static periodic_bspline_basis_eval_deriv_t *__pomp_periodic_bspline_basis_eval_deriv;
+#define periodic_bspline_basis_eval(X,T,P,N,Y)  (__pomp_periodic_bspline_basis_eval_deriv((X),(T),(P),(N),0,(Y)))
+#define periodic_bspline_basis_eval_deriv(X,T,P,N,D,Y)  (__pomp_periodic_bspline_basis_eval_deriv((X),(T),(P),(N),(D),(Y)))}",
       reg=r"{
-  __pomp_periodic_bspline_basis_eval = (periodic_bspline_basis_eval_t *) R_GetCCallable("pomp","periodic_bspline_basis_eval");}"
+  __pomp_periodic_bspline_basis_eval_deriv = (periodic_bspline_basis_eval_deriv_t *) R_GetCCallable("pomp","periodic_bspline_basis_eval_deriv");}"
     ),
     get_userdata_int=list(
       trigger="get_userdata_int",
@@ -43,7 +53,7 @@ static get_userdata_double_t *__pomp_get_userdata_double;
   __pomp_get_userdata_double = (get_userdata_double_t *) R_GetCCallable("pomp","get_userdata_double");}"
     ),
     get_userdata=list(
-      trigger=r"{get_userdata(\b|[^_])}",
+      trigger=r"{get_userdata(?!_)}",
       header=r"{
 static get_userdata_t *__pomp_get_userdata;
 #define get_userdata(X)  (__pomp_get_userdata(X))}",

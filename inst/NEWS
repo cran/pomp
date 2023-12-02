@@ -1,5 +1,26 @@
 _N_e_w_s _f_o_r _p_a_c_k_a_g_e '_p_o_m_p'
 
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _5._5:
+
+        • There is now access to ordinary B-spline basis functions (and
+          their derivatives) at the C snippet level.  It will still
+          almost always be preferable to construct a spline basis once
+          and pass it to ‘pomp’ functions as part of a
+          ‘covariate_table’, but this functionality may occasionally be
+          useful.
+
+        • ‘bspline_eval’ is now deprecated as part of the ‘pomp’ C API.
+
+        • The formatting of some printed messages has been modified to
+          forestall warnings in the latest R-devel.
+
+        • Stateful objective functions (class ‘objfun’) now behave as
+          if they are ‘pomp’ objects.
+
+        • C-level functions ‘set_pomp_userdata’ and
+          ‘unset_pomp_userdata’ are deprecated.  The latter now
+          generates a warning.
+
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _5._4:
 
         • ‘stew’ now returns timing information by default.
