@@ -1,5 +1,12 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 5.6}{
+  \itemize{
+    \item Minor corrections to documentation.
+    \item C-level functions \code{set_pomp_userdata} and \code{unset_pomp_userdata} are no longer exported.
+    \item \code{bspline_eval} is no longer exported.
+  }
+}
 \section{Changes in \pkg{pomp} version 5.5}{
   \itemize{
     \item There is now access to ordinary B-spline basis functions (and their derivatives) at the C snippet level.
