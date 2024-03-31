@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 5.6
-Date: 2024-02-14
+Version: 5.7
+Date: 2024-03-30
 Authors@R: c(person(given=c("Aaron","A."),family="King",role=c("aut","cre"),email="kingaa@umich.edu",comment=c(ORCID="0000-0001-6159-3207")),
 	  person(given=c("Edward","L."),family="Ionides",role="aut",comment=c(ORCID="0000-0002-4190-0174"))	,
 	  person(given="Carles",family="Bretó",role="aut",comment=c(ORCID="0000-0003-4695-4902")),
@@ -58,7 +58,7 @@ Collate: 'package.R' 'pstop.R' 'undefined.R' 'csnippet.R' 'pomp_fun.R'
         'traces.R' 'transformations.R' 'userdata.R' 'verhulst.R'
         'vmeasure_spec.R' 'window.R' 'wquant.R'
 NeedsCompilation: yes
-Packaged: 2024-02-14 13:37:25 UTC; kingaa
+Packaged: 2024-03-30 17:19:47 UTC; kingaa
 Author: Aaron A. King [aut, cre] (<https://orcid.org/0000-0001-6159-3207>),
   Edward L. Ionides [aut] (<https://orcid.org/0000-0002-4190-0174>),
   Carles Bretó [aut] (<https://orcid.org/0000-0003-4695-4902>),
@@ -75,4 +75,4 @@ Author: Aaron A. King [aut, cre] (<https://orcid.org/0000-0001-6159-3207>),
   Simon N. Wood [ctb] (<https://orcid.org/0000-0002-2034-7453>)
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2024-02-14 17:10:02 UTC
+Date/Publication: 2024-03-31 09:50:02 UTC

@@ -1,5 +1,12 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 5.7}{
+  \itemize{
+    \item Minor corrections to documentation.
+    \item Changes in some C codes to avoid issues detected by \pkg{rchk}.
+    \item Fixed bug in \code{wquant} introduced by changes in \code{pbeta} with \R version 4.3.3.
+  }
+}
 \section{Changes in \pkg{pomp} version 5.6}{
   \itemize{
     \item Minor corrections to documentation.
@@ -634,7 +641,7 @@
     \item Further improvements to the test suite.
     Code coverage is now 100\%.
   }
-}  
+}
 \section{Changes in \pkg{pomp} version 1.7}{
   \itemize{
     \item Improvement of the test suite and of error messages.

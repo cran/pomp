@@ -1,5 +1,14 @@
 _N_e_w_s _f_o_r _p_a_c_k_a_g_e '_p_o_m_p'
 
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _5._7:
+
+        • Minor corrections to documentation.
+
+        • Changes in some C codes to avoid issues detected by ‘rchk’.
+
+        • Fixed bug in ‘wquant’ introduced by changes in ‘pbeta’ with R
+          version 4.3.3.
+
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _5._6:
 
         • Minor corrections to documentation.
