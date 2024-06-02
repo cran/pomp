@@ -1,5 +1,16 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 5.9}{
+  \itemize{
+    \item To add additional elements for use by the basic model components (i.e., \dQuote{userdata}), the \code{userdata} argument should now be used.
+    The old behavior will still work, but will generate a warning.
+    In a future release, this will become an error.
+    \item Internally, \pkg{pomp} codes no longer include \file{Rinternal.h}.
+    \item A bug in covariate-table extrapolation for the case \code{order="constant"} has been fixed.
+    \item A new experimental function \code{repair_lookup_table} is provided to help eliminate unnecessary warnings about extrapolation.
+    \item Functions with names that include dots (\code{.}), which have been defunct since version 4.7, have been expunged.
+  }
+}
 \section{Changes in \pkg{pomp} version 5.8}{
   \itemize{
     \item The \code{err()} and \code{warn()} C-level macros have been redefined to forestall problems that would arise when these macros are included in C++ code under forthcoming versions of \R.
