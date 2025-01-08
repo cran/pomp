@@ -2,7 +2,7 @@
 % Please edit documentation in R/userdata.R
 \name{userdata}
 \alias{userdata}
-\title{Facilities for making additional information to basic components}
+\title{Facilities for making additional information available to basic model components}
 \description{
 When \acronym{POMP} basic components need information they can't get from parameters or covariates.
 }
@@ -94,7 +94,7 @@ See the example below.
   ## C snippet approach:
 
   simulate(times=1:100,t0=0,
-    phi=as.double(100),
+    userdata=list(phi=as.double(100)),
     params=c(r=3.8,sigma=0.3,N.0=7),
     rprocess=discrete_time(
       step.fun=Csnippet(r"{
@@ -134,7 +134,7 @@ See the example below.
   ## Finally, the R function approach:
 
   simulate(times=1:100,t0=0,
-    phi=100,
+    userdata=list(phi=100),
     params=c(r=3.8,sigma=0.3,N_0=7),
     rprocess=discrete_time(
       step.fun=function (r, N, sigma, ...) {

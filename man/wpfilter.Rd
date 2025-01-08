@@ -11,6 +11,7 @@
 \usage{
 \S4method{wpfilter}{data.frame}(
   data,
+  ...,
   Np,
   params,
   rinit,
@@ -18,26 +19,28 @@
   dmeasure,
   trigger = 1,
   target = 0.5,
-  ...,
   verbose = getOption("verbose", FALSE)
 )
 
 \S4method{wpfilter}{pomp}(
   data,
+  ...,
   Np,
   trigger = 1,
   target = 0.5,
-  ...,
   verbose = getOption("verbose", FALSE)
 )
 
-\S4method{wpfilter}{wpfilterd_pomp}(data, Np, trigger, target, ..., verbose = getOption("verbose", FALSE))
+\S4method{wpfilter}{wpfilterd_pomp}(data, ..., Np, trigger, target, verbose = getOption("verbose", FALSE))
 }
 \arguments{
 \item{data}{either a data frame holding the time series data,
 or an object of class \sQuote{pomp},
 i.e., the output of another \pkg{pomp} calculation.
 Internally, \code{data} will be coerced to an array with storage-mode \code{double}.}
+
+\item{...}{additional arguments are passed to \code{\link{pomp}}.
+This allows one to set, unset, or modify \link[=basic_components]{basic model components} within a call to this function.}
 
 \item{Np}{the number of particles to use.
 This may be specified as a single positive integer, in which case the same number of particles will be used at each timestep.
@@ -67,8 +70,6 @@ For more information, see \link[=dmeasure_spec]{dmeasure specification}.}
 \item{trigger}{numeric; if the effective sample size becomes smaller than \code{trigger * Np}, resampling is triggered.}
 
 \item{target}{numeric; target power.}
-
-\item{...}{additional arguments are passed to \code{\link{pomp}}.}
 
 \item{verbose}{logical; if \code{TRUE}, diagnostic messages will be printed to the console.}
 }

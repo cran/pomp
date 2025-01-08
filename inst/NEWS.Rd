@@ -1,5 +1,25 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 6.1}{
+  \itemize{
+    \item In calls to \pkg{pomp} elementary and inference algorithms, it is now necessary to pass all arguments by name.
+    This has always been good practice, but from this release, calls that rely on the position of arguments will typically generate errors.
+    \item From version 5.8.4, the manner in which extra model elements (\code{userdata}) are supplied has changed.
+    As of that version, use of the old method generated a warning.
+    As of this version, an error will be generated.
+    To supply additional elements (i.e., beyond parameters, latent-state variables, observations, and covariates) to the basic model components, provide them as a list via the \code{userdata} argument.
+    \item It is now possible to specify more than one lag in the \code{ivp} function, which is evaluated only when the \code{mif2} perturbations are specified.
+    See \code{?mif2}.
+    \item The new function \code{append_data} appends a data frame to an existing CSV file (creating the file if it does not exist).
+    This facilitates keeping a database of parameter-space explorations.
+    \item The new function \code{eeulermultinom} gives the expectation of an Euler-multinomial random variable.
+    \item A new addition to the C API allows one to easily compute the expectation of the Euler-multinomial.
+    The function is \code{eeulermultinom}.
+    \item The \code{save.states} option to \code{pfilter} has changed.
+    See \code{?pfilter} and \code{?saved_states} for details.
+    \item The help-page discussion of accumulator variables has been expanded and clarified.
+  }
+}
 \section{Changes in \pkg{pomp} version 5.11}{
   \itemize{
     \item An improper typecast in the C snippet system, which was resolvable by many compilers but threw an error under recent versions of \pkg{clang} on MacOS, has been repaired.

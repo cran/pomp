@@ -1,5 +1,42 @@
 _N_e_w_s _f_o_r _p_a_c_k_a_g_e '_p_o_m_p'
 
+_C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _6._1:
+
+        • In calls to ‘pomp’ elementary and inference algorithms, it is
+          now necessary to pass all arguments by name.  This has always
+          been good practice, but from this release, calls that rely on
+          the position of arguments will typically generate errors.
+
+        • From version 5.8.4, the manner in which extra model elements
+          (‘userdata’) are supplied has changed.  As of that version,
+          use of the old method generated a warning.  As of this
+          version, an error will be generated.  To supply additional
+          elements (i.e., beyond parameters, latent-state variables,
+          observations, and covariates) to the basic model components,
+          provide them as a list via the ‘userdata’ argument.
+
+        • It is now possible to specify more than one lag in the ‘ivp’
+          function, which is evaluated only when the ‘mif2’
+          perturbations are specified.  See ‘?mif2’.
+
+        • The new function ‘append_data’ appends a data frame to an
+          existing CSV file (creating the file if it does not exist).
+          This facilitates keeping a database of parameter-space
+          explorations.
+
+        • The new function ‘eeulermultinom’ gives the expectation of an
+          Euler-multinomial random variable.
+
+        • A new addition to the C API allows one to easily compute the
+          expectation of the Euler-multinomial.  The function is
+          ‘eeulermultinom’.
+
+        • The ‘save.states’ option to ‘pfilter’ has changed.  See
+          ‘?pfilter’ and ‘?saved_states’ for details.
+
+        • The help-page discussion of accumulator variables has been
+          expanded and clarified.
+
 _C_h_a_n_g_e_s _i_n '_p_o_m_p' _v_e_r_s_i_o_n _5._1_1:
 
         • An improper typecast in the C snippet system, which was

@@ -121,8 +121,7 @@
 ##' @param userdata optional list; the elements of this list will be available to basic model components.
 ##' This allows the user to pass information to the basic components outside of the usual routes of covariates (\code{covar}) and model parameters (\code{params}).
 ##' See \link[=userdata]{userdata} for information on how to use this facility.
-##' @param ... additional arguments will be added to the \code{userdata} list, with a warning.
-##' In a future release, this warning will become an error.
+##' @param ... additional arguments will generate an error.
 ##' @param verbose logical; if \code{TRUE}, diagnostic messages will be printed to the console.
 ##' @return
 ##' The \code{pomp} constructor function returns an object, call it \code{P}, of class \sQuote{pomp}.
@@ -148,7 +147,10 @@ NULL
 
 ##' @rdname pomp
 ##' @export
-pomp <- function (data, times, t0, ...,
+pomp <- function (
+  data,
+  ...,
+  times, t0,
   rinit, dinit,
   rprocess, dprocess,
   rmeasure, dmeasure, emeasure, vmeasure,
@@ -161,7 +163,8 @@ pomp <- function (data, times, t0, ...,
   userdata,
   cdir = getOption("pomp_cdir", NULL), cfile,
   shlib.args, compile = TRUE,
-  verbose = getOption("verbose", FALSE)) {
+  verbose = getOption("verbose", FALSE)
+) {
 
   if (missing(data))
     reqd_arg("pomp","data")
@@ -184,11 +187,27 @@ pomp <- function (data, times, t0, ...,
   )
     return(as(data,"pomp"))
 
+  extra_args <- list(...)
+  if (length(extra_args)>0L) {
+    nm <- names(extra_args)
+    if (length(nm)==0 || any(nchar(nm)==0))
+      pStop_("Unnamed arguments are not permitted.")
+    else
+      pStop_("The ",
+        ngettext(length(extra_args),"argument ","arguments "),
+        paste(sQuote(nm),collapse=","),
+        ngettext(length(extra_args)," is"," are"),
+        " not recognized.\nUse the ",sQuote("userdata"),
+        " argument to supply extra objects to basic model components.\n",
+        "See ",sQuote("?userdata"),"."
+      )
+  }
+
   if (missing(times)) times <- NULL
 
   tryCatch(
     construct_pomp(
-      data=data,times=times,t0=t0,...,
+      data=data,times=times,t0=t0,
       rinit=rinit,dinit=dinit,
       rprocess=rprocess,dprocess=dprocess,
       rmeasure=rmeasure,dmeasure=dmeasure,
@@ -286,7 +305,8 @@ setMethod(
   signature=signature(data="array", times="numeric"),
   definition = function (
     data, times,
-    ..., userdata,
+    ...,
+    userdata,
     rinit, dinit, rprocess, dprocess,
     rmeasure, dmeasure, emeasure, vmeasure,
     skeleton, rprior, dprior,
@@ -325,6 +345,7 @@ setMethod(
 
     pomp_internal(
       data=data,
+      ...,
       times=times,
       rinit=rinit,
       dinit=dinit,
@@ -340,8 +361,7 @@ setMethod(
       partrans=partrans,
       params=params,
       covar=covar,
-      userdata=userdata,
-      ...
+      userdata=userdata
     )
 
   }
@@ -360,8 +380,10 @@ setMethod(
   "construct_pomp",
   signature=signature(data="pomp", times="NULL"),
   definition = function (
-    data, times, t0, timename,
-    ..., userdata,
+    data, times, t0,
+    ...,
+    timename,
+    userdata,
     rinit, dinit, rprocess, dprocess,
     rmeasure, dmeasure, emeasure, vmeasure,
     skeleton, rprior, dprior, partrans, params, covar,
@@ -413,6 +435,7 @@ setMethod(
 
     pomp_internal(
       data=data@data,
+      ...,
       times=times,
       t0=t0,
       timename=timename,
@@ -435,16 +458,15 @@ setMethod(
       params=params,
       .solibs=data@solibs,
       .userdata=data@userdata,
-      cfile=cfile,
-      ...
+      cfile=cfile
     )
 
   }
 )
 
 pomp_internal <- function (
-  data, times, t0, timename,
-  ...,
+  data,
+  times, t0, timename,
   rinit, dinit, rprocess, dprocess,
   rmeasure, dmeasure, emeasure, vmeasure,
   skeleton, rprior, dprior,
@@ -475,19 +497,6 @@ pomp_internal <- function (
   else
     timename <- as.character(timename)
 
-  added.userdata <- list(...)
-  if (length(added.userdata)>0L) {
-    pWarn_("The provided ",
-      ngettext(length(added.userdata),"object","objects")," ",
-      paste(sQuote(names(added.userdata)),collapse=","),
-      ngettext(length(added.userdata)," is"," are"),
-      " available for use by POMP basic components.\n",
-      "This option is deprecated: use ",sQuote("userdata"),
-      " to specify the list of such objects explicitly.\n",
-      "In a future release, this warning will become an error."
-    )
-    .userdata[names(added.userdata)] <- added.userdata
-  }
   .userdata[names(userdata)] <- userdata
 
   if (!is(rprocess,"rprocPlugin")) {
