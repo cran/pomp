@@ -1,5 +1,11 @@
 \name{NEWS}
 \title{News for package `pomp'}
+\section{Changes in \pkg{pomp} version 6.2}{
+  \itemize{
+    \item The basic Kalman filter (\code{kalmanFilter}) has been refactored, with a roughly 3-fold speed up.
+    \item Some internal changes have been made in anticipation of changes to the C API for R.
+  }
+}
 \section{Changes in \pkg{pomp} version 6.1}{
   \itemize{
     \item In calls to \pkg{pomp} elementary and inference algorithms, it is now necessary to pass all arguments by name.
