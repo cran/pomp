@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 6.2
-Date: 2025-04-16
+Version: 6.3
+Date: 2025-05-09
 Authors@R: c(person(given=c("Aaron","A."),family="King",role=c("aut","cre"),email="kingaa@umich.edu",comment=c(ORCID="0000-0001-6159-3207")),
 	  person(given=c("Edward","L."),family="Ionides",role="aut",comment=c(ORCID="0000-0002-4190-0174"))	,
 	  person(given="Carles",family="Bretó",role="aut",comment=c(ORCID="0000-0003-4695-4902")),
@@ -57,21 +57,25 @@ Collate: 'package.R' 'pstop.R' 'undefined.R' 'csnippet.R' 'pomp_fun.R'
         'timezero.R' 'traces.R' 'transformations.R' 'userdata.R'
         'verhulst.R' 'vmeasure_spec.R' 'window.R' 'wquant.R'
 NeedsCompilation: yes
-Packaged: 2025-04-16 13:45:56 UTC; kingaa
-Author: Aaron A. King [aut, cre] (<https://orcid.org/0000-0001-6159-3207>),
-  Edward L. Ionides [aut] (<https://orcid.org/0000-0002-4190-0174>),
-  Carles Bretó [aut] (<https://orcid.org/0000-0003-4695-4902>),
-  Stephen P. Ellner [ctb] (<https://orcid.org/0000-0002-8351-9734>),
-  Matthew J. Ferrari [ctb] (<https://orcid.org/0000-0001-5251-8168>),
-  Sebastian Funk [ctb] (<https://orcid.org/0000-0002-2842-3406>),
+Packaged: 2025-05-09 11:29:55 UTC; kingaa
+Author: Aaron A. King [aut, cre] (ORCID:
+    <https://orcid.org/0000-0001-6159-3207>),
+  Edward L. Ionides [aut] (ORCID:
+    <https://orcid.org/0000-0002-4190-0174>),
+  Carles Bretó [aut] (ORCID: <https://orcid.org/0000-0003-4695-4902>),
+  Stephen P. Ellner [ctb] (ORCID:
+    <https://orcid.org/0000-0002-8351-9734>),
+  Matthew J. Ferrari [ctb] (ORCID:
+    <https://orcid.org/0000-0001-5251-8168>),
+  Sebastian Funk [ctb] (ORCID: <https://orcid.org/0000-0002-2842-3406>),
   Steven G. Johnson [ctb],
-  Bruce E. Kendall [ctb] (<https://orcid.org/0000-0003-1782-8106>),
+  Bruce E. Kendall [ctb] (ORCID: <https://orcid.org/0000-0003-1782-8106>),
   Michael Lavine [ctb],
-  Dao Nguyen [ctb] (<https://orcid.org/0000-0003-2215-613X>),
-  Eamon B. O'Dea [ctb] (<https://orcid.org/0000-0003-4748-683X>),
+  Dao Nguyen [ctb] (ORCID: <https://orcid.org/0000-0003-2215-613X>),
+  Eamon B. O'Dea [ctb] (ORCID: <https://orcid.org/0000-0003-4748-683X>),
   Daniel C. Reuman [ctb],
-  Helen Wearing [ctb] (<https://orcid.org/0000-0002-9837-9797>),
-  Simon N. Wood [ctb] (<https://orcid.org/0000-0002-2034-7453>)
+  Helen Wearing [ctb] (ORCID: <https://orcid.org/0000-0002-9837-9797>),
+  Simon N. Wood [ctb] (ORCID: <https://orcid.org/0000-0002-2034-7453>)
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2025-04-16 14:30:10 UTC
+Date/Publication: 2025-05-09 14:50:01 UTC
