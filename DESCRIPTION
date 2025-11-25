@@ -1,8 +1,8 @@
 Package: pomp
 Type: Package
 Title: Statistical Inference for Partially Observed Markov Processes
-Version: 6.3
-Date: 2025-05-09
+Version: 6.4
+Date: 2025-11-23
 Authors@R: c(person(given=c("Aaron","A."),family="King",role=c("aut","cre"),email="kingaa@umich.edu",comment=c(ORCID="0000-0001-6159-3207")),
 	  person(given=c("Edward","L."),family="Ionides",role="aut",comment=c(ORCID="0000-0002-4190-0174"))	,
 	  person(given="Carles",family="Bretó",role="aut",comment=c(ORCID="0000-0003-4695-4902")),
@@ -30,7 +30,7 @@ License: GPL-3
 LazyData: true
 BugReports: https://github.com/kingaa/pomp/issues/
 Encoding: UTF-8
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Collate: 'package.R' 'pstop.R' 'undefined.R' 'csnippet.R' 'pomp_fun.R'
         'parameter_trans.R' 'covariate_table.R' 'skeleton_spec.R'
         'rprocess_spec.R' 'safecall.R' 'pomp_class.R' 'load.R'
@@ -57,7 +57,7 @@ Collate: 'package.R' 'pstop.R' 'undefined.R' 'csnippet.R' 'pomp_fun.R'
         'timezero.R' 'traces.R' 'transformations.R' 'userdata.R'
         'verhulst.R' 'vmeasure_spec.R' 'window.R' 'wquant.R'
 NeedsCompilation: yes
-Packaged: 2025-05-09 11:29:55 UTC; kingaa
+Packaged: 2025-11-24 12:23:18 UTC; kingaa
 Author: Aaron A. King [aut, cre] (ORCID:
     <https://orcid.org/0000-0001-6159-3207>),
   Edward L. Ionides [aut] (ORCID:
@@ -78,4 +78,4 @@ Author: Aaron A. King [aut, cre] (ORCID:
   Simon N. Wood [ctb] (ORCID: <https://orcid.org/0000-0002-2034-7453>)
 Maintainer: Aaron A. King <kingaa@umich.edu>
 Repository: CRAN
-Date/Publication: 2025-05-09 14:50:01 UTC
+Date/Publication: 2025-11-25 06:10:11 UTC
